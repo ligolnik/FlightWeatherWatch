@@ -6,10 +6,12 @@ Outputs a self-contained HTML file with embedded charts.
 
 Usage:
     python3 flightweather.py <origin> <destination> <date> <time_utc> <altitude_ft>
+    python3 flightweather.py <origin> [waypoints...] <destination> <date> <time_utc> <altitude_ft>
 
 Examples:
     python3 flightweather.py KORD KJFK 2026-03-12 14:00 8000
     python3 flightweather.py KMQY KEDC 2026-03-16 15:00 12000
+    python3 flightweather.py KBNA KMEM KDFW KEDC 2026-03-10 19:00 12000
     python3 flightweather.py --all KDEN KPHX 2026-03-11 06:00 10500
 """
 
@@ -371,11 +373,141 @@ def fetch_chart(url, label):
         return None
 
 
+AWC_API = "https://aviationweather.gov/api/data"
+
+
+# ---------------------------------------------------------------------------
+# Route overlay — draw magenta flight path on chart images
+# ---------------------------------------------------------------------------
+
+# Calibration points: (lon, lat, px, py) — click-calibrated by user
+# Two projections: AWC (1000x720) and WPC (~800x560)
+
+_AWC_CAL = [
+    (-81.50, 25.10, 749, 646), (-97.40, 25.95, 483, 630),
+    (-124.20, 42.00, 49, 316), (-124.73, 48.38, 41, 173),
+    (-87.65, 41.65, 642, 324), (-70.07, 42.04, 919, 315),
+    (-71.94, 41.05, 891, 338), (-80.52, 41.50, 715, 328),
+    (-103.00, 36.50, 392, 431), (-109.05, 37.00, 293, 422),
+]
+_AWC_REF_SIZE = (1000, 720)
+
+_WPC_CAL = [
+    (-81.50, 25.10, 677, 479), (-97.40, 25.95, 402, 500),
+    (-124.20, 42.00, 95, 153), (-124.73, 48.38, 138, 60),
+    (-87.65, 41.65, 520, 222), (-70.07, 42.04, 710, 151),
+    (-71.94, 41.05, 698, 178), (-80.52, 41.50, 565, 211),
+    (-103.00, 36.50, 325, 313), (-109.05, 37.00, 248, 291),
+]
+_WPC_REF_SIZE = (799, 559)
+
+_rbf_cache = {}
+
+
+def _get_rbf(cal_key):
+    """Build or retrieve cached RBF interpolators for a calibration set."""
+    if cal_key in _rbf_cache:
+        return _rbf_cache[cal_key]
+    try:
+        from scipy.interpolate import RBFInterpolator
+        import numpy as np
+    except ImportError:
+        return None
+    cal = _AWC_CAL if cal_key == "awc" else _WPC_CAL
+    geo = np.array([[lon, lat] for lon, lat, _, _ in cal])
+    px = np.array([p for _, _, p, _ in cal])
+    py = np.array([p for _, _, _, p in cal])
+    rbf = (
+        RBFInterpolator(geo, px, kernel='thin_plate_spline', smoothing=0),
+        RBFInterpolator(geo, py, kernel='thin_plate_spline', smoothing=0),
+    )
+    _rbf_cache[cal_key] = rbf
+    return rbf
+
+
+def _pick_calibration(img_w, img_h):
+    """Pick AWC or WPC calibration based on image size."""
+    if img_w >= 900 and img_h >= 650:
+        return "awc", _AWC_REF_SIZE
+    return "wpc", _WPC_REF_SIZE
+
+
+def _geo_to_pixel(lon, lat, img_w, img_h, rbf, ref_size):
+    """Convert lon/lat to pixel coordinates on a chart image."""
+    px = rbf[0]([[lon, lat]])[0]
+    py = rbf[1]([[lon, lat]])[0]
+    return int(px * img_w / ref_size[0]), int(py * img_h / ref_size[1])
+
+
+def draw_route_on_chart(b64_data, media_type, waypoints):
+    """Draw a magenta route line on a chart image.
+
+    waypoints: list of (lon, lat) tuples
+    Returns new base64-encoded image data, or original if drawing fails.
+    """
+    if len(waypoints) < 2:
+        return b64_data
+
+    try:
+        from PIL import Image, ImageDraw
+        import io
+    except ImportError:
+        return b64_data
+
+    raw = base64.standard_b64decode(b64_data)
+    img = Image.open(io.BytesIO(raw)).convert("RGB")
+    w, h = img.size
+
+    cal_key, ref_size = _pick_calibration(w, h)
+    rbf = _get_rbf(cal_key)
+    if rbf is None:
+        return b64_data
+
+    draw = ImageDraw.Draw(img)
+    lw = max(2, w // 400)
+    rad = max(3, w // 250)
+
+    # Convert waypoints to pixels
+    pixels = [_geo_to_pixel(lon, lat, w, h, rbf, ref_size) for lon, lat in waypoints]
+
+    # Draw route segments
+    for i in range(len(pixels) - 1):
+        draw.line([pixels[i], pixels[i + 1]], fill='magenta', width=lw)
+
+    # Draw waypoint dots
+    for p in pixels:
+        draw.ellipse([p[0] - rad, p[1] - rad, p[0] + rad, p[1] + rad], fill='magenta')
+
+    # Encode back as PNG (works for all input formats)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return base64.standard_b64encode(buf.getvalue()).decode("utf-8")
+
+
+def resolve_route_coords(airports):
+    """Resolve airport ICAO codes to (lon, lat) via AWC flightpath API.
+
+    airports: list of ICAO codes, e.g. ["KMQY", "KEDC"]
+    Returns list of (lon, lat) tuples.
+    """
+    path = " ".join(a.upper() for a in airports)
+    try:
+        r = httpx.get(f"{AWC_API}/flightpath", params={"path": path}, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        coords = []
+        for feat in data.get("features", []):
+            if feat["geometry"]["type"] == "Point":
+                lon, lat = feat["geometry"]["coordinates"]
+                coords.append((lon, lat))
+        return coords if len(coords) >= 2 else None
+    except Exception:
+        return None
+
+
 # ---------------------------------------------------------------------------
 # TAF fetching
 # ---------------------------------------------------------------------------
-
-AWC_API = "https://aviationweather.gov/api/data"
 
 
 def _nm_distance(lat1, lon1, lat2, lon2):
@@ -1237,11 +1369,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument("origin",      help="Departure airport ICAO (e.g. KMQY)")
-    parser.add_argument("destination", help="Arrival airport ICAO  (e.g. KEDC)")
-    parser.add_argument("date",        help="Departure date UTC (YYYY-MM-DD)")
-    parser.add_argument("time",        help="Departure time UTC (HH:MM)")
-    parser.add_argument("altitude",    help="Planned cruise altitude in feet (e.g. 12000)", type=int)
+    parser.add_argument("route",       nargs="+",
+                        help="Route: ORIGIN [WAYPOINTS...] DESTINATION DATE TIME ALTITUDE")
+    parser.add_argument("--no-route",  action="store_true",
+                        help="Skip drawing route line on charts")
     parser.add_argument("--all",       action="store_true",
                         help="Fetch all available charts instead of auto-selecting")
     parser.add_argument("--no-open",   action="store_true",
@@ -1252,9 +1383,28 @@ def main():
                         help="Skip fetching/analysis — rebuild HTML from a cache file")
     args = parser.parse_args()
 
+    # Parse route: AIRPORT [AIRPORT...] DATE TIME ALTITUDE
+    # Last 3 positional args are always date, time, altitude
+    route_args = args.route
+    if len(route_args) < 5:
+        sys.exit("Error: Need at least ORIGIN DESTINATION DATE TIME ALTITUDE")
+    try:
+        altitude = int(route_args[-1])
+        time_str = route_args[-2]
+        date_str = route_args[-3]
+        airports = [a.upper() for a in route_args[:-3]]
+    except (ValueError, IndexError):
+        sys.exit("Error: Usage: ORIGIN [WAYPOINTS...] DESTINATION DATE TIME ALTITUDE")
+
+    if len(airports) < 2:
+        sys.exit("Error: Need at least origin and destination airports.")
+
+    origin = airports[0]
+    destination = airports[-1]
+
     try:
         departure_dt = datetime.strptime(
-            f"{args.date} {args.time}", "%Y-%m-%d %H:%M"
+            f"{date_str} {time_str}", "%Y-%m-%d %H:%M"
         ).replace(tzinfo=timezone.utc)
     except ValueError:
         sys.exit("Error: Use YYYY-MM-DD for date and HH:MM for time (UTC).")
@@ -1262,9 +1412,10 @@ def main():
     now_utc = datetime.now(timezone.utc)
     hours_until = (departure_dt - now_utc).total_seconds() / 3600
 
-    print(f"\nFlight   : {args.origin.upper()} → {args.destination.upper()}")
+    route_str = " → ".join(airports)
+    print(f"\nFlight   : {route_str}")
     print(f"Departs  : {departure_dt.strftime('%Y-%m-%d %H:%MZ')} ({hours_until:+.1f} hrs from now)")
-    print(f"Altitude : {args.altitude:,} ft MSL")
+    print(f"Altitude : {altitude:,} ft MSL")
 
     if hours_until < -2:
         sys.exit("Error: Departure time is more than 2 hours in the past.")
@@ -1273,7 +1424,7 @@ def main():
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     dep_str_safe = departure_dt.strftime("%Y-%m-%d")
-    cache_prefix = f"cache_{args.origin.upper()}_{args.destination.upper()}_{dep_str_safe}"
+    cache_prefix = f"cache_{origin}_{destination}_{dep_str_safe}"
 
     if args.from_cache:
         # ── Rebuild from cache — no fetching, no API calls ──────────────
@@ -1292,17 +1443,33 @@ def main():
         briefing_html = llm_cache["briefing_html"]
         significant_labels = set(llm_cache["significant_labels"])
         print(f"  {len(chart_data)} charts, {len(significant_labels)} significant")
+
+        # Draw route overlay on cached charts
+        if not args.no_route:
+            print("Resolving route ... ", end="", flush=True)
+            waypoints = resolve_route_coords(airports)
+            if waypoints:
+                print(f"{len(waypoints)} waypoints, drawing ... ", end="", flush=True)
+                overlaid = 0
+                for i, (label, url, b64, mt) in enumerate(chart_data):
+                    new_b64 = draw_route_on_chart(b64, mt, waypoints)
+                    if new_b64 is not b64:
+                        chart_data[i] = (label, url, new_b64, "image/png")
+                        overlaid += 1
+                print(f"{overlaid} charts")
+            else:
+                print("FAILED")
     else:
         # ── Normal flow: fetch charts + run analysis ────────────────────
         if hours_until <= 18:
-            print(f"AWC products: Icing FL{_nearest_level(args.altitude, ICING_LEVELS):03d}, "
-                  f"Turb FL{_nearest_level(args.altitude, TURBULENCE_LEVELS):03d}, "
+            print(f"AWC products: Icing FL{_nearest_level(altitude, ICING_LEVELS):03d}, "
+                  f"Turb FL{_nearest_level(altitude, TURBULENCE_LEVELS):03d}, "
                   f"G-AIRMET, SIGMET, SigWx")
         else:
             print("AWC products: skipped (>18 hrs out)")
 
-        chart_list = (all_charts(args.altitude) if args.all
-                      else select_charts(max(hours_until, 0), args.altitude))
+        chart_list = (all_charts(altitude) if args.all
+                      else select_charts(max(hours_until, 0), altitude))
         print(f"\nFetching {len(chart_list)} chart(s):")
 
         chart_data = []
@@ -1314,21 +1481,38 @@ def main():
         if not chart_data:
             sys.exit("Error: Could not fetch any charts. Check your internet connection.")
 
+        # Draw route overlay on charts
+        if not args.no_route:
+            print("\nResolving route coordinates ... ", end="", flush=True)
+            waypoints = resolve_route_coords(airports)
+            if waypoints:
+                print(f"{len(waypoints)} waypoints")
+                print("Drawing route overlay ... ", end="", flush=True)
+                overlaid = 0
+                for i, (label, url, b64, mt) in enumerate(chart_data):
+                    new_b64 = draw_route_on_chart(b64, mt, waypoints)
+                    if new_b64 is not b64:
+                        chart_data[i] = (label, url, new_b64, "image/png")
+                        overlaid += 1
+                print(f"{overlaid} charts")
+            else:
+                print("FAILED (continuing without route overlay)")
+
         # Fetch TAFs
         print("\nFetching TAFs:")
-        taf_data = fetch_tafs(args.origin, args.destination)
+        taf_data = fetch_tafs(origin, destination)
 
         synoptic_html, briefing_html, significant_labels, prompts = analyze(
-            args.origin, args.destination, departure_dt, args.altitude, chart_data, taf_data
+            origin, destination, departure_dt, altitude, chart_data, taf_data
         )
 
         if args.cache:
             # Charts file — binary image data + metadata
             charts_obj = {
-                "origin": args.origin.upper(),
-                "destination": args.destination.upper(),
+                "origin": origin,
+                "destination": destination,
                 "departure": departure_dt.strftime("%Y-%m-%d %H:%MZ"),
-                "altitude_ft": args.altitude,
+                "altitude_ft": altitude,
                 "chart_data": chart_data,
             }
             charts_path = os.path.join(base_dir, cache_prefix + "_charts.json")
@@ -1337,10 +1521,10 @@ def main():
 
             # LLM file — prompts, responses, TAFs, classification
             llm_obj = {
-                "origin": args.origin.upper(),
-                "destination": args.destination.upper(),
+                "origin": origin,
+                "destination": destination,
                 "departure": departure_dt.strftime("%Y-%m-%d %H:%MZ"),
-                "altitude_ft": args.altitude,
+                "altitude_ft": altitude,
                 "taf_data": taf_data,
                 "prompts": prompts,
                 "synoptic_html": synoptic_html,
@@ -1423,11 +1607,11 @@ def main():
 
     now_utc = datetime.now(timezone.utc)
     html = HTML_TEMPLATE.format(
-        origin=args.origin.upper(),
-        destination=args.destination.upper(),
-        dep_date=args.date,
+        origin=origin,
+        destination=destination,
+        dep_date=date_str,
         dep_str=departure_dt.strftime("%Y-%m-%d %H:%MZ"),
-        altitude_ft=f"{args.altitude:,}",
+        altitude_ft=f"{altitude:,}",
         generated=now_utc.strftime("%Y-%m-%d %H:%MZ"),
         taf_section_html=taf_section_html,
         chart_count=len(chart_data),
@@ -1438,7 +1622,7 @@ def main():
         briefing_html=briefing_html,
     )
 
-    fname = f"briefing_{args.origin.upper()}_{args.destination.upper()}_{args.date}.html"
+    fname = f"briefing_{origin}_{destination}_{date_str}.html"
     out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), fname)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
