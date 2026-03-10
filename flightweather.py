@@ -21,6 +21,7 @@ import json
 import os
 import re
 import sys
+import time
 import webbrowser
 from datetime import datetime, timezone
 from typing import Optional
@@ -565,8 +566,31 @@ def _find_nearby_taf_station(icao, max_nm=50):
     return None, None
 
 
-def _fetch_single_taf(icao):
-    """Fetch TAF for one airport. Falls back to nearest TAF station."""
+def _taf_covers_time(taf_text, target_dt):
+    """Check if a TAF's validity period covers the target datetime."""
+    import re
+    m = re.search(r'(\d{2})(\d{2})/(\d{2})(\d{2})', taf_text)
+    if not m:
+        return False
+    start_day, start_hr = int(m.group(1)), int(m.group(2))
+    end_day, end_hr = int(m.group(3)), int(m.group(4))
+    t_day, t_hr = target_dt.day, target_dt.hour
+    # Simple check: target day/hour within start and end
+    # Handle month wrap (start_day > end_day)
+    if end_day >= start_day:
+        in_range = (t_day > start_day or (t_day == start_day and t_hr >= start_hr)) and \
+                   (t_day < end_day or (t_day == end_day and t_hr <= end_hr))
+    else:
+        # Wraps across month boundary
+        in_range = (t_day >= start_day and t_hr >= start_hr) or \
+                   (t_day <= end_day and t_hr <= end_hr)
+    return in_range
+
+
+def _fetch_single_taf(icao, target_dt=None):
+    """Fetch TAF for one airport. Falls back to nearest TAF station.
+    If target_dt is provided, only returns TAF if it covers that time.
+    """
     print(f"  TAF {icao} ... ", end="", flush=True)
     try:
         r = httpx.get(f"{AWC_API}/taf", params={"ids": icao, "format": "raw"}, timeout=10)
@@ -575,6 +599,9 @@ def _fetch_single_taf(icao):
         taf_text = ""
 
     if taf_text and taf_text.startswith("TAF"):
+        if target_dt and not _taf_covers_time(taf_text, target_dt):
+            print("not yet valid for flight time")
+            return {"icao": icao, "taf": None, "note": "TAF not yet available for flight time"}
         print("OK")
         return {"icao": icao, "taf": taf_text, "note": None}
 
@@ -589,6 +616,10 @@ def _fetch_single_taf(icao):
         except Exception:
             taf_text = ""
         if taf_text and taf_text.startswith("TAF"):
+            if target_dt and not _taf_covers_time(taf_text, target_dt):
+                print(f"{nearby_icao} not yet valid for flight time")
+                return {"icao": nearby_icao, "taf": None,
+                        "note": f"TAF not yet available for flight time (nearest: {nearby_icao}, {dist:.0f} nm)"}
             print(f"using {nearby_icao} ({dist:.0f} nm)")
             return {"icao": nearby_icao, "taf": taf_text,
                     "note": f"Nearest TAF to {icao} ({dist:.0f} nm)"}
@@ -637,9 +668,10 @@ def fetch_tafs(airports, route_legs):
     """
     results = []
     for leg in route_legs:
-        entry = _fetch_single_taf(leg["icao"])
+        entry = _fetch_single_taf(leg["icao"], target_dt=leg["eta"])
         entry["role"] = leg["role"]
-        entry["eta"] = leg["eta"]
+        entry["eta"] = leg["eta"].strftime("%Y-%m-%d %H:%MZ")
+        entry["eta_dt"] = leg["eta"]  # keep datetime for internal use
         entry["nm"] = leg.get("cum_nm", 0)
         results.append(entry)
     return results
@@ -989,12 +1021,13 @@ HTML_TEMPLATE = """\
 
 <header>
   <div class="header-top">
-    <h1>{origin} → {destination}</h1>
+    <h1>{route_display}</h1>
     <span class="badge">{altitude_ft} ft</span>
   </div>
   <div class="meta">
     <span>Departure <strong>{dep_str}</strong></span>
-    <span>Generated <strong>{generated}</strong></span>
+    <span>Arrival <strong>{arr_str}</strong></span>
+    <span>Route <strong>{total_nm} nm</strong></span>
     <span>Charts <strong>{chart_count}</strong></span>
   </div>
 </header>
@@ -1230,8 +1263,8 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
         if isinstance(taf_data, list):
             for entry in taf_data:
                 if entry.get("taf"):
-                    eta = entry.get("eta")
-                    eta_str = eta.strftime("%H:%MZ") if eta else "?"
+                    eta = entry.get("eta", "")
+                    eta_str = eta if isinstance(eta, str) else (eta.strftime("%H:%MZ") if eta else "?")
                     hdr = entry.get("note") or entry["icao"]
                     taf_lines.append(f"  {entry['role']} {hdr} (ETA {eta_str}):\n    {entry['taf']}")
         elif isinstance(taf_data, dict):
@@ -1282,18 +1315,31 @@ Respond with HTML using: h2, h3, p, ul, ol, li, strong, em, table, thead, tbody,
 Do NOT include html/head/body/style/script tags.""",
     }]
 
+    def _stream_with_retry(label, prompt, max_tokens=4096, retries=3):
+        """Stream a Claude request with retry on rate limit."""
+        for attempt in range(retries):
+            try:
+                result = ""
+                with client.messages.stream(
+                    model="claude-sonnet-4-6",
+                    max_tokens=max_tokens,
+                    system=SYSTEM_PROMPT,
+                    messages=[{"role": "user", "content": prompt}],
+                ) as stream:
+                    for text in stream.text_stream:
+                        result += text
+                        print(".", end="", flush=True)
+                print(" done.")
+                return result
+            except anthropic.RateLimitError:
+                wait = 30 * (attempt + 1)
+                print(f" rate limited, waiting {wait}s ...", end="", flush=True)
+                time.sleep(wait)
+        print(" FAILED after retries.")
+        return ""
+
     print(f"\nPass 1/2 — Synoptic overview ", end="", flush=True)
-    synoptic_html = ""
-    with client.messages.stream(
-        model="claude-sonnet-4-6",
-        max_tokens=4096,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": synoptic_prompt}],
-    ) as stream:
-        for text in stream.text_stream:
-            synoptic_html += text
-            print(".", end="", flush=True)
-    print(" done.")
+    synoptic_html = _stream_with_retry("synoptic", synoptic_prompt)
 
     # Parse SIGNIFICANT_CHARTS from the first line
     significant_labels = set()
@@ -1375,17 +1421,7 @@ No html/head/body/style/script tags.""",
     }]
 
     print(f"Pass 2/2 — Operational briefing ", end="", flush=True)
-    briefing_html = ""
-    with client.messages.stream(
-        model="claude-sonnet-4-6",
-        max_tokens=4096,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": briefing_prompt}],
-    ) as stream:
-        for text in stream.text_stream:
-            briefing_html += text
-            print(".", end="", flush=True)
-    print(" done.")
+    briefing_html = _stream_with_retry("briefing", briefing_prompt)
 
     # Extract text-only prompts (strip image blocks for readability)
     def _prompt_text(blocks):
@@ -1488,8 +1524,8 @@ def main():
         significant_labels = set(llm_cache["significant_labels"])
         print(f"  {len(chart_data)} charts, {len(significant_labels)} significant")
 
-        # Draw route overlay on cached charts
-        if not args.no_route:
+        # Draw route overlay on cached charts (disabled — calibration WIP)
+        if False and not args.no_route:
             print("Resolving route ... ", end="", flush=True)
             waypoints = resolve_route_coords(airports)
             if waypoints:
@@ -1535,9 +1571,8 @@ def main():
         if not chart_data:
             sys.exit("Error: Could not fetch any charts. Check your internet connection.")
 
-        # Draw route overlay on charts
-        if waypoints:
-            print("Drawing route overlay ... ", end="", flush=True)
+        # Draw route overlay on charts (disabled — calibration WIP)
+        if False and waypoints:
             overlaid = 0
             for i, (label, url, b64, mt) in enumerate(chart_data):
                 new_b64 = draw_route_on_chart(b64, mt, waypoints)
@@ -1579,7 +1614,7 @@ def main():
                 "destination": destination,
                 "departure": departure_dt.strftime("%Y-%m-%d %H:%MZ"),
                 "altitude_ft": altitude,
-                "taf_data": taf_data,
+                "taf_data": [{k: v for k, v in e.items() if k != "eta_dt"} for e in taf_data] if isinstance(taf_data, list) else taf_data,
                 "prompts": prompts,
                 "synoptic_html": synoptic_html,
                 "briefing_html": briefing_html,
@@ -1621,9 +1656,17 @@ def main():
             if not entry.get("taf"):
                 continue
             role_label = entry.get("role", "")
-            eta = entry.get("eta")
-            target_hour = eta.strftime("%d%H") if eta else departure_dt.strftime("%d%H")
-            eta_str = eta.strftime("%H:%MZ") if eta else ""
+            eta_dt = entry.get("eta_dt")
+            eta_s = entry.get("eta", "")
+            if eta_dt:
+                target_hour = eta_dt.strftime("%d%H")
+                eta_str = eta_dt.strftime("%H:%MZ")
+            elif eta_s:
+                target_hour = eta_s[8:10] + eta_s[11:13]  # parse "YYYY-MM-DD HH:MMZ"
+                eta_str = eta_s[11:]
+            else:
+                target_hour = departure_dt.strftime("%d%H")
+                eta_str = ""
             nm = entry.get("nm", 0)
             hdr = entry["icao"]
             note = ""
@@ -1682,12 +1725,23 @@ def main():
                 '  </section>\n'
             )
 
+    # Compute arrival info from route legs or TAF data
+    arr_str = "—"
+    total_nm = "—"
+    if isinstance(taf_data, list) and taf_data:
+        last = taf_data[-1]
+        arr_str = last.get("eta", "—")
+        total_nm = f"{last.get('nm', 0):.0f}"
+
     now_utc = datetime.now(timezone.utc)
     html = HTML_TEMPLATE.format(
         origin=origin,
         destination=destination,
+        route_display=" → ".join(airports),
         dep_date=date_str,
         dep_str=departure_dt.strftime("%Y-%m-%d %H:%MZ"),
+        arr_str=arr_str,
+        total_nm=total_nm,
         altitude_ft=f"{altitude:,}",
         generated=now_utc.strftime("%Y-%m-%d %H:%MZ"),
         taf_section_html=taf_section_html,
