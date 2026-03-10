@@ -1276,10 +1276,14 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
         if taf_lines:
             taf_section = "\n  TAFs:\n" + "\n".join(taf_lines) + "\n"
 
+    now_str = datetime.now(timezone.utc).strftime("%A %Y-%m-%d %H:%MZ")
+    dep_day = departure_dt.strftime("%A")
+
     flight_header = f"""
 FLIGHT
+  Today        : {now_str}
   Route        : {origin.upper()} → {destination.upper()}
-  Departure    : {dep_str} UTC
+  Departure    : {dep_day} {dep_str} UTC
   Planned Alt  : {altitude_ft:,} ft MSL
   Charts       : {len(chart_data)} weather charts
 {taf_section}"""
