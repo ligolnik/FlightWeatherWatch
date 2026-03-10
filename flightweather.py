@@ -1083,8 +1083,11 @@ HTML_TEMPLATE = """\
 <!-- Lightbox overlay -->
 <div id="lightbox" onclick="closeLightbox()">
   <button id="lb-close" onclick="closeLightbox()">&times;</button>
+  <button id="lb-prev" onclick="navLightbox(-1)">&#8249;</button>
+  <button id="lb-next" onclick="navLightbox(1)">&#8250;</button>
   <img id="lb-img" src="" alt="">
   <div id="lb-label"></div>
+  <div id="lb-counter"></div>
 </div>
 <style>
   #lightbox {{
@@ -1113,9 +1116,27 @@ HTML_TEMPLATE = """\
     z-index: 10000;
   }}
   #lb-close:hover {{ opacity: 1; }}
+  #lb-prev, #lb-next {{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    font-size: 3rem;
+    cursor: pointer;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    opacity: 0.6;
+    z-index: 10000;
+    line-height: 1;
+  }}
+  #lb-prev {{ left: 1rem; }}
+  #lb-next {{ right: 1rem; }}
+  #lb-prev:hover, #lb-next:hover {{ opacity: 1; background: rgba(255,255,255,0.2); }}
   #lb-img {{
-    max-width: 95vw;
-    max-height: 88vh;
+    max-width: 90vw;
+    max-height: 85vh;
     object-fit: contain;
     border-radius: 4px;
     background: #fff;
@@ -1126,26 +1147,50 @@ HTML_TEMPLATE = """\
     margin-top: 0.75rem;
     text-align: center;
   }}
+  #lb-counter {{
+    color: var(--muted);
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+    opacity: 0.6;
+  }}
 </style>
 <script>
-  document.querySelectorAll('.chart-card img').forEach(function(img) {{
+  var lbImages = [];
+  var lbIndex = 0;
+  document.querySelectorAll('.chart-card img').forEach(function(img, idx) {{
+    var label = img.closest('.chart-card').querySelector('.chart-label');
+    lbImages.push({{ src: img.src, label: label ? label.textContent : '' }});
     img.style.cursor = 'zoom-in';
     img.addEventListener('click', function(e) {{
       e.stopPropagation();
-      var lb = document.getElementById('lightbox');
-      document.getElementById('lb-img').src = img.src;
-      var label = img.closest('.chart-card').querySelector('.chart-label');
-      document.getElementById('lb-label').textContent = label ? label.textContent : '';
-      lb.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      lbIndex = idx;
+      showLightbox();
     }});
   }});
+  function showLightbox() {{
+    var lb = document.getElementById('lightbox');
+    document.getElementById('lb-img').src = lbImages[lbIndex].src;
+    document.getElementById('lb-label').textContent = lbImages[lbIndex].label;
+    document.getElementById('lb-counter').textContent = (lbIndex+1) + ' / ' + lbImages.length;
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }}
   function closeLightbox() {{
     document.getElementById('lightbox').classList.remove('active');
     document.body.style.overflow = '';
   }}
+  function navLightbox(dir) {{
+    event.stopPropagation();
+    lbIndex = (lbIndex + dir + lbImages.length) % lbImages.length;
+    document.getElementById('lb-img').src = lbImages[lbIndex].src;
+    document.getElementById('lb-label').textContent = lbImages[lbIndex].label;
+    document.getElementById('lb-counter').textContent = (lbIndex+1) + ' / ' + lbImages.length;
+  }}
   document.addEventListener('keydown', function(e) {{
+    if (!document.getElementById('lightbox').classList.contains('active')) return;
     if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') navLightbox(-1);
+    if (e.key === 'ArrowRight') navLightbox(1);
   }});
 </script>
 
