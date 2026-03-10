@@ -410,6 +410,55 @@ HTML_TEMPLATE = """\
     line-height: 1.8;
   }}
   footer strong {{ color: var(--red); }}
+
+  /* ── Chart images — never overflow on any screen ── */
+  .chart-card img, img {{ max-width: 100%; height: auto; }}
+
+  /* ── Mobile responsive ── */
+  @media (max-width: 640px) {{
+    /* Container padding */
+    .container {{ padding: 0 1rem; }}
+
+    /* Header: stack vertically, smaller h1 */
+    header {{ padding: 1rem; }}
+    .header-top {{
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }}
+    header h1 {{ font-size: 1.2rem; }}
+
+    /* Meta row: wrap with smaller gaps */
+    .meta {{
+      flex-direction: column;
+      gap: 0.35rem;
+    }}
+
+    /* Chart grid: single column, full-width cards */
+    .chart-grid {{
+      grid-template-columns: 1fr;
+    }}
+
+    /* Briefing tables: horizontal scroll so they don't break layout */
+    .briefing {{
+      overflow-x: auto;
+      padding: 1rem;
+    }}
+
+    /* Details/summary synoptic: full width */
+    details.synoptic {{
+      width: 100%;
+    }}
+    .synoptic-body {{ padding: 1rem; }}
+
+    /* Footer: smaller text, centered, wraps properly */
+    footer {{
+      padding: 1rem;
+      font-size: 0.65rem;
+      text-align: center;
+      line-height: 2;
+    }}
+  }}
 </style>
 </head>
 <body>
