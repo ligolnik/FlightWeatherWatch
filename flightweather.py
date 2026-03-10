@@ -222,16 +222,33 @@ def _add_awc_products(unique, seen, hours_until, altitude_ft):
             seen.add(item[1])
             unique.append(item)
 
-    ice_lvl = f"{_nearest_level(altitude_ft, ICING_LEVELS):03d}"
+    ice_cruise = _nearest_level(altitude_ft, ICING_LEVELS)
     turb_lvl = f"{_nearest_level(altitude_ft, TURBULENCE_LEVELS):03d}"
+
+    # Build vertical icing profile: cruise level + levels above & below + max
+    ice_idx = ICING_LEVELS.index(ice_cruise)
+    ice_profile = set()
+    ice_profile.add(ice_cruise)
+    # 2 levels below, 2 above (for escape altitude / best cruise analysis)
+    for offset in [-2, -1, 1, 2]:
+        idx = ice_idx + offset
+        if 0 <= idx < len(ICING_LEVELS):
+            ice_profile.add(ICING_LEVELS[idx])
+    ice_profile_sorted = sorted(ice_profile)
 
     # Pick bracketing frames (not every 3-hr step)
     fip_fhrs = _pick_bracket_fhrs(hours_until, AWC_FHRS)
     gairmet_fhrs = _pick_bracket_fhrs(hours_until, GAIRMET_FHRS)
 
+    # Use the frame closest to departure for the vertical icing profile
+    dep_fhr = fip_fhrs[-1] if len(fip_fhrs) > 1 else fip_fhrs[0]
+    dep_fhr_str = f"{dep_fhr:02d}"
+
     for fhr_num in fip_fhrs:
         fhr = f"{fhr_num:02d}"
-        # Icing probability + severity + SLD
+        ice_lvl = f"{ice_cruise:03d}"
+
+        # Icing at cruise level — prob + severity + SLD
         _add((fhr_num, f"{AWC_BASE}/icing/F{fhr}_fip_{ice_lvl}_prob.gif",
               f"Icing Prob +{fhr}hr FL{ice_lvl}"))
         _add((fhr_num, f"{AWC_BASE}/icing/F{fhr}_fip_{ice_lvl}_sev.gif",
@@ -239,9 +256,22 @@ def _add_awc_products(unique, seen, hours_until, altitude_ft):
         _add((fhr_num, f"{AWC_BASE}/icing/F{fhr}_fip_{ice_lvl}_sevsld.gif",
               f"Icing SLD +{fhr}hr FL{ice_lvl}"))
 
+        # Icing max — worst across all altitudes
+        _add((fhr_num, f"{AWC_BASE}/icing/F{fhr}_fip_max_prob.gif",
+              f"Icing Prob MAX +{fhr}hr"))
+
         # Turbulence — total (CAT + MWT combined)
         _add((fhr_num, f"{AWC_BASE}/turbulence/F{fhr}_gtg_{turb_lvl}_total.gif",
               f"Turb Total +{fhr}hr FL{turb_lvl}"))
+
+    # Vertical icing profile at departure frame — prob at each level
+    for lvl in ice_profile_sorted:
+        lvl_str = f"{lvl:03d}"
+        if lvl == ice_cruise:
+            continue  # already added above
+        tag = ""
+        _add((dep_fhr, f"{AWC_BASE}/icing/F{dep_fhr_str}_fip_{lvl_str}_prob.gif",
+              f"Icing Prob +{dep_fhr_str}hr FL{lvl_str}"))
 
     # G-AIRMET — all four hazard types, CONUS (bracketing frames)
     for fhr_num in gairmet_fhrs:
@@ -1136,9 +1166,20 @@ Winds on the runway, ceilings, visibility — pilot language, not METAR codes.
 
 <h2>The Ride at {altitude_ft:,} ft</h2>
 What's the flight actually going to be like at {altitude_ft:,} ft?
-- Will they be in ice? Is {altitude_ft:,} ft above or below the freezing level?
+
+ICING ANALYSIS (you have FIP charts at multiple altitudes — use them):
+- Am I above or below the freezing level at {altitude_ft:,} ft? Where is the freezing level?
+- What's the worst icing band? Which altitude range has the highest icing probability?
+- What's the best cruise altitude to avoid or minimize icing along this route?
+- If I pick up ice, where's my escape altitude — up or down?
+- Any SLD risk? SLD is a hard no-go for most GA aircraft.
+Use a mini table for the vertical icing picture: Altitude | Icing Prob | Notes
+
+TURBULENCE & RIDE QUALITY:
 - Smooth or bumpy? Where are the rough spots?
 - Headwind or tailwind? Rough estimate of the wind effect at that altitude.
+
+OTHER HAZARDS:
 - Any weather to dodge or plan around?
 Use a table: Hazard | Risk | Leg | What to Expect
 Incorporate findings from icing (FIP), turbulence (GTG), G-AIRMET, SIGMET, SigWx, and QPF charts.
