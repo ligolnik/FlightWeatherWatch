@@ -23,6 +23,8 @@ import webbrowser
 from datetime import datetime, timezone
 from typing import Optional
 
+import math
+
 import httpx
 import anthropic
 
@@ -337,6 +339,115 @@ def fetch_chart(url, label):
     except Exception as exc:
         print(f"FAILED ({exc})")
         return None
+
+
+# ---------------------------------------------------------------------------
+# TAF fetching
+# ---------------------------------------------------------------------------
+
+AWC_API = "https://aviationweather.gov/api/data"
+
+
+def _nm_distance(lat1, lon1, lat2, lon2):
+    """Great-circle distance in nautical miles."""
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = (math.sin(dlat / 2) ** 2
+         + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2))
+         * math.sin(dlon / 2) ** 2)
+    return 3440.065 * 2 * math.asin(math.sqrt(a))
+
+
+def _get_station_info(icao):
+    """Return station dict from AWC or None."""
+    try:
+        r = httpx.get(f"{AWC_API}/stationinfo", params={"ids": icao}, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        return data[0] if data else None
+    except Exception:
+        return None
+
+
+def _find_nearby_taf_station(icao, max_nm=50):
+    """If `icao` has no TAF, find the nearest station that does within max_nm."""
+    info = _get_station_info(icao)
+    if not info:
+        return None, None
+    lat, lon = info["lat"], info["lon"]
+
+    # Search a bounding box roughly max_nm around the station
+    deg = max_nm / 60.0  # ~1 degree latitude ≈ 60 nm
+    try:
+        r = httpx.get(f"{AWC_API}/stationinfo",
+                      params={"bbox": f"{lat-deg},{lon-deg},{lat+deg},{lon+deg}"},
+                      timeout=10)
+        r.raise_for_status()
+        stations = r.json()
+    except Exception:
+        return None, None
+
+    best = None
+    best_dist = max_nm + 1
+    for s in stations:
+        if "TAF" not in s.get("siteType", []):
+            continue
+        if s["icaoId"] == icao:
+            continue
+        d = _nm_distance(lat, lon, s["lat"], s["lon"])
+        if d < best_dist:
+            best_dist = d
+            best = s
+    if best:
+        return best["icaoId"], best_dist
+    return None, None
+
+
+def fetch_tafs(origin, destination):
+    """Fetch TAFs for origin and destination. If not available, find nearby.
+
+    Returns dict: {
+        "origin": {"icao": "KMQY", "taf": "TAF KMQY ...", "note": None},
+        "destination": {"icao": "KAUS", "taf": "TAF KAUS ...", "note": "Nearest TAF to KEDC (14 nm)"},
+    }
+    """
+    result = {}
+    for role, icao in [("origin", origin.upper()), ("destination", destination.upper())]:
+        print(f"  TAF {icao} ... ", end="", flush=True)
+        try:
+            r = httpx.get(f"{AWC_API}/taf", params={"ids": icao, "format": "raw"}, timeout=10)
+            taf_text = r.text.strip()
+        except Exception:
+            taf_text = ""
+
+        if taf_text and taf_text.startswith("TAF"):
+            print("OK")
+            result[role] = {"icao": icao, "taf": taf_text, "note": None}
+        else:
+            # No TAF — search nearby
+            print("not available, searching nearby ... ", end="", flush=True)
+            nearby_icao, dist = _find_nearby_taf_station(icao)
+            if nearby_icao:
+                try:
+                    r = httpx.get(f"{AWC_API}/taf",
+                                  params={"ids": nearby_icao, "format": "raw"}, timeout=10)
+                    taf_text = r.text.strip()
+                except Exception:
+                    taf_text = ""
+                if taf_text and taf_text.startswith("TAF"):
+                    print(f"using {nearby_icao} ({dist:.0f} nm)")
+                    result[role] = {
+                        "icao": nearby_icao,
+                        "taf": taf_text,
+                        "note": f"Nearest TAF to {icao} ({dist:.0f} nm)",
+                    }
+                else:
+                    print("none found")
+                    result[role] = {"icao": icao, "taf": None, "note": "No TAF available"}
+            else:
+                print("none found")
+                result[role] = {"icao": icao, "taf": None, "note": "No TAF available"}
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -695,6 +806,7 @@ HTML_TEMPLATE = """\
 
 <div class="container">
 
+{taf_section_html}
   <section>
     <div class="section-label">Weather Charts</div>
     <details class="collapsible" open>
@@ -827,13 +939,55 @@ REFERENCE_SECTION_TEMPLATE = """\
     </details>"""
 
 CHART_CARD_TEMPLATE = """\
-      <div class="chart-card">
+      <div class="chart-card{extra_class}">
         <img src="data:{media_type};base64,{b64}" alt="{label}" loading="lazy">
         <div class="chart-caption">
           <span class="chart-label">{label}</span>
           <a href="{url}" target="_blank" rel="noopener">Source ↗</a>
         </div>
       </div>"""
+
+def _card_class(label):
+    """Return extra CSS class for chart cards."""
+    return ""
+
+
+def _highlight_taf_line(taf_text, target_ddhh, role_label):
+    """Bold the TAF line that covers target_ddhh (e.g. '1019' = 10th day 19Z).
+
+    TAF lines start with FM, TEMPO, PROB, BECMG or the initial line.
+    We find the last FM/initial group whose start time is at or before target.
+    """
+    lines = taf_text.split("\n")
+    # Parse each line's validity start as DDHH
+    line_times = []  # (index, ddhh_start_str)
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        # Initial TAF line: "TAF KMQY 092333Z 1000/1024 ..."
+        #   validity starts at DDHH from the "DDHH/DDHH" group
+        m = re.search(r'\b(\d{4})/(\d{4})\b', stripped)
+        if i == 0 and m:
+            line_times.append((i, m.group(1)))
+            continue
+        # FM lines: "FM101600" → starts at DDHH=1016
+        m = re.match(r'\s*FM(\d{6})', stripped)
+        if m:
+            line_times.append((i, m.group(1)[:4]))  # take DDHH, drop MM
+            continue
+
+    # Find the line whose start is at or before target
+    best_idx = None
+    for idx, start in line_times:
+        if start <= target_ddhh:
+            best_idx = idx
+
+    if best_idx is not None:
+        tag = f'<b style="color:var(--amber)"> ◀ {role_label}</b>'
+        # Bold the line and append the tag
+        original = lines[best_idx]
+        lines[best_idx] = f'<b style="color:#fff">{original}</b>{tag}'
+
+    return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------
@@ -850,13 +1004,14 @@ SYSTEM_PROMPT = (
     "Respond only with HTML body content using the tags specified. No outer html/head/body/style tags."
 )
 
-def analyze(origin, destination, departure_dt, altitude_ft, chart_data):
+def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None):
     """
     Two-pass Claude query:
       1. Synoptic overview — broad pattern analysis + chart significance classification
       2. Operational briefing — focused on day-before and day-of at planned altitude
 
     chart_data: list of (label, url, b64, media_type)
+    taf_data: dict from fetch_tafs() or None
     Returns (synoptic_html, briefing_html, significant_labels)
     """
     client = anthropic.Anthropic()
@@ -873,13 +1028,25 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data):
             "source": {"type": "base64", "media_type": media_type, "data": b64},
         })
 
+    # Build TAF text block
+    taf_section = ""
+    if taf_data:
+        taf_lines = []
+        for role in ["origin", "destination"]:
+            entry = taf_data.get(role)
+            if entry and entry.get("taf"):
+                hdr = entry["note"] if entry["note"] else entry["icao"]
+                taf_lines.append(f"  {role.upper()} ({hdr}):\n    {entry['taf']}")
+        if taf_lines:
+            taf_section = "\n  TAFs:\n" + "\n".join(taf_lines) + "\n"
+
     flight_header = f"""
 FLIGHT
   Route        : {origin.upper()} → {destination.upper()}
   Departure    : {dep_str} UTC
   Planned Alt  : {altitude_ft:,} ft MSL
   Charts       : {len(chart_data)} weather charts
-"""
+{taf_section}"""
 
     label_list = "\n".join(f"  - {l}" for l in chart_labels)
 
@@ -954,6 +1121,7 @@ Write in plain pilot language. No meteorology lectures. Answer the questions pil
 
 Do NOT repeat the background pattern analysis — that's in a separate section.
 Focus ONLY on the day before and the day/time of the flight.
+If TAFs are provided above, use them for specific ceiling/visibility/wind forecasts at departure and arrival.
 
 REQUIRED SECTIONS (use these exact h2 headings):
 
@@ -1005,7 +1173,17 @@ No html/head/body/style/script tags.""",
             print(".", end="", flush=True)
     print(" done.")
 
-    return synoptic_html, briefing_html, significant_labels
+    # Extract text-only prompts (strip image blocks for readability)
+    def _prompt_text(blocks):
+        return "\n".join(b["text"] for b in blocks if b.get("type") == "text")
+
+    prompts = {
+        "system": SYSTEM_PROMPT,
+        "synoptic_prompt": _prompt_text(synoptic_prompt),
+        "briefing_prompt": _prompt_text(briefing_prompt),
+    }
+
+    return synoptic_html, briefing_html, significant_labels, prompts
 
 
 # ---------------------------------------------------------------------------
@@ -1052,15 +1230,26 @@ def main():
     if hours_until > 7 * 24:
         print("Warning: >7 days out — extended prog reliability is very low.")
 
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    dep_str_safe = departure_dt.strftime("%Y-%m-%d")
+    cache_prefix = f"cache_{args.origin.upper()}_{args.destination.upper()}_{dep_str_safe}"
+
     if args.from_cache:
         # ── Rebuild from cache — no fetching, no API calls ──────────────
-        print(f"\nLoading cache: {args.from_cache}")
-        with open(args.from_cache, "r", encoding="utf-8") as f:
-            cache = json.load(f)
-        chart_data = [tuple(c) for c in cache["chart_data"]]
-        synoptic_html = cache["synoptic_html"]
-        briefing_html = cache["briefing_html"]
-        significant_labels = set(cache["significant_labels"])
+        # --from-cache takes the prefix or the _charts.json path
+        prefix = args.from_cache.replace("_charts.json", "").replace("_llm.json", "")
+        charts_path = prefix + "_charts.json"
+        llm_path = prefix + "_llm.json"
+        print(f"\nLoading cache: {prefix}_*.json")
+        with open(charts_path, "r", encoding="utf-8") as f:
+            charts_cache = json.load(f)
+        with open(llm_path, "r", encoding="utf-8") as f:
+            llm_cache = json.load(f)
+        chart_data = [tuple(c) for c in charts_cache["chart_data"]]
+        taf_data = llm_cache.get("taf_data")
+        synoptic_html = llm_cache["synoptic_html"]
+        briefing_html = llm_cache["briefing_html"]
+        significant_labels = set(llm_cache["significant_labels"])
         print(f"  {len(chart_data)} charts, {len(significant_labels)} significant")
     else:
         # ── Normal flow: fetch charts + run analysis ────────────────────
@@ -1084,35 +1273,54 @@ def main():
         if not chart_data:
             sys.exit("Error: Could not fetch any charts. Check your internet connection.")
 
-        synoptic_html, briefing_html, significant_labels = analyze(
-            args.origin, args.destination, departure_dt, args.altitude, chart_data
+        # Fetch TAFs
+        print("\nFetching TAFs:")
+        taf_data = fetch_tafs(args.origin, args.destination)
+
+        synoptic_html, briefing_html, significant_labels, prompts = analyze(
+            args.origin, args.destination, departure_dt, args.altitude, chart_data, taf_data
         )
 
         if args.cache:
-            cache_obj = {
+            # Charts file — binary image data + metadata
+            charts_obj = {
                 "origin": args.origin.upper(),
                 "destination": args.destination.upper(),
                 "departure": departure_dt.strftime("%Y-%m-%d %H:%MZ"),
                 "altitude_ft": args.altitude,
                 "chart_data": chart_data,
+            }
+            charts_path = os.path.join(base_dir, cache_prefix + "_charts.json")
+            with open(charts_path, "w", encoding="utf-8") as f:
+                json.dump(charts_obj, f)
+
+            # LLM file — prompts, responses, TAFs, classification
+            llm_obj = {
+                "origin": args.origin.upper(),
+                "destination": args.destination.upper(),
+                "departure": departure_dt.strftime("%Y-%m-%d %H:%MZ"),
+                "altitude_ft": args.altitude,
+                "taf_data": taf_data,
+                "prompts": prompts,
                 "synoptic_html": synoptic_html,
                 "briefing_html": briefing_html,
                 "significant_labels": sorted(significant_labels),
             }
-            dep_str_safe = departure_dt.strftime("%Y-%m-%d")
-            cache_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                f"cache_{args.origin.upper()}_{args.destination.upper()}_{dep_str_safe}.json")
-            with open(cache_path, "w", encoding="utf-8") as f:
-                json.dump(cache_obj, f)
-            print(f"\nCache saved → {cache_path}")
+            llm_path = os.path.join(base_dir, cache_prefix + "_llm.json")
+            with open(llm_path, "w", encoding="utf-8") as f:
+                json.dump(llm_obj, f)
+
+            print(f"\nCache saved:")
+            print(f"  Charts → {charts_path}")
+            print(f"  LLM    → {llm_path}")
 
     # Split charts into significant / reference
     sig_cards = []
     ref_cards = []
     for label, url, b64, media_type in chart_data:
         card = CHART_CARD_TEMPLATE.format(
-            label=label, url=url, b64=b64, media_type=media_type
+            label=label, url=url, b64=b64, media_type=media_type,
+            extra_class=_card_class(label),
         )
         if label in significant_labels:
             sig_cards.append(card)
@@ -1126,6 +1334,52 @@ def main():
             reference_chart_cards="\n".join(ref_cards),
         )
 
+    # Build TAF section HTML
+    taf_section_html = ""
+    dep_hour = departure_dt.strftime("%d%H")  # e.g. "1019" for 10th day 19Z
+    # Estimate arrival ~3 hrs after departure
+    arr_dt = departure_dt.replace(hour=min(departure_dt.hour + 3, 23))
+    arr_hour = arr_dt.strftime("%d%H")
+
+    if taf_data:
+        taf_blocks = []
+        for role in ["origin", "destination"]:
+            entry = taf_data.get(role)
+            if entry and entry.get("taf"):
+                role_label = "Departure" if role == "origin" else "Arrival"
+                target_hour = dep_hour if role == "origin" else arr_hour
+                hdr = entry["icao"]
+                note = ""
+                if entry.get("note"):
+                    note = f' <span style="color:var(--amber);font-size:0.75rem">({entry["note"]})</span>'
+
+                # Highlight the TAF line covering the target time
+                taf_html = _highlight_taf_line(entry["taf"], target_hour, role_label)
+
+                taf_blocks.append(
+                    f'<div style="margin-bottom:0.75rem">'
+                    f'<strong>{hdr}</strong>'
+                    f' <span style="color:var(--blue);font-size:0.75rem;font-weight:700">{role_label}</span>'
+                    f'{note}'
+                    f'<pre style="margin-top:0.3rem;font-size:0.78rem;color:var(--green);'
+                    f'white-space:pre-wrap;line-height:1.5">{taf_html}</pre></div>'
+                )
+        if taf_blocks:
+            taf_section_html = (
+                '  <section>\n'
+                '    <div class="section-label">Terminal Forecasts (TAF)</div>\n'
+                '    <details class="collapsible">\n'
+                '      <summary>\n'
+                '        Raw TAFs — departure + arrival\n'
+                '        <span class="pill">' + str(len(taf_blocks)) + ' stations</span>\n'
+                '      </summary>\n'
+                '      <div class="collapsible-body">\n'
+                + "\n".join(taf_blocks)
+                + '\n      </div>\n'
+                '    </details>\n'
+                '  </section>\n'
+            )
+
     now_utc = datetime.now(timezone.utc)
     html = HTML_TEMPLATE.format(
         origin=args.origin.upper(),
@@ -1134,6 +1388,7 @@ def main():
         dep_str=departure_dt.strftime("%Y-%m-%d %H:%MZ"),
         altitude_ft=f"{args.altitude:,}",
         generated=now_utc.strftime("%Y-%m-%d %H:%MZ"),
+        taf_section_html=taf_section_html,
         chart_count=len(chart_data),
         sig_count=len(sig_cards),
         significant_chart_cards="\n".join(sig_cards),
