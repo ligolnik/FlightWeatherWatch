@@ -565,51 +565,84 @@ def _find_nearby_taf_station(icao, max_nm=50):
     return None, None
 
 
-def fetch_tafs(origin, destination):
-    """Fetch TAFs for origin and destination. If not available, find nearby.
+def _fetch_single_taf(icao):
+    """Fetch TAF for one airport. Falls back to nearest TAF station."""
+    print(f"  TAF {icao} ... ", end="", flush=True)
+    try:
+        r = httpx.get(f"{AWC_API}/taf", params={"ids": icao, "format": "raw"}, timeout=10)
+        taf_text = r.text.strip()
+    except Exception:
+        taf_text = ""
 
-    Returns dict: {
-        "origin": {"icao": "KMQY", "taf": "TAF KMQY ...", "note": None},
-        "destination": {"icao": "KAUS", "taf": "TAF KAUS ...", "note": "Nearest TAF to KEDC (14 nm)"},
-    }
-    """
-    result = {}
-    for role, icao in [("origin", origin.upper()), ("destination", destination.upper())]:
-        print(f"  TAF {icao} ... ", end="", flush=True)
+    if taf_text and taf_text.startswith("TAF"):
+        print("OK")
+        return {"icao": icao, "taf": taf_text, "note": None}
+
+    # No TAF — search nearby
+    print("not available, searching nearby ... ", end="", flush=True)
+    nearby_icao, dist = _find_nearby_taf_station(icao)
+    if nearby_icao:
         try:
-            r = httpx.get(f"{AWC_API}/taf", params={"ids": icao, "format": "raw"}, timeout=10)
+            r = httpx.get(f"{AWC_API}/taf",
+                          params={"ids": nearby_icao, "format": "raw"}, timeout=10)
             taf_text = r.text.strip()
         except Exception:
             taf_text = ""
-
         if taf_text and taf_text.startswith("TAF"):
-            print("OK")
-            result[role] = {"icao": icao, "taf": taf_text, "note": None}
+            print(f"using {nearby_icao} ({dist:.0f} nm)")
+            return {"icao": nearby_icao, "taf": taf_text,
+                    "note": f"Nearest TAF to {icao} ({dist:.0f} nm)"}
+    print("none found")
+    return {"icao": icao, "taf": None, "note": "No TAF available"}
+
+
+def compute_route_legs(airports, waypoint_coords, departure_dt, tas_kts):
+    """Compute ETA at each waypoint based on great-circle distance and TAS.
+
+    Returns list of dicts: [{"icao": "KMQY", "role": "Departure", "eta": datetime, "nm": 0}, ...]
+    """
+    legs = [{"icao": airports[0], "role": "Departure", "eta": departure_dt, "nm": 0, "cum_nm": 0}]
+    cum_time = 0.0
+    cum_nm = 0.0
+
+    for i in range(1, len(airports)):
+        if i < len(waypoint_coords) and (i - 1) < len(waypoint_coords):
+            lon1, lat1 = waypoint_coords[i - 1]
+            lon2, lat2 = waypoint_coords[i]
+            dist = _nm_distance(lat1, lon1, lat2, lon2)
         else:
-            # No TAF — search nearby
-            print("not available, searching nearby ... ", end="", flush=True)
-            nearby_icao, dist = _find_nearby_taf_station(icao)
-            if nearby_icao:
-                try:
-                    r = httpx.get(f"{AWC_API}/taf",
-                                  params={"ids": nearby_icao, "format": "raw"}, timeout=10)
-                    taf_text = r.text.strip()
-                except Exception:
-                    taf_text = ""
-                if taf_text and taf_text.startswith("TAF"):
-                    print(f"using {nearby_icao} ({dist:.0f} nm)")
-                    result[role] = {
-                        "icao": nearby_icao,
-                        "taf": taf_text,
-                        "note": f"Nearest TAF to {icao} ({dist:.0f} nm)",
-                    }
-                else:
-                    print("none found")
-                    result[role] = {"icao": icao, "taf": None, "note": "No TAF available"}
-            else:
-                print("none found")
-                result[role] = {"icao": icao, "taf": None, "note": "No TAF available"}
-    return result
+            dist = 0
+
+        leg_time_hrs = dist / tas_kts if tas_kts > 0 else 0
+        cum_time += leg_time_hrs
+        cum_nm += dist
+
+        from datetime import timedelta
+        eta = departure_dt + timedelta(hours=cum_time)
+        role = "Arrival" if i == len(airports) - 1 else "Enroute"
+        legs.append({
+            "icao": airports[i],
+            "role": role,
+            "eta": eta,
+            "nm": dist,
+            "cum_nm": cum_nm,
+        })
+    return legs
+
+
+def fetch_tafs(airports, route_legs):
+    """Fetch TAFs for all airports on the route.
+
+    Returns list of dicts: [{"icao", "taf", "note", "role", "eta", "nm"}, ...]
+    """
+    results = []
+    for leg in route_legs:
+        entry = _fetch_single_taf(leg["icao"])
+        entry["role"] = leg["role"]
+        entry["eta"] = leg["eta"]
+        entry["nm"] = leg.get("cum_nm", 0)
+        results.append(entry)
+    return results
 
 
 # ---------------------------------------------------------------------------
@@ -1190,15 +1223,23 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
             "source": {"type": "base64", "media_type": media_type, "data": b64},
         })
 
-    # Build TAF text block
+    # Build TAF text block for the prompt
     taf_section = ""
     if taf_data:
         taf_lines = []
-        for role in ["origin", "destination"]:
-            entry = taf_data.get(role)
-            if entry and entry.get("taf"):
-                hdr = entry["note"] if entry["note"] else entry["icao"]
-                taf_lines.append(f"  {role.upper()} ({hdr}):\n    {entry['taf']}")
+        if isinstance(taf_data, list):
+            for entry in taf_data:
+                if entry.get("taf"):
+                    eta = entry.get("eta")
+                    eta_str = eta.strftime("%H:%MZ") if eta else "?"
+                    hdr = entry.get("note") or entry["icao"]
+                    taf_lines.append(f"  {entry['role']} {hdr} (ETA {eta_str}):\n    {entry['taf']}")
+        elif isinstance(taf_data, dict):
+            for role in ["origin", "destination"]:
+                entry = taf_data.get(role)
+                if entry and entry.get("taf"):
+                    hdr = entry["note"] if entry["note"] else entry["icao"]
+                    taf_lines.append(f"  {role.upper()} ({hdr}):\n    {entry['taf']}")
         if taf_lines:
             taf_section = "\n  TAFs:\n" + "\n".join(taf_lines) + "\n"
 
@@ -1371,6 +1412,8 @@ def main():
     )
     parser.add_argument("route",       nargs="+",
                         help="Route: ORIGIN [WAYPOINTS...] DESTINATION DATE TIME ALTITUDE")
+    parser.add_argument("--tas",       type=int, default=150,
+                        help="True airspeed in knots for ETA estimates (default: 150)")
     parser.add_argument("--no-route",  action="store_true",
                         help="Skip drawing route line on charts")
     parser.add_argument("--all",       action="store_true",
@@ -1416,6 +1459,7 @@ def main():
     print(f"\nFlight   : {route_str}")
     print(f"Departs  : {departure_dt.strftime('%Y-%m-%d %H:%MZ')} ({hours_until:+.1f} hrs from now)")
     print(f"Altitude : {altitude:,} ft MSL")
+    print(f"TAS      : {args.tas} kts")
 
     if hours_until < -2:
         sys.exit("Error: Departure time is more than 2 hours in the past.")
@@ -1460,6 +1504,16 @@ def main():
             else:
                 print("FAILED")
     else:
+        # ── Resolve route coordinates (used for overlay + legs) ───────
+        waypoints = None
+        if not args.no_route:
+            print("\nResolving route coordinates ... ", end="", flush=True)
+            waypoints = resolve_route_coords(airports)
+            if waypoints:
+                print(f"{len(waypoints)} waypoints")
+            else:
+                print("FAILED (continuing without route overlay)")
+
         # ── Normal flow: fetch charts + run analysis ────────────────────
         if hours_until <= 18:
             print(f"AWC products: Icing FL{_nearest_level(altitude, ICING_LEVELS):03d}, "
@@ -1482,25 +1536,25 @@ def main():
             sys.exit("Error: Could not fetch any charts. Check your internet connection.")
 
         # Draw route overlay on charts
-        if not args.no_route:
-            print("\nResolving route coordinates ... ", end="", flush=True)
-            waypoints = resolve_route_coords(airports)
-            if waypoints:
-                print(f"{len(waypoints)} waypoints")
-                print("Drawing route overlay ... ", end="", flush=True)
-                overlaid = 0
-                for i, (label, url, b64, mt) in enumerate(chart_data):
-                    new_b64 = draw_route_on_chart(b64, mt, waypoints)
-                    if new_b64 is not b64:
-                        chart_data[i] = (label, url, new_b64, "image/png")
-                        overlaid += 1
-                print(f"{overlaid} charts")
-            else:
-                print("FAILED (continuing without route overlay)")
+        if waypoints:
+            print("Drawing route overlay ... ", end="", flush=True)
+            overlaid = 0
+            for i, (label, url, b64, mt) in enumerate(chart_data):
+                new_b64 = draw_route_on_chart(b64, mt, waypoints)
+                if new_b64 is not b64:
+                    chart_data[i] = (label, url, new_b64, "image/png")
+                    overlaid += 1
+            print(f"{overlaid} charts")
 
-        # Fetch TAFs
+        # Compute route legs and fetch TAFs
+        print("\nComputing route legs:")
+        route_legs = compute_route_legs(airports, waypoints if waypoints else [], departure_dt, args.tas)
+        for leg in route_legs:
+            eta_str = leg["eta"].strftime("%H:%MZ")
+            print(f"  {leg['icao']:6s} {leg['role']:10s} ETA {eta_str}  ({leg['cum_nm']:.0f} nm)")
+
         print("\nFetching TAFs:")
-        taf_data = fetch_tafs(origin, destination)
+        taf_data = fetch_tafs(airports, route_legs)
 
         synoptic_html, briefing_html, significant_labels, prompts = analyze(
             origin, destination, departure_dt, altitude, chart_data, taf_data
@@ -1561,41 +1615,64 @@ def main():
 
     # Build TAF section HTML
     taf_section_html = ""
-    dep_hour = departure_dt.strftime("%d%H")  # e.g. "1019" for 10th day 19Z
-    # Estimate arrival ~3 hrs after departure
-    arr_dt = departure_dt.replace(hour=min(departure_dt.hour + 3, 23))
-    arr_hour = arr_dt.strftime("%d%H")
-
     if taf_data:
         taf_blocks = []
-        for role in ["origin", "destination"]:
-            entry = taf_data.get(role)
-            if entry and entry.get("taf"):
-                role_label = "Departure" if role == "origin" else "Arrival"
-                target_hour = dep_hour if role == "origin" else arr_hour
-                hdr = entry["icao"]
-                note = ""
-                if entry.get("note"):
-                    note = f' <span style="color:var(--amber);font-size:0.75rem">({entry["note"]})</span>'
+        for entry in (taf_data if isinstance(taf_data, list) else []):
+            if not entry.get("taf"):
+                continue
+            role_label = entry.get("role", "")
+            eta = entry.get("eta")
+            target_hour = eta.strftime("%d%H") if eta else departure_dt.strftime("%d%H")
+            eta_str = eta.strftime("%H:%MZ") if eta else ""
+            nm = entry.get("nm", 0)
+            hdr = entry["icao"]
+            note = ""
+            if entry.get("note"):
+                note = f' <span style="color:var(--amber);font-size:0.75rem">({entry["note"]})</span>'
 
-                # Highlight the TAF line covering the target time
-                taf_html = _highlight_taf_line(entry["taf"], target_hour, role_label)
+            eta_badge = ""
+            if eta_str:
+                dist_str = f" &middot; {nm:.0f} nm" if nm > 0 else ""
+                eta_badge = f' <span style="color:var(--muted);font-size:0.72rem">ETA {eta_str}{dist_str}</span>'
 
-                taf_blocks.append(
-                    f'<div style="margin-bottom:0.75rem">'
-                    f'<strong>{hdr}</strong>'
-                    f' <span style="color:var(--blue);font-size:0.75rem;font-weight:700">{role_label}</span>'
-                    f'{note}'
-                    f'<pre style="margin-top:0.3rem;font-size:0.78rem;color:var(--green);'
-                    f'white-space:pre-wrap;line-height:1.5">{taf_html}</pre></div>'
-                )
+            taf_html = _highlight_taf_line(entry["taf"], target_hour, role_label)
+
+            taf_blocks.append(
+                f'<div style="margin-bottom:0.75rem">'
+                f'<strong>{hdr}</strong>'
+                f' <span style="color:var(--blue);font-size:0.75rem;font-weight:700">{role_label}</span>'
+                f'{eta_badge}{note}'
+                f'<pre style="margin-top:0.3rem;font-size:0.78rem;color:var(--green);'
+                f'white-space:pre-wrap;line-height:1.5">{taf_html}</pre></div>'
+            )
+
+        # Fallback: legacy dict format from old cache files
+        if not taf_blocks and isinstance(taf_data, dict):
+            for role in ["origin", "destination"]:
+                entry = taf_data.get(role)
+                if entry and entry.get("taf"):
+                    role_label = "Departure" if role == "origin" else "Arrival"
+                    target_hour = departure_dt.strftime("%d%H")
+                    taf_html = _highlight_taf_line(entry["taf"], target_hour, role_label)
+                    note = ""
+                    if entry.get("note"):
+                        note = f' <span style="color:var(--amber);font-size:0.75rem">({entry["note"]})</span>'
+                    taf_blocks.append(
+                        f'<div style="margin-bottom:0.75rem">'
+                        f'<strong>{entry["icao"]}</strong>'
+                        f' <span style="color:var(--blue);font-size:0.75rem;font-weight:700">{role_label}</span>'
+                        f'{note}'
+                        f'<pre style="margin-top:0.3rem;font-size:0.78rem;color:var(--green);'
+                        f'white-space:pre-wrap;line-height:1.5">{taf_html}</pre></div>'
+                    )
+
         if taf_blocks:
             taf_section_html = (
                 '  <section>\n'
                 '    <div class="section-label">Terminal Forecasts (TAF)</div>\n'
                 '    <details class="collapsible">\n'
                 '      <summary>\n'
-                '        Raw TAFs — departure + arrival\n'
+                '        Raw TAFs — route\n'
                 '        <span class="pill">' + str(len(taf_blocks)) + ' stations</span>\n'
                 '      </summary>\n'
                 '      <div class="collapsible-body">\n'
