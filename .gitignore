@@ -1,0 +1,5 @@
+briefing_*.html
+.claude/
+__pycache__/
+*.pyc
+.env
