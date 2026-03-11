@@ -515,10 +515,11 @@ def draw_route_on_chart(b64_data, media_type, waypoints):
 
 
 def resolve_route_coords(airports):
-    """Resolve airport ICAO codes to (lon, lat) via AWC flightpath API.
+    """Resolve airport ICAO codes to (lon, lat) and names via AWC flightpath API.
 
     airports: list of ICAO codes, e.g. ["KMQY", "KEDC"]
-    Returns list of (lon, lat) tuples.
+    Returns (coords, names) where coords is list of (lon, lat) tuples
+    and names is dict mapping ICAO to airport name, or (None, {}).
     """
     path = " ".join(a.upper() for a in airports)
     try:
@@ -526,13 +527,21 @@ def resolve_route_coords(airports):
         r.raise_for_status()
         data = r.json()
         coords = []
+        names = {}
         for feat in data.get("features", []):
             if feat["geometry"]["type"] == "Point":
                 lon, lat = feat["geometry"]["coordinates"]
                 coords.append((lon, lat))
-        return coords if len(coords) >= 2 else None
+                faa_id = feat["properties"].get("id", "")
+                name = feat["properties"].get("name", "")
+                # Map back to ICAO — AWC strips the K prefix
+                for apt in airports:
+                    if apt.upper().endswith(faa_id):
+                        names[apt.upper()] = name.replace("_", " ").title()
+                        break
+        return (coords, names) if len(coords) >= 2 else (None, {})
     except Exception:
-        return None
+        return None, {}
 
 
 # ---------------------------------------------------------------------------
@@ -1407,7 +1416,7 @@ SYSTEM_PROMPT = (
     "Respond only with HTML body content using the tags specified. No outer html/head/body/style tags."
 )
 
-def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None, winds_text=""):
+def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None, winds_text="", airport_names=None):
     """
     Single-pass Claude query: operational briefing + chart classification.
 
@@ -1457,6 +1466,12 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
     if winds_text:
         winds_section = f"\n  Winds/Temps Aloft (stations near route):\n{winds_text}\n"
 
+    # Airport names — prevents LLM from guessing wrong names
+    names_section = ""
+    if airport_names:
+        name_lines = "\n".join(f"    {k} = {v}" for k, v in airport_names.items())
+        names_section = f"\n  Airport Names (use these exact names):\n{name_lines}\n"
+
     flight_header = f"""
 FLIGHT
   Today        : {now_str}
@@ -1464,7 +1479,7 @@ FLIGHT
   Departure    : {dep_day} {dep_str} UTC
   Planned Alt  : {altitude_ft:,} ft MSL
   Charts       : {len(chart_data)} weather charts
-{taf_section}{winds_section}"""
+{names_section}{taf_section}{winds_section}"""
 
     label_list = "\n".join(f"  - {l}" for l in chart_labels)
 
@@ -1697,7 +1712,7 @@ def main():
         # Draw route overlay on cached charts (disabled — calibration WIP)
         if False and not args.no_route:
             print("Resolving route ... ", end="", flush=True)
-            waypoints = resolve_route_coords(airports)
+            waypoints, _ = resolve_route_coords(airports)
             if waypoints:
                 print(f"{len(waypoints)} waypoints, drawing ... ", end="", flush=True)
                 overlaid = 0
@@ -1712,11 +1727,14 @@ def main():
     else:
         # ── Resolve route coordinates (used for overlay + legs) ───────
         waypoints = None
+        airport_names = {}
         if not args.no_route:
             print("\nResolving route coordinates ... ", end="", flush=True)
-            waypoints = resolve_route_coords(airports)
+            waypoints, airport_names = resolve_route_coords(airports)
             if waypoints:
                 print(f"{len(waypoints)} waypoints")
+                for apt, name in airport_names.items():
+                    print(f"  {apt}: {name}")
             else:
                 print("FAILED (continuing without route overlay)")
 
@@ -1765,7 +1783,7 @@ def main():
         winds_text = fetch_winds_aloft(waypoints, hours_until)
 
         briefing_html, significant_labels, prompts = analyze(
-            origin, destination, departure_dt, altitude, chart_data, taf_data, winds_text
+            origin, destination, departure_dt, altitude, chart_data, taf_data, winds_text, airport_names
         )
 
         if args.cache:
