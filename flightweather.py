@@ -1078,19 +1078,6 @@ HTML_TEMPLATE = """\
   </section>
 
   <section>
-    <div class="section-label">Synoptic Overview</div>
-    <details class="collapsible">
-      <summary>
-        Background pattern — chart-by-chart detail
-        <span class="pill">click to expand</span>
-      </summary>
-      <div class="collapsible-body">
-{synoptic_html}
-      </div>
-    </details>
-  </section>
-
-  <section>
     <div class="section-label">Operational Briefing</div>
     <div class="briefing">
 {briefing_html}
@@ -1290,7 +1277,7 @@ def _highlight_taf_line(taf_text, target_ddhh, role_label):
 
 
 # ---------------------------------------------------------------------------
-# Claude analysis — returns (synoptic_html, briefing_html, significant_labels)
+# Claude analysis — returns (briefing_html, significant_labels, prompts)
 # ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = (
@@ -1305,18 +1292,16 @@ SYSTEM_PROMPT = (
 
 def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None):
     """
-    Two-pass Claude query:
-      1. Synoptic overview — broad pattern analysis + chart significance classification
-      2. Operational briefing — focused on day-before and day-of at planned altitude
+    Single-pass Claude query: operational briefing + chart classification.
 
     chart_data: list of (label, url, b64, media_type)
-    taf_data: dict from fetch_tafs() or None
-    Returns (synoptic_html, briefing_html, significant_labels)
+    taf_data: list from fetch_tafs() or dict (legacy) or None
+    Returns (briefing_html, significant_labels, prompts)
     """
     client = anthropic.Anthropic()
     dep_str = departure_dt.strftime("%Y-%m-%d %H:%MZ")
 
-    # Build shared image content block
+    # Build image content block
     image_blocks = []
     chart_labels = []
     for label, url, b64, media_type in chart_data:
@@ -1361,36 +1346,7 @@ FLIGHT
 
     label_list = "\n".join(f"  - {l}" for l in chart_labels)
 
-    # ── Pass 1: Synoptic overview + chart classification ─────────────────
-    synoptic_prompt = image_blocks + [{
-        "type": "text",
-        "text": flight_header + f"""
-TASK — BACKGROUND PATTERN + CHART CLASSIFICATION
-
-FIRST, output a JSON line classifying which charts show significant weather
-hazards relevant to this specific flight route ({origin.upper()} → {destination.upper()}).
-A chart is "significant" if it shows relevant weather (fronts, precip, icing,
-turbulence, IFR conditions, SIGMETs, wind shifts, etc.) that intersect or
-affect the planned route, departure/arrival airports, or alternates.
-Charts showing no relevant weather along the route go in the reference pile.
-
-Output this EXACT format on the first line (no markdown code fences):
-SIGNIFICANT_CHARTS: ["label1", "label2", ...]
-
-All chart labels:
-{label_list}
-
-THEN a blank line, then your HTML analysis.
-
-Walk through each chart chronologically. Describe what's moving where and how it's evolving.
-This is the "nerd section" — technical chart reading for the curious pilot who wants the full picture.
-Keep it factual: what systems are where, where they're headed, what they're doing.
-
-Respond with HTML using: h2, h3, p, ul, ol, li, strong, em, table, thead, tbody, tr, th, td, blockquote.
-Do NOT include html/head/body/style/script tags.""",
-    }]
-
-    def _stream_with_retry(label, prompt, max_tokens=4096, retries=3):
+    def _stream_with_retry(prompt, max_tokens=4096, retries=3):
         """Stream a Claude request with retry on rate limit."""
         for attempt in range(retries):
             try:
@@ -1413,37 +1369,36 @@ Do NOT include html/head/body/style/script tags.""",
         print(" FAILED after retries.")
         return ""
 
-    print(f"\nPass 1/2 — Synoptic overview ", end="", flush=True)
-    synoptic_html = _stream_with_retry("synoptic", synoptic_prompt)
-
-    # Parse SIGNIFICANT_CHARTS from the first line
-    significant_labels = set()
-    sig_match = re.match(r'SIGNIFICANT_CHARTS:\s*(\[.*?\])', synoptic_html, re.DOTALL)
-    if sig_match:
-        try:
-            labels = json.loads(sig_match.group(1))
-            significant_labels = set(labels)
-        except (json.JSONDecodeError, TypeError):
-            pass
-        # Strip the classification line from the displayed HTML
-        synoptic_html = synoptic_html[sig_match.end():].lstrip("\n")
-
-    # Fallback: if parsing failed, treat all charts as significant
-    if not significant_labels:
-        significant_labels = set(chart_labels)
-
-    # ── Pass 2: Operational briefing ──────────────────────────────────────
+    # ── Single pass: classification + operational briefing ────────────────
     briefing_prompt = image_blocks + [{
         "type": "text",
         "text": flight_header + f"""
-TASK — PILOT BRIEFING (the main briefing a pilot actually reads)
+TASK — CHART CLASSIFICATION + PILOT BRIEFING
+
+FIRST, output a JSON line classifying which charts show relevant weather
+for this specific flight route ({origin.upper()} → {destination.upper()}).
+A chart is "relevant" if it shows weather (fronts, precip, icing,
+turbulence, IFR conditions, SIGMETs, wind shifts, etc.) that intersect or
+affect the planned route, departure/arrival airports, or alternates.
+Charts showing no relevant weather along the route go in the reference pile.
+
+Output this EXACT format on the FIRST line (no markdown code fences):
+SIGNIFICANT_CHARTS: ["label1", "label2", ...]
+
+All chart labels:
+{label_list}
+
+THEN a blank line, then the pilot briefing below.
+
+---
+
+PILOT BRIEFING — the main briefing a pilot actually reads.
 
 This is what a weather-savvy CFI would tell you over the phone before your flight.
 Write in plain pilot language. No meteorology lectures. Answer the questions pilots actually ask:
-"Can I get out of Nashville?", "Will I hit ice at 12 grand?", "What's Austin doing when I get there?",
+"Can I get out?", "Will I hit ice at {altitude_ft:,}?", "What's it doing when I get there?",
 "Should I just wait until tomorrow?". Be direct. Be opinionated. Ground it in what the charts show.
 
-Do NOT repeat the background pattern analysis — that's in a separate section.
 Focus ONLY on the day before and the day/time of the flight.
 If TAFs are provided above, use them for specific ceiling/visibility/wind forecasts at departure and arrival.
 
@@ -1495,20 +1450,36 @@ Respond with HTML using: h2, h3, h4, p, ul, ol, li, strong, em, blockquote, tabl
 No html/head/body/style/script tags.""",
     }]
 
-    print(f"Pass 2/2 — Operational briefing ", end="", flush=True)
-    briefing_html = _stream_with_retry("briefing", briefing_prompt)
+    print(f"\nAnalyzing {len(chart_data)} charts ", end="", flush=True)
+    raw_html = _stream_with_retry(briefing_prompt, max_tokens=6144)
 
-    # Extract text-only prompts (strip image blocks for readability)
+    # Parse SIGNIFICANT_CHARTS from the first line
+    significant_labels = set()
+    sig_match = re.match(r'SIGNIFICANT_CHARTS:\s*(\[.*?\])', raw_html, re.DOTALL)
+    if sig_match:
+        try:
+            labels = json.loads(sig_match.group(1))
+            significant_labels = set(labels)
+        except (json.JSONDecodeError, TypeError):
+            pass
+        briefing_html = raw_html[sig_match.end():].lstrip("\n")
+    else:
+        briefing_html = raw_html
+
+    # Fallback: if parsing failed, treat all charts as significant
+    if not significant_labels:
+        significant_labels = set(chart_labels)
+
+    # Extract text-only prompt for cache
     def _prompt_text(blocks):
         return "\n".join(b["text"] for b in blocks if b.get("type") == "text")
 
     prompts = {
         "system": SYSTEM_PROMPT,
-        "synoptic_prompt": _prompt_text(synoptic_prompt),
         "briefing_prompt": _prompt_text(briefing_prompt),
     }
 
-    return synoptic_html, briefing_html, significant_labels, prompts
+    return briefing_html, significant_labels, prompts
 
 
 # ---------------------------------------------------------------------------
@@ -1594,8 +1565,8 @@ def main():
             llm_cache = json.load(f)
         chart_data = [tuple(c) for c in charts_cache["chart_data"]]
         taf_data = llm_cache.get("taf_data")
-        synoptic_html = llm_cache["synoptic_html"]
-        briefing_html = llm_cache["briefing_html"]
+        briefing_html = llm_cache.get("briefing_html", llm_cache.get("synoptic_html", ""))
+        # Legacy caches may have synoptic_html but no briefing_html
         significant_labels = set(llm_cache["significant_labels"])
         print(f"  {len(chart_data)} charts, {len(significant_labels)} significant")
 
@@ -1666,7 +1637,7 @@ def main():
         print("\nFetching TAFs:")
         taf_data = fetch_tafs(airports, route_legs)
 
-        synoptic_html, briefing_html, significant_labels, prompts = analyze(
+        briefing_html, significant_labels, prompts = analyze(
             origin, destination, departure_dt, altitude, chart_data, taf_data
         )
 
@@ -1691,7 +1662,6 @@ def main():
                 "altitude_ft": altitude,
                 "taf_data": [{k: v for k, v in e.items() if k != "eta_dt"} for e in taf_data] if isinstance(taf_data, list) else taf_data,
                 "prompts": prompts,
-                "synoptic_html": synoptic_html,
                 "briefing_html": briefing_html,
                 "significant_labels": sorted(significant_labels),
             }
@@ -1824,7 +1794,6 @@ def main():
         sig_count=len(sig_cards),
         significant_chart_cards="\n".join(sig_cards),
         reference_section=reference_section,
-        synoptic_html=synoptic_html,
         briefing_html=briefing_html,
     )
 
