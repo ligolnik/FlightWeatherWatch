@@ -401,6 +401,10 @@ def fetch_chart(url, label, forecast_hr=0):
 
 AWC_API = "https://aviationweather.gov/api/data"
 
+# Winds aloft station IDs near common route corridors
+# We fetch the full product and filter by stations near the route
+WINDS_ALOFT_FCSTS = ["06", "12", "24"]  # available forecast periods
+
 
 # ---------------------------------------------------------------------------
 # Route overlay — draw magenta flight path on chart images
@@ -700,6 +704,119 @@ def fetch_tafs(airports, route_legs):
         entry["nm"] = leg.get("cum_nm", 0)
         results.append(entry)
     return results
+
+
+# ---------------------------------------------------------------------------
+# Winds aloft
+# ---------------------------------------------------------------------------
+
+def fetch_winds_aloft(waypoint_coords, hours_until):
+    """Fetch winds/temps aloft for stations near the route.
+
+    Returns a formatted text block for the LLM prompt, or empty string.
+    """
+    if not waypoint_coords or len(waypoint_coords) < 2:
+        return ""
+
+    # Pick the best forecast period
+    if hours_until <= 9:
+        fcst = "06"
+    elif hours_until <= 18:
+        fcst = "12"
+    elif hours_until <= 30:
+        fcst = "24"
+    else:
+        return ""  # No winds aloft beyond 24hrs
+
+    print(f"  Winds aloft (FD {fcst}hr) ... ", end="", flush=True)
+
+    try:
+        r = httpx.get(f"{AWC_API}/windtemp",
+                      params={"region": "all", "level": "low", "fcst": fcst},
+                      timeout=10)
+        raw = r.text.strip()
+    except Exception:
+        print("FAILED")
+        return ""
+
+    if not raw or "error" in raw[:50].lower():
+        print("FAILED")
+        return ""
+
+    # Parse the product — extract header + station lines
+    lines = raw.split("\n")
+    header_lines = []
+    station_lines = {}
+    ft_line = ""
+    for line in lines:
+        line = line.rstrip()
+        if line.startswith("FT "):
+            ft_line = line
+            continue
+        if line.startswith("DATA BASED") or line.startswith("VALID "):
+            header_lines.append(line)
+            continue
+        # Station lines start with 3-letter ID
+        if len(line) >= 3 and line[:3].isalpha() and line[:3].isupper():
+            sid = line[:3]
+            station_lines[sid] = line
+
+    if not station_lines:
+        print("no data")
+        return ""
+
+    # Find stations within ~100nm of route waypoints
+    # First, get station locations
+    try:
+        r2 = httpx.get(f"{AWC_API}/stationinfo",
+                       params={"bbox": _route_bbox(waypoint_coords, margin_deg=2.0)},
+                       timeout=10)
+        all_stations = r2.json()
+    except Exception:
+        print("station lookup failed")
+        return ""
+
+    # Filter to stations that are in the winds aloft data and near the route
+    route_stations = []
+    for stn in all_stations:
+        icao = stn.get("icaoId") or ""
+        faa = stn.get("faaId") or ""
+        sid = icao[1:] if icao.startswith("K") else faa
+        if not sid or sid not in station_lines:
+            continue
+        # Check distance to nearest route segment
+        stn_lat, stn_lon = stn["lat"], stn["lon"]
+        min_dist = min(
+            _nm_distance(stn_lat, stn_lon, lat, lon)
+            for lon, lat in waypoint_coords
+        )
+        if min_dist < 100:
+            route_stations.append((sid, min_dist, station_lines[sid]))
+
+    route_stations.sort(key=lambda x: x[1])
+
+    if not route_stations:
+        print("no stations near route")
+        return ""
+
+    # Build formatted text
+    result_lines = []
+    for hl in header_lines:
+        result_lines.append(hl)
+    if ft_line:
+        result_lines.append(ft_line)
+    for sid, dist, line in route_stations[:15]:  # max 15 stations
+        result_lines.append(line)
+
+    print(f"{len(route_stations)} stations")
+    return "\n".join(result_lines)
+
+
+def _route_bbox(waypoint_coords, margin_deg=2.0):
+    """Compute a bounding box string for route waypoints."""
+    lats = [lat for lon, lat in waypoint_coords]
+    lons = [lon for lon, lat in waypoint_coords]
+    return f"{min(lats)-margin_deg},{min(lons)-margin_deg},{max(lats)+margin_deg},{max(lons)+margin_deg}"
 
 
 # ---------------------------------------------------------------------------
@@ -1290,12 +1407,13 @@ SYSTEM_PROMPT = (
     "Respond only with HTML body content using the tags specified. No outer html/head/body/style tags."
 )
 
-def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None):
+def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None, winds_text=""):
     """
     Single-pass Claude query: operational briefing + chart classification.
 
     chart_data: list of (label, url, b64, media_type)
     taf_data: list from fetch_tafs() or dict (legacy) or None
+    winds_text: formatted winds aloft text or empty string
     Returns (briefing_html, significant_labels, prompts)
     """
     client = anthropic.Anthropic()
@@ -1335,6 +1453,10 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
     now_str = datetime.now(timezone.utc).strftime("%A %Y-%m-%d %H:%MZ")
     dep_day = departure_dt.strftime("%A")
 
+    winds_section = ""
+    if winds_text:
+        winds_section = f"\n  Winds/Temps Aloft (stations near route):\n{winds_text}\n"
+
     flight_header = f"""
 FLIGHT
   Today        : {now_str}
@@ -1342,7 +1464,7 @@ FLIGHT
   Departure    : {dep_day} {dep_str} UTC
   Planned Alt  : {altitude_ft:,} ft MSL
   Charts       : {len(chart_data)} weather charts
-{taf_section}"""
+{taf_section}{winds_section}"""
 
     label_list = "\n".join(f"  - {l}" for l in chart_labels)
 
@@ -1426,7 +1548,9 @@ Use a mini table for the vertical icing picture: Altitude | Icing Prob | Notes
 
 TURBULENCE & RIDE QUALITY:
 - Smooth or bumpy? Where are the rough spots?
-- Headwind or tailwind? Rough estimate of the wind effect at that altitude.
+- Winds aloft: If winds/temps data is provided above, decode and present the actual winds
+  at cruise altitude for stations along the route. Calculate headwind/tailwind/crosswind
+  components for each leg. Estimate total wind effect on flight time.
 
 OTHER HAZARDS:
 - Any weather to dodge or plan around?
@@ -1637,8 +1761,11 @@ def main():
         print("\nFetching TAFs:")
         taf_data = fetch_tafs(airports, route_legs)
 
+        print("\nFetching winds aloft:")
+        winds_text = fetch_winds_aloft(waypoints, hours_until)
+
         briefing_html, significant_labels, prompts = analyze(
-            origin, destination, departure_dt, altitude, chart_data, taf_data
+            origin, destination, departure_dt, altitude, chart_data, taf_data, winds_text
         )
 
         if args.cache:
@@ -1661,6 +1788,7 @@ def main():
                 "departure": departure_dt.strftime("%Y-%m-%d %H:%MZ"),
                 "altitude_ft": altitude,
                 "taf_data": [{k: v for k, v in e.items() if k != "eta_dt"} for e in taf_data] if isinstance(taf_data, list) else taf_data,
+                "winds_text": winds_text,
                 "prompts": prompts,
                 "briefing_html": briefing_html,
                 "significant_labels": sorted(significant_labels),
