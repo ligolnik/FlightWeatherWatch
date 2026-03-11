@@ -1943,7 +1943,8 @@ def main():
         briefing_html=briefing_html,
     )
 
-    fname = f"briefing_{origin}_{destination}_{date_str}.html"
+    gen_stamp = now_utc.strftime("%Y%m%d_%H%MZ")
+    fname = f"briefing_{origin}_{destination}_{date_str}_{gen_stamp}.html"
     out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), fname)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
