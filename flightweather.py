@@ -353,7 +353,25 @@ def all_charts(altitude_ft=10000):
 # Image fetching — returns (label, url, base64_data, media_type)
 # ---------------------------------------------------------------------------
 
-def fetch_chart(url, label):
+def _compute_valid_time(last_modified, forecast_hr):
+    """Compute chart valid time from Last-Modified header + forecast hour.
+
+    Returns a datetime string like 'Tue 18Z' or None.
+    """
+    from datetime import timedelta
+    from email.utils import parsedate_to_datetime
+    try:
+        issued = parsedate_to_datetime(last_modified)
+        # Round down to nearest 6-hr cycle (00/06/12/18Z)
+        cycle_hr = (issued.hour // 6) * 6
+        issued = issued.replace(hour=cycle_hr, minute=0, second=0, microsecond=0)
+        valid = issued + timedelta(hours=forecast_hr)
+        return valid.strftime("%a %HZ")
+    except Exception:
+        return None
+
+
+def fetch_chart(url, label, forecast_hr=0):
     # type: (...) -> Optional[tuple]
     try:
         print(f"  Fetching {label} ... ", end="", flush=True)
@@ -367,6 +385,13 @@ def fetch_chart(url, label):
         else:
             media_type = "image/jpeg"
         encoded = base64.standard_b64encode(r.content).decode("utf-8")
+
+        # Compute valid time from Last-Modified + forecast hour
+        lm = r.headers.get("last-modified", "")
+        valid_str = _compute_valid_time(lm, forecast_hr) if lm else None
+        if valid_str:
+            label = f"{label} (valid {valid_str})"
+
         print("OK")
         return (label, url, encoded, media_type)
     except Exception as exc:
@@ -1612,8 +1637,8 @@ def main():
         print(f"\nFetching {len(chart_list)} chart(s):")
 
         chart_data = []
-        for _, url, label in chart_list:
-            result = fetch_chart(url, label)
+        for fhr, url, label in chart_list:
+            result = fetch_chart(url, label, forecast_hr=fhr)
             if result:
                 chart_data.append(result)
 
