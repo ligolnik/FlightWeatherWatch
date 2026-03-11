@@ -1054,6 +1054,7 @@ HTML_TEMPLATE = """\
     <span>Arrival <strong>{arr_str}</strong></span>
     <span>Route <strong>{total_nm} nm</strong></span>
     <span>Charts <strong>{chart_count}</strong></span>
+    <span>Generated <strong>{generated}</strong></span>
   </div>
 </header>
 
