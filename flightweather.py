@@ -410,63 +410,45 @@ WINDS_ALOFT_FCSTS = ["06", "12", "24"]  # available forecast periods
 # Route overlay — draw magenta flight path on chart images
 # ---------------------------------------------------------------------------
 
-# Calibration points: (lon, lat, px, py) — click-calibrated by user
-# Two projections: AWC (1000x720) and WPC (~800x560)
-
-_AWC_CAL = [
-    (-81.50, 25.10, 749, 646), (-97.40, 25.95, 483, 630),
-    (-124.20, 42.00, 49, 316), (-124.73, 48.38, 41, 173),
-    (-87.65, 41.65, 642, 324), (-70.07, 42.04, 919, 315),
-    (-71.94, 41.05, 891, 338), (-80.52, 41.50, 715, 328),
-    (-103.00, 36.50, 392, 431), (-109.05, 37.00, 293, 422),
-]
-_AWC_REF_SIZE = (1000, 720)
-
-_WPC_CAL = [
-    (-81.50, 25.10, 677, 479), (-97.40, 25.95, 402, 500),
-    (-124.20, 42.00, 95, 153), (-124.73, 48.38, 138, 60),
-    (-87.65, 41.65, 520, 222), (-70.07, 42.04, 710, 151),
-    (-71.94, 41.05, 698, 178), (-80.52, 41.50, 565, 211),
-    (-103.00, 36.50, 325, 313), (-109.05, 37.00, 248, 291),
-]
-_WPC_REF_SIZE = (799, 559)
-
-_rbf_cache = {}
+_georef_cache = {}  # type: dict
 
 
-def _get_rbf(cal_key):
-    """Build or retrieve cached RBF interpolators for a calibration set."""
-    if cal_key in _rbf_cache:
-        return _rbf_cache[cal_key]
+def _get_georef(img_w, img_h):
+    """Get a ChartGeoreferencer for the given image dimensions, or None."""
+    key = (img_w, img_h)
+    if key in _georef_cache:
+        return _georef_cache[key]
+
     try:
-        from scipy.interpolate import RBFInterpolator
-        import numpy as np
+        from chart_georef import load_calibration, list_calibrations
     except ImportError:
+        _georef_cache[key] = None
         return None
-    cal = _AWC_CAL if cal_key == "awc" else _WPC_CAL
-    geo = np.array([[lon, lat] for lon, lat, _, _ in cal])
-    px = np.array([p for _, _, p, _ in cal])
-    py = np.array([p for _, _, _, p in cal])
-    rbf = (
-        RBFInterpolator(geo, px, kernel='thin_plate_spline', smoothing=0),
-        RBFInterpolator(geo, py, kernel='thin_plate_spline', smoothing=0),
-    )
-    _rbf_cache[cal_key] = rbf
-    return rbf
 
+    # Match image dimensions to a calibration:
+    #   WPC short-term prog  ~799x559  -> wpc_prog_short  (also wpc_qpf ~800x561)
+    #   WPC extended prog    ~848x638  -> wpc_prog_extended
+    #   AWC charts           ~1000x720 -> (not yet calibrated)
+    #
+    # Tolerance of ±5 pixels handles slight size variations between chart issues.
+    cal_map = [
+        ("wpc_prog_short",    799, 559, 5),
+        ("wpc_qpf",           800, 561, 5),
+        ("wpc_prog_extended", 848, 638, 10),
+    ]
 
-def _pick_calibration(img_w, img_h):
-    """Pick AWC or WPC calibration based on image size."""
-    if img_w >= 900 and img_h >= 650:
-        return "awc", _AWC_REF_SIZE
-    return "wpc", _WPC_REF_SIZE
+    georef = None
+    for cal_name, ref_w, ref_h, tol in cal_map:
+        if abs(img_w - ref_w) <= tol and abs(img_h - ref_h) <= tol:
+            if cal_name in list_calibrations():
+                try:
+                    georef = load_calibration(cal_name)
+                    break
+                except Exception:
+                    pass
 
-
-def _geo_to_pixel(lon, lat, img_w, img_h, rbf, ref_size):
-    """Convert lon/lat to pixel coordinates on a chart image."""
-    px = rbf[0]([[lon, lat]])[0]
-    py = rbf[1]([[lon, lat]])[0]
-    return int(px * img_w / ref_size[0]), int(py * img_h / ref_size[1])
+    _georef_cache[key] = georef
+    return georef
 
 
 def draw_route_on_chart(b64_data, media_type, waypoints):
@@ -488,17 +470,19 @@ def draw_route_on_chart(b64_data, media_type, waypoints):
     img = Image.open(io.BytesIO(raw)).convert("RGB")
     w, h = img.size
 
-    cal_key, ref_size = _pick_calibration(w, h)
-    rbf = _get_rbf(cal_key)
-    if rbf is None:
+    georef = _get_georef(w, h)
+    if georef is None:
         return b64_data
 
     draw = ImageDraw.Draw(img)
     lw = max(2, w // 400)
     rad = max(3, w // 250)
 
-    # Convert waypoints to pixels
-    pixels = [_geo_to_pixel(lon, lat, w, h, rbf, ref_size) for lon, lat in waypoints]
+    # Convert waypoints to pixels (waypoints are lon, lat)
+    pixels = []
+    for lon, lat in waypoints:
+        px, py = georef.latlon_to_pixel(lat, lon)
+        pixels.append((int(round(px)), int(round(py))))
 
     # Draw route segments
     for i in range(len(pixels) - 1):
@@ -1409,6 +1393,83 @@ def _highlight_taf_line(taf_text, target_ddhh, role_label):
 SYSTEM_PROMPT = (
     "You are a highly experienced CFI/CFII and charter pilot talking directly to a fellow pilot. "
     "Your job is to help them decide whether to fly, when to fly, and how to fly it safely. "
+    "\n\n"
+    "CRITICAL — DO NOT OVERSTATE CONDITIONS:\n\n"
+    "Do not describe IMC, icing, turbulence, or convection as 'likely' unless it is directly supported "
+    "by forecast data (TAFs, cloud cover, icing charts, satellite, turbulence guidance, or widespread QPF) "
+    "that clearly overlaps the route and timing.\n\n"
+    "If conditions are patchy, terrain-driven, altitude-dependent, or uncertain, say so explicitly using words like:\n"
+    "- 'possible'\n"
+    "- 'localized'\n"
+    "- 'conditional'\n"
+    "- 'brief'\n\n"
+    "Do not upgrade limited or terrain-localized weather into route-wide conditions.\n\n"
+    "WHEN DESCRIBING ANY HAZARD, classify it as one of:\n"
+    "- WIDESPREAD (affects most of the route)\n"
+    "- LOCALIZED (terrain or isolated areas)\n"
+    "- CONDITIONAL (depends on timing/altitude)\n"
+    "- LOW CONFIDENCE (data unclear or weak signal)\n\n"
+    "Use those words in the briefing when appropriate.\n\n"
+    "MOISTURE GATING RULE:\n\n"
+    "Clouds, IMC, and icing require explicit evidence of moisture.\n"
+    "Do not infer moisture from temperature, terrain, or wind alone.\n\n"
+    "If icing charts, QPF, or cloud fields do not show a continuous or meaningful moisture presence "
+    "along the route, assume:\n"
+    "- no widespread IMC\n"
+    "- no significant icing risk\n\n"
+    "Localized terrain clouds may still exist, but must be described as LOCALIZED or CONDITIONAL, not LIKELY.\n\n"
+    "PRIMARY RISK PRIORITIZATION RULE:\n\n"
+    "Identify and clearly state the single most important operational risk for this flight "
+    "(e.g., terrain/wind, convection, icing, ceilings).\n\n"
+    "Do not give equal weight to all hazards.\n"
+    "If one hazard dominates, say so explicitly and structure the briefing around it.\n\n"
+    "Secondary hazards should be clearly labeled as secondary or conditional.\n\n"
+    "CAUSE → EFFECT RULE:\n\n"
+    "When describing any hazard, explicitly connect:\n"
+    "- the data (what chart or forecast shows)\n"
+    "- the mechanism (why that creates the hazard)\n"
+    "- the impact (what the pilot will experience)\n\n"
+    "Do not skip steps.\n"
+    "Do not jump from 'conditions exist' to 'hazard likely' without explaining the mechanism.\n\n"
+    "ROUTE/TIME OVERLAP RULE:\n\n"
+    "Only describe weather as affecting the flight if it overlaps:\n"
+    "- the planned route AND\n"
+    "- the planned time window AND\n"
+    "- the planned altitude band\n\n"
+    "Do not extrapolate weather outside those dimensions into the flight path.\n\n"
+    "ALTITUDE SENSITIVITY RULE:\n\n"
+    "For any hazard, explicitly state how it changes with altitude:\n"
+    "- better above?\n"
+    "- worse above?\n"
+    "- avoidable by climbing or descending?\n\n"
+    "If altitude materially changes the risk, call that out clearly.\n\n"
+    "ABSENCE OF EVIDENCE RULE:\n\n"
+    "If key supporting data is missing (e.g., no icing signal, no QPF, no cloud layer), explicitly state that.\n\n"
+    "Do not assume hazards exist without supporting signals.\n"
+    "Say things like:\n"
+    "- 'No significant icing signal present'\n"
+    "- 'No widespread moisture indicated'\n\n"
+    "DECISION CLARITY RULE:\n\n"
+    "Tie the GO / MARGINAL / NO-GO decision directly to:\n"
+    "- the primary risk\n"
+    "- whether that risk is manageable\n\n"
+    "Avoid vague or generalized justifications.\n\n"
+    "LANGUAGE PRECISION RULE:\n\n"
+    "Use:\n"
+    "- 'likely' only when high confidence and strong supporting data exist\n"
+    "- 'possible' or 'conditional' otherwise\n\n"
+    "Avoid mixing strong language ('likely', 'expect') with weak or uncertain data.\n\n"
+    "TERRAIN VS SYSTEM RULE:\n\n"
+    "Clearly distinguish between:\n"
+    "- large-scale weather systems (fronts, widespread clouds, precipitation)\n"
+    "- terrain-driven effects (mountain wave, rotor, localized cloud)\n\n"
+    "Do not describe terrain-driven effects as route-wide conditions.\n\n"
+    "PILOT MENTAL MODEL:\n\n"
+    "At least once in the briefing, summarize the situation in one sentence:\n"
+    "'What kind of day this is'\n\n"
+    "Examples:\n"
+    "- 'This is a wind and terrain day, not a weather system day'\n"
+    "- 'This is a marginal ceiling/visibility day'\n\n"
     "Write like a pilot, not a meteorologist. Use plain language — 'expect a rough ride over Arkansas', "
     "'you'll likely be in the soup on departure', 'that front will nail your arrival window'. "
     "Skip the textbook synoptic descriptions. Focus on what the pilot will actually see, feel, and deal with. "
@@ -1514,10 +1575,12 @@ TASK — CHART CLASSIFICATION + PILOT BRIEFING
 
 FIRST, output a JSON line classifying which charts show relevant weather
 for this specific flight route ({origin.upper()} → {destination.upper()}).
-A chart is "relevant" if it shows weather (fronts, precip, icing,
-turbulence, IFR conditions, SIGMETs, wind shifts, etc.) that intersect or
-affect the planned route, departure/arrival airports, or alternates.
-Charts showing no relevant weather along the route go in the reference pile.
+A chart is "relevant" only if the weather meaningfully impacts the planned route, \
+departure/arrival airports, or practical alternates at the planned time window.
+
+Do not include charts showing distant, weak, non-overlapping, or merely possible weather \
+with no meaningful route impact.
+Charts showing no meaningful weather impact along the route go in the reference pile.
 
 Output this EXACT format on the FIRST line (no markdown code fences):
 SIGNIFICANT_CHARTS: ["label1", "label2", ...]
@@ -1550,6 +1613,21 @@ Will they get out? What are conditions like on the ground and climbing out?
 Talk about what they'll see: are they punching through a layer, is it clear, is there a front nearby?
 Winds on the runway, ceilings, visibility — pilot language, not METAR codes.
 
+IMC / CEILING RULE:
+Only state "likely IMC" if:
+- TAFs show BKN/OVC ceilings at or below likely climb altitudes, OR
+- cloud/icing products show a continuous saturated/cloud-bearing layer overlapping the route and timing.
+
+If neither is present:
+- do NOT say "likely IMC"
+- instead describe cloud layers, coverage, and where IMC could occur, if at all.
+
+Clearly distinguish:
+- widespread departure IMC
+- brief layer penetration
+- localized terrain cloud
+- mostly VMC with pockets of cloud
+
 <h2>The Ride at {altitude_ft:,} ft</h2>
 What's the flight actually going to be like at {altitude_ft:,} ft?
 
@@ -1561,11 +1639,35 @@ ICING ANALYSIS (you have FIP charts at multiple altitudes — use them):
 - Any SLD risk? SLD is a hard no-go for most GA aircraft.
 Use a mini table for the vertical icing picture: Altitude | Icing Prob | Notes
 
+ICING INTERPRETATION RULE:
+Icing requires BOTH temperature AND moisture.
+If icing charts show little or no icing probability, assume limited moisture even if temperatures are favorable.
+
+Do not infer widespread icing without a clear icing signal.
+State clearly whether icing is:
+- WIDESPREAD
+- LOCALIZED
+- CONDITIONAL
+- LOW CONFIDENCE
+
+If no SLD signal is shown, say that explicitly. If SLD risk exists, treat it as a hard stop for most GA aircraft.
+
 TURBULENCE & RIDE QUALITY:
 - Smooth or bumpy? Where are the rough spots?
 - Winds aloft: If winds/temps data is provided above, decode and present the actual winds
   at cruise altitude for stations along the route. Calculate headwind/tailwind/crosswind
   components for each leg. Estimate total wind effect on flight time.
+
+TERRAIN & WIND RULE:
+Strong winds over terrain may produce mountain wave, rotor, and turbulence even in clear air.
+
+Treat this as:
+- LOCALIZED or CONDITIONAL hazard unless widespread turbulence guidance supports broader impact.
+
+Do not ignore terrain-driven turbulence.
+Do not assume smooth conditions just because skies are clear.
+
+If altitude materially changes the risk, say so explicitly.
 
 OTHER HAZARDS:
 - Any weather to dodge or plan around?
@@ -1577,13 +1679,37 @@ Heavy QPF near the route means IMC, potential icing, and possible convection.
 What does the pilot walk into on arrival? Estimate block time and describe arrival conditions.
 Is there a front nearby? Are ceilings dropping? Is it a non-event? Pick good alternates.
 
+When discussing arrival conditions, distinguish between:
+- widespread en route cloud/IMC
+- terrain-localized cloud near arrival
+- a non-event VMC arrival
+
+Do not imply route-wide IMC unless supported by overlapping forecast evidence.
+
 <h2>Fly or No</h2>
 Bottom line up front. Start with a clear verdict: GO / MARGINAL GO / NO-GO.
 Hard stops first. Then the stuff to watch. Be opinionated — this is what the pilot needs.
 
+IFR JUSTIFICATION RULE:
+If recommending IFR, clearly state WHY:
+- IMC (clouds/visibility)
+- terrain / altitude / routing complexity
+- workload / safety margin
+
+Do not imply IMC as the reason unless it is clearly supported by the data.
+
+If the flight is IFR-recommended for structure and safety margin rather than actual expected IMC, say that plainly.
+
 <h2>If You Go — Do This</h2>
 Concrete action items. Departure time tweak, altitude change, specific alternates, fuel stop,
 what forecast products to check the night before and morning of.
+
+<h2>Confidence</h2>
+State your confidence level (High / Medium / Low) and what forecast elements could still change the go/no-go picture.
+
+When the data signal is weak, mixed, or terrain-localized, preserve that uncertainty in the wording.
+Do not convert "possible" into "likely" unless the forecast evidence clearly supports it.
+Operational tone is encouraged, but accuracy and uncertainty preservation come first.
 
 Respond with HTML using: h2, h3, h4, p, ul, ol, li, strong, em, blockquote, table, thead, tbody, tr, th, td, code, hr.
 No html/head/body/style/script tags.""",
@@ -1682,7 +1808,7 @@ def main():
     print(f"Altitude : {altitude:,} ft MSL")
     print(f"TAS      : {args.tas} kts")
 
-    if hours_until < -2:
+    if hours_until < -2 and not args.from_cache:
         sys.exit("Error: Departure time is more than 2 hours in the past.")
     if hours_until > 7 * 24:
         print("Warning: >7 days out — extended prog reliability is very low.")
@@ -1709,8 +1835,8 @@ def main():
         significant_labels = set(llm_cache["significant_labels"])
         print(f"  {len(chart_data)} charts, {len(significant_labels)} significant")
 
-        # Draw route overlay on cached charts (disabled — calibration WIP)
-        if False and not args.no_route:
+        # Draw route overlay on cached charts
+        if not args.no_route:
             print("Resolving route ... ", end="", flush=True)
             waypoints, _ = resolve_route_coords(airports)
             if waypoints:
@@ -1759,8 +1885,8 @@ def main():
         if not chart_data:
             sys.exit("Error: Could not fetch any charts. Check your internet connection.")
 
-        # Draw route overlay on charts (disabled — calibration WIP)
-        if False and waypoints:
+        # Draw route overlay on charts
+        if waypoints:
             overlaid = 0
             for i, (label, url, b64, mt) in enumerate(chart_data):
                 new_b64 = draw_route_on_chart(b64, mt, waypoints)

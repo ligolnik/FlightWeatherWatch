@@ -3,3 +3,5 @@ httpx>=0.27.0
 Pillow>=10.0.0
 numpy>=1.24.0
 scipy>=1.10.0
+pyproj>=3.5.0
+opencv-python>=4.7.0
