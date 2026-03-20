@@ -381,14 +381,23 @@ def fetch_chart(url, label, forecast_hr=0):
         print(f"  Fetching {label} ... ", end="", flush=True)
         r = httpx.get(url, timeout=20, follow_redirects=True)
         r.raise_for_status()
-        ct = r.headers.get("content-type", "")
-        if "gif" in ct or url.lower().endswith(".gif"):
-            media_type = "image/gif"
-        elif "png" in ct or url.lower().endswith(".png"):
+        # Detect actual image format from magic bytes (servers sometimes lie)
+        data = r.content
+        if data[:8] == b'\x89PNG\r\n\x1a\n':
             media_type = "image/png"
-        else:
+        elif data[:3] == b'GIF':
+            media_type = "image/gif"
+        elif data[:2] in (b'\xff\xd8',):
             media_type = "image/jpeg"
-        encoded = base64.standard_b64encode(r.content).decode("utf-8")
+        else:
+            ct = r.headers.get("content-type", "")
+            if "png" in ct:
+                media_type = "image/png"
+            elif "gif" in ct:
+                media_type = "image/gif"
+            else:
+                media_type = "image/jpeg"
+        encoded = base64.standard_b64encode(data).decode("utf-8")
 
         # Compute valid time from Last-Modified + forecast hour
         lm = r.headers.get("last-modified", "")
@@ -1259,6 +1268,7 @@ HTML_TEMPLATE = """\
 
 <div class="container">
 
+{exec_summary_html}
 {taf_section_html}
 {afd_section_html}
   <section>
@@ -1849,6 +1859,26 @@ Never reverse this relationship.
 
 REQUIRED SECTIONS (use these exact h2 headings):
 
+<h2>Executive Summary</h2>
+A single short paragraph (3-5 sentences max) that answers:
+- What kind of day is this?
+- What is the primary operational risk?
+- Can I make this flight safely?
+- What is the one thing I need to pay attention to?
+
+Requirements:
+- Start with a clear framing sentence (e.g., "This is a VMC wind/terrain day, not a weather system problem.")
+- Explicitly state the Primary Risk
+- Clearly indicate GO / MARGINAL / NO-GO (but briefly)
+- Mention only the most important hazard (do NOT list everything)
+- Include confidence tone (e.g., "high confidence", "some variability", etc.)
+
+Tone: Write like a pilot briefing another pilot. Direct, concise, no hedging or filler. No meteorology explanations.
+
+Do NOT: repeat detailed data (no TAF strings, no tables), list multiple hazards, or use vague language.
+
+A pilot should be able to read ONLY this paragraph and understand the go/no-go and why.
+
 <h2>The Day Before — What to Watch</h2>
 What's the situation the evening before? What weather check should the pilot do that night?
 Tell them what to look for and what would change the go/no-go. Keep it short and practical.
@@ -2332,6 +2362,25 @@ def main():
         arr_str = last.get("eta", "—")
         total_nm = f"{last.get('nm', 0):.0f}"
 
+    # Extract Executive Summary from briefing HTML and place it above charts
+    exec_summary_html = ""
+    exec_match = re.search(
+        r'(<h2>Executive Summary</h2>.*?)(?=<h2>)',
+        briefing_html, re.DOTALL
+    )
+    if exec_match:
+        exec_summary_html = (
+            '  <section>\n'
+            '    <div class="section-label">Executive Summary</div>\n'
+            '    <div class="briefing">\n'
+            + exec_match.group(1)
+            + '\n    </div>\n'
+            '  </section>\n'
+        )
+        # Remove it from the main briefing so it's not repeated
+        briefing_html = briefing_html[:exec_match.start()] + briefing_html[exec_match.end():]
+        briefing_html = briefing_html.lstrip("\n")
+
     now_utc = datetime.now(timezone.utc)
     html = HTML_TEMPLATE.format(
         origin=origin,
@@ -2343,6 +2392,7 @@ def main():
         total_nm=total_nm,
         altitude_ft=f"{altitude:,}",
         generated=now_utc.strftime("%Y-%m-%d %H:%MZ"),
+        exec_summary_html=exec_summary_html,
         taf_section_html=taf_section_html,
         afd_section_html=afd_section_html,
         chart_count=len(chart_data),
