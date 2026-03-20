@@ -30,6 +30,10 @@ import math
 
 import httpx
 import anthropic
+try:
+    import openai as _openai_mod
+except ImportError:
+    _openai_mod = None
 
 # Load .env if present (keeps API key out of the environment)
 _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
@@ -1620,28 +1624,46 @@ SYSTEM_PROMPT = (
     "No html/head/body/style/script tags."
 )
 
-def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None, winds_text="", airport_names=None, afd_data=None):
+def _is_openai_model(model):
+    """Return True if the model name indicates an OpenAI model."""
+    return model.startswith(("gpt-", "o1", "o3", "o4"))
+
+
+def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None, winds_text="", airport_names=None, afd_data=None, model="claude-sonnet-4-6"):
     """
-    Single-pass Claude query: operational briefing + chart classification.
+    Single-pass LLM query: operational briefing + chart classification.
 
     chart_data: list of (label, url, b64, media_type)
     taf_data: list from fetch_tafs() or dict (legacy) or None
     winds_text: formatted winds aloft text or empty string
+    model: model ID (claude-* for Anthropic, gpt-*/o1*/o3*/o4* for OpenAI)
     Returns (briefing_html, significant_labels, prompts)
     """
-    client = anthropic.Anthropic()
+    use_openai = _is_openai_model(model)
+    if use_openai:
+        if _openai_mod is None:
+            sys.exit("Error: openai package not installed. Run: pip install openai")
+        client = _openai_mod.OpenAI()
+    else:
+        client = anthropic.Anthropic()
     dep_str = departure_dt.strftime("%Y-%m-%d %H:%MZ")
 
-    # Build image content block
+    # Build image content blocks (format differs by provider)
     image_blocks = []
     chart_labels = []
     for label, url, b64, media_type in chart_data:
         chart_labels.append(label)
         image_blocks.append({"type": "text", "text": f"--- {label} ---"})
-        image_blocks.append({
-            "type": "image",
-            "source": {"type": "base64", "media_type": media_type, "data": b64},
-        })
+        if use_openai:
+            image_blocks.append({
+                "type": "image_url",
+                "image_url": {"url": f"data:{media_type};base64,{b64}"},
+            })
+        else:
+            image_blocks.append({
+                "type": "image",
+                "source": {"type": "base64", "media_type": media_type, "data": b64},
+            })
 
     # Build TAF text block for the prompt
     taf_section = ""
@@ -1696,22 +1718,42 @@ FLIGHT
     label_list = "\n".join(f"  - {l}" for l in chart_labels)
 
     def _stream_with_retry(prompt, max_tokens=4096, retries=3):
-        """Stream a Claude request with retry on rate limit."""
+        """Stream an LLM request with retry on rate limit."""
+        rate_limit_exc = (
+            _openai_mod.RateLimitError if use_openai else anthropic.RateLimitError
+        )
         for attempt in range(retries):
             try:
                 result = ""
-                with client.messages.stream(
-                    model="claude-sonnet-4-6",
-                    max_tokens=max_tokens,
-                    system=SYSTEM_PROMPT,
-                    messages=[{"role": "user", "content": prompt}],
-                ) as stream:
-                    for text in stream.text_stream:
-                        result += text
-                        print(".", end="", flush=True)
+                if use_openai:
+                    messages = [
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": prompt},
+                    ]
+                    stream = client.chat.completions.create(
+                        model=model,
+                        max_tokens=max_tokens,
+                        messages=messages,
+                        stream=True,
+                    )
+                    for chunk in stream:
+                        delta = chunk.choices[0].delta if chunk.choices else None
+                        if delta and delta.content:
+                            result += delta.content
+                            print(".", end="", flush=True)
+                else:
+                    with client.messages.stream(
+                        model=model,
+                        max_tokens=max_tokens,
+                        system=SYSTEM_PROMPT,
+                        messages=[{"role": "user", "content": prompt}],
+                    ) as stream:
+                        for text in stream.text_stream:
+                            result += text
+                            print(".", end="", flush=True)
                 print(" done.")
                 return result
-            except anthropic.RateLimitError:
+            except rate_limit_exc:
                 wait = 30 * (attempt + 1)
                 print(f" rate limited, waiting {wait}s ...", end="", flush=True)
                 time.sleep(wait)
@@ -1943,6 +1985,7 @@ No html/head/body/style/script tags.""",
         return "\n".join(b["text"] for b in blocks if b.get("type") == "text")
 
     prompts = {
+        "model": model,
         "system": SYSTEM_PROMPT,
         "briefing_prompt": _prompt_text(briefing_prompt),
     }
@@ -1972,6 +2015,8 @@ def main():
                         help="Save HTML but do not open browser automatically")
     parser.add_argument("--cache",      action="store_true",
                         help="Save LLM output + chart data to a cache file for re-rendering")
+    parser.add_argument("--model",     default="claude-sonnet-4-6",
+                        help="Model ID: claude-sonnet-4-6, gpt-4o, etc. (default: claude-sonnet-4-6)")
     parser.add_argument("--from-cache", metavar="FILE",
                         help="Skip fetching/analysis — rebuild HTML from a cache file")
     args = parser.parse_args()
@@ -2010,6 +2055,7 @@ def main():
     print(f"Departs  : {departure_dt.strftime('%Y-%m-%d %H:%MZ')} ({hours_until:+.1f} hrs from now)")
     print(f"Altitude : {altitude:,} ft MSL")
     print(f"TAS      : {args.tas} kts")
+    print(f"Model    : {args.model}")
 
     if hours_until < -2 and not args.from_cache:
         sys.exit("Error: Departure time is more than 2 hours in the past.")
@@ -2116,7 +2162,7 @@ def main():
         afd_data = fetch_afd_aviation(waypoints) if waypoints else []
 
         briefing_html, significant_labels, prompts = analyze(
-            origin, destination, departure_dt, altitude, chart_data, taf_data, winds_text, airport_names, afd_data
+            origin, destination, departure_dt, altitude, chart_data, taf_data, winds_text, airport_names, afd_data, args.model
         )
 
         if args.cache:
