@@ -1695,9 +1695,58 @@ Write in plain pilot language. No meteorology lectures. Answer the questions pil
 
 Focus ONLY on the day before and the day/time of the flight.
 If TAFs are provided above, use them for specific ceiling/visibility/wind forecasts at departure and arrival.
-If Area Forecast Discussion (AFD) AVIATION sections are provided above, use them as expert local forecaster \
-context for conditions at departure and arrival. AFD aviation sections are written by local WFO meteorologists \
-and often contain nuance about cloud layers, icing, turbulence, and wind that TAFs alone cannot convey.
+AREA FORECAST DISCUSSION (AFD) INTEGRATION:
+
+AFD USAGE RULE:
+Use AFD only as supporting context, not primary evidence.
+
+AFD may be used to:
+- confirm or increase confidence in hazards already supported by charts
+- highlight forecaster concerns (winds, timing, uncertainty)
+- identify terrain-driven effects (mountain wave, downslope winds, mixing)
+
+AFD must NOT be used to:
+- introduce new hazards not supported by charts or forecast data
+- override chart-based evidence
+- justify "likely" conditions on its own
+
+AFD EXTRACTION:
+If AFD is provided, extract ONLY the following:
+- Key concerns (winds, clouds, precipitation, timing)
+- Forecaster confidence (high / low / uncertain)
+- Any mention of terrain effects (wave, downslope, mixing)
+- Any "if/then" trigger conditions that could change the forecast
+Summarize these in 2-4 concise bullet points before using them in the briefing.
+
+AFD FRAMING:
+When using AFD-derived insights, explicitly identify them as forecaster input.
+Use phrases such as:
+- "Forecaster discussion suggests..."
+- "AFD highlights..."
+- "Forecaster confidence is..."
+Do NOT blend AFD conclusions indistinguishably with chart-based evidence.
+
+AFD CONFIDENCE ADJUSTMENT:
+Use AFD primarily to adjust confidence, not severity.
+- If AFD expresses uncertainty, disagreement, or timing sensitivity:
+  -> reduce confidence level in the briefing
+- If AFD strongly confirms conditions:
+  -> increase confidence, but do NOT increase hazard severity without chart support
+
+AFD TRIGGER CONDITIONS:
+Translate any AFD "if/then" statements into pilot-relevant decision triggers.
+Examples:
+- "If surface winds mix down earlier..." -> potential for stronger gusts at destination
+- "If cloud cover increases..." -> potential for reduced ceilings
+Use these triggers to inform:
+- arrival risk discussion
+- timing considerations
+- abort/diversion criteria
+
+AFD PRIORITY:
+Charts and forecast data define WHAT conditions exist.
+AFD explains HOW CONFIDENT those conditions are and WHAT MIGHT CHANGE.
+Never reverse this relationship.
 
 REQUIRED SECTIONS (use these exact h2 headings):
 
