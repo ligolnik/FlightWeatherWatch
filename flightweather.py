@@ -700,6 +700,91 @@ def fetch_tafs(airports, route_legs):
 
 
 # ---------------------------------------------------------------------------
+# Area Forecast Discussion — AVIATION section
+# ---------------------------------------------------------------------------
+
+
+def _get_wfo_for_coords(lat, lon):
+    """Return 3-letter WFO code for a lat/lon via NWS points API, or None."""
+    try:
+        r = httpx.get(
+            f"https://api.weather.gov/points/{lat:.4f},{lon:.4f}",
+            headers={"User-Agent": "FlightWeatherWatch/1.0"},
+            timeout=10,
+        )
+        r.raise_for_status()
+        data = r.json()
+        cwa = data.get("properties", {}).get("cwa")
+        return cwa  # e.g. "BOU"
+    except Exception:
+        return None
+
+
+def _fetch_afd_text(wfo):
+    """Fetch AFD text product for a WFO. Returns raw text or None."""
+    url = (
+        f"https://forecast.weather.gov/product.php"
+        f"?site={wfo}&issuedby={wfo}&product=AFD&format=txt&version=1&glossary=0"
+    )
+    try:
+        r = httpx.get(url, timeout=15)
+        r.raise_for_status()
+        return r.text
+    except Exception:
+        return None
+
+
+def _extract_aviation_section(afd_text):
+    """Extract the AVIATION section from an AFD. Returns text or None."""
+    if not afd_text:
+        return None
+    # Match .AVIATION ... through && (end marker)
+    m = re.search(r'(\.AVIATION.*?)(?:\n&&)', afd_text, re.DOTALL | re.IGNORECASE)
+    if m:
+        return m.group(1).strip()
+    return None
+
+
+def fetch_afd_aviation(waypoint_coords):
+    """Fetch AFD AVIATION sections for WFOs covering departure and arrival.
+
+    waypoint_coords: list of (lon, lat) tuples — first is departure, last is arrival.
+    Returns list of dicts: [{"wfo": "BOU", "airport": "KBJC", "role": "Departure", "text": "..."}, ...]
+    """
+    if not waypoint_coords or len(waypoint_coords) < 2:
+        return []
+
+    results = []
+    seen_wfos = set()
+
+    endpoints = [
+        (waypoint_coords[0], "Departure"),
+        (waypoint_coords[-1], "Arrival"),
+    ]
+
+    for (lon, lat), role in endpoints:
+        wfo = _get_wfo_for_coords(lat, lon)
+        if not wfo or wfo in seen_wfos:
+            if wfo and wfo in seen_wfos:
+                print(f"  AFD {wfo} ({role}) ... same WFO as departure, skipping")
+            else:
+                print(f"  AFD ({role}) ... could not determine WFO")
+            continue
+        seen_wfos.add(wfo)
+
+        print(f"  AFD {wfo} ({role}) ... ", end="", flush=True)
+        raw = _fetch_afd_text(wfo)
+        aviation = _extract_aviation_section(raw)
+        if aviation:
+            results.append({"wfo": wfo, "role": role, "text": aviation})
+            print("OK")
+        else:
+            print("no AVIATION section found")
+
+    return results
+
+
+# ---------------------------------------------------------------------------
 # Winds aloft
 # ---------------------------------------------------------------------------
 
@@ -1171,6 +1256,7 @@ HTML_TEMPLATE = """\
 <div class="container">
 
 {taf_section_html}
+{afd_section_html}
   <section>
     <div class="section-label">Weather Charts</div>
     <details class="collapsible" open>
@@ -1477,7 +1563,7 @@ SYSTEM_PROMPT = (
     "Respond only with HTML body content using the tags specified. No outer html/head/body/style tags."
 )
 
-def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None, winds_text="", airport_names=None):
+def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None, winds_text="", airport_names=None, afd_data=None):
     """
     Single-pass Claude query: operational briefing + chart classification.
 
@@ -1527,6 +1613,14 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
     if winds_text:
         winds_section = f"\n  Winds/Temps Aloft (stations near route):\n{winds_text}\n"
 
+    afd_section = ""
+    if afd_data:
+        afd_lines = []
+        for entry in afd_data:
+            afd_lines.append(f"  {entry['role']} WFO {entry['wfo']}:\n{entry['text']}")
+        if afd_lines:
+            afd_section = "\n  Area Forecast Discussion — AVIATION:\n" + "\n\n".join(afd_lines) + "\n"
+
     # Airport names — prevents LLM from guessing wrong names
     names_section = ""
     if airport_names:
@@ -1540,7 +1634,7 @@ FLIGHT
   Departure    : {dep_day} {dep_str} UTC
   Planned Alt  : {altitude_ft:,} ft MSL
   Charts       : {len(chart_data)} weather charts
-{names_section}{taf_section}{winds_section}"""
+{names_section}{taf_section}{winds_section}{afd_section}"""
 
     label_list = "\n".join(f"  - {l}" for l in chart_labels)
 
@@ -1601,6 +1695,9 @@ Write in plain pilot language. No meteorology lectures. Answer the questions pil
 
 Focus ONLY on the day before and the day/time of the flight.
 If TAFs are provided above, use them for specific ceiling/visibility/wind forecasts at departure and arrival.
+If Area Forecast Discussion (AFD) AVIATION sections are provided above, use them as expert local forecaster \
+context for conditions at departure and arrival. AFD aviation sections are written by local WFO meteorologists \
+and often contain nuance about cloud layers, icing, turbulence, and wind that TAFs alone cannot convey.
 
 REQUIRED SECTIONS (use these exact h2 headings):
 
@@ -1830,6 +1927,7 @@ def main():
             llm_cache = json.load(f)
         chart_data = [tuple(c) for c in charts_cache["chart_data"]]
         taf_data = llm_cache.get("taf_data")
+        afd_data = llm_cache.get("afd_data", [])
         briefing_html = llm_cache.get("briefing_html", llm_cache.get("synoptic_html", ""))
         # Legacy caches may have synoptic_html but no briefing_html
         significant_labels = set(llm_cache["significant_labels"])
@@ -1908,8 +2006,11 @@ def main():
         print("\nFetching winds aloft:")
         winds_text = fetch_winds_aloft(waypoints, hours_until)
 
+        print("\nFetching AFD aviation sections:")
+        afd_data = fetch_afd_aviation(waypoints) if waypoints else []
+
         briefing_html, significant_labels, prompts = analyze(
-            origin, destination, departure_dt, altitude, chart_data, taf_data, winds_text, airport_names
+            origin, destination, departure_dt, altitude, chart_data, taf_data, winds_text, airport_names, afd_data
         )
 
         if args.cache:
@@ -1933,6 +2034,7 @@ def main():
                 "altitude_ft": altitude,
                 "taf_data": [{k: v for k, v in e.items() if k != "eta_dt"} for e in taf_data] if isinstance(taf_data, list) else taf_data,
                 "winds_text": winds_text,
+                "afd_data": afd_data,
                 "prompts": prompts,
                 "briefing_html": briefing_html,
                 "significant_labels": sorted(significant_labels),
@@ -2042,6 +2144,34 @@ def main():
                 '  </section>\n'
             )
 
+    # Build AFD section HTML
+    afd_section_html = ""
+    if afd_data:
+        afd_blocks = []
+        for entry in afd_data:
+            afd_blocks.append(
+                f'<div style="margin-bottom:0.75rem">'
+                f'<strong>WFO {entry["wfo"]}</strong>'
+                f' <span style="color:var(--blue);font-size:0.75rem;font-weight:700">{entry["role"]}</span>'
+                f'<pre style="margin-top:0.3rem;font-size:0.78rem;color:var(--green);'
+                f'white-space:pre-wrap;line-height:1.5">{entry["text"]}</pre></div>'
+            )
+        if afd_blocks:
+            afd_section_html = (
+                '  <section>\n'
+                '    <div class="section-label">Area Forecast Discussion — Aviation</div>\n'
+                '    <details class="collapsible">\n'
+                '      <summary>\n'
+                '        AFD Aviation Sections\n'
+                '        <span class="pill">' + str(len(afd_blocks)) + ' WFOs</span>\n'
+                '      </summary>\n'
+                '      <div class="collapsible-body">\n'
+                + "\n".join(afd_blocks)
+                + '\n      </div>\n'
+                '    </details>\n'
+                '  </section>\n'
+            )
+
     # Compute arrival info from route legs or TAF data
     arr_str = "—"
     total_nm = "—"
@@ -2062,6 +2192,7 @@ def main():
         altitude_ft=f"{altitude:,}",
         generated=now_utc.strftime("%Y-%m-%d %H:%MZ"),
         taf_section_html=taf_section_html,
+        afd_section_html=afd_section_html,
         chart_count=len(chart_data),
         sig_count=len(sig_cards),
         significant_chart_cards="\n".join(sig_cards),
