@@ -1681,11 +1681,17 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
         taf_lines = []
         if isinstance(taf_data, list):
             for entry in taf_data:
+                eta = entry.get("eta", "")
+                eta_str = eta if isinstance(eta, str) else (eta.strftime("%H:%MZ") if eta else "?")
                 if entry.get("taf"):
-                    eta = entry.get("eta", "")
-                    eta_str = eta if isinstance(eta, str) else (eta.strftime("%H:%MZ") if eta else "?")
                     hdr = entry.get("note") or entry["icao"]
                     taf_lines.append(f"  {entry['role']} {hdr} (ETA {eta_str}):\n    {entry['taf']}")
+                else:
+                    note = entry.get("note", "")
+                    if "not yet available" in note.lower() or "not yet valid" in note.lower():
+                        taf_lines.append(f"  {entry['role']} {entry['icao']} (ETA {eta_str}):\n    [TAF exists but does not cover flight time — not yet valid]")
+                    else:
+                        taf_lines.append(f"  {entry['role']} {entry['icao']} (ETA {eta_str}):\n    [No TAF available for this airport or vicinity]")
         elif isinstance(taf_data, dict):
             for role in ["origin", "destination"]:
                 entry = taf_data.get(role)
@@ -1767,6 +1773,13 @@ FLIGHT
                 wait = 30 * (attempt + 1)
                 print(f" rate limited, waiting {wait}s ...", end="", flush=True)
                 time.sleep(wait)
+            except (anthropic.APIStatusError if not use_openai else Exception) as e:
+                if "overloaded" in str(e).lower():
+                    wait = 30 * (attempt + 1)
+                    print(f" overloaded, waiting {wait}s ...", end="", flush=True)
+                    time.sleep(wait)
+                else:
+                    raise
         print(" FAILED after retries.")
         return ""
 
@@ -2254,8 +2267,6 @@ def main():
     if taf_data:
         taf_blocks = []
         for entry in (taf_data if isinstance(taf_data, list) else []):
-            if not entry.get("taf"):
-                continue
             role_label = entry.get("role", "")
             eta_dt = entry.get("eta_dt")
             eta_s = entry.get("eta", "")
@@ -2270,23 +2281,32 @@ def main():
                 eta_str = ""
             nm = entry.get("nm", 0)
             hdr = entry["icao"]
+            note_text = entry.get("note", "")
             note = ""
-            if entry.get("note"):
-                note = f' <span style="color:var(--amber);font-size:0.75rem">({entry["note"]})</span>'
+            if note_text:
+                note = f' <span style="color:var(--amber);font-size:0.75rem">({note_text})</span>'
 
             eta_badge = ""
             if eta_str:
                 dist_str = f" &middot; {nm:.0f} nm" if nm > 0 else ""
                 eta_badge = f' <span style="color:var(--muted);font-size:0.72rem">ETA {eta_str}{dist_str}</span>'
 
-            taf_html = _highlight_taf_line(entry["taf"], target_hour, role_label)
+            if entry.get("taf"):
+                taf_html = _highlight_taf_line(entry["taf"], target_hour, role_label)
+                pre_color = "var(--green)"
+            elif "not yet available" in note_text.lower() or "not yet valid" in note_text.lower():
+                taf_html = "TAF exists but does not cover flight time — not yet valid"
+                pre_color = "var(--amber)"
+            else:
+                taf_html = "No TAF available for this airport or vicinity"
+                pre_color = "var(--amber)"
 
             taf_blocks.append(
                 f'<div style="margin-bottom:0.75rem">'
                 f'<strong>{hdr}</strong>'
                 f' <span style="color:var(--blue);font-size:0.75rem;font-weight:700">{role_label}</span>'
                 f'{eta_badge}{note}'
-                f'<pre style="margin-top:0.3rem;font-size:0.78rem;color:var(--green);'
+                f'<pre style="margin-top:0.3rem;font-size:0.78rem;color:{pre_color};'
                 f'white-space:pre-wrap;line-height:1.5">{taf_html}</pre></div>'
             )
 
