@@ -46,6 +46,18 @@ python3 flightweather.py <ORIGIN> [WAYPOINTS...] <DESTINATION> <DATE> <TIME_UTC>
 | `--no-route` | Skip drawing route overlay on charts |
 | `--no-open` | Save HTML file but don't open browser |
 
+## Workflow
+
+1. **Parse the request** — resolve airport codes, convert local time to UTC, identify waypoints.
+2. **Confirm inputs** — before running, verify the command looks right: correct airports, date, UTC time, altitude, `--cache` flag present.
+3. **Run the tool** — execute `python3 flightweather.py ...` and monitor stdout for errors.
+4. **Validate output** — after the tool completes, check:
+   - Exit code is 0 (no crash or unhandled error).
+   - The HTML file was created (tool prints the filename).
+   - Chart fetch summary shows `OK` for most charts (a few failures are tolerable; all failures means a network issue).
+   - The briefing contains a GO / NO-GO / CAUTION recommendation.
+5. **Report to user** — summarize the recommendation and note any fetch failures or missing data (e.g., TAFs not yet valid). If the tool errored, diagnose and re-run or advise.
+
 ## Interpreting User Requests
 
 ### Airport Codes
@@ -86,6 +98,8 @@ python3 flightweather.py --from-cache cache_KMQY_KEDC_2026-03-16 KMQY KEDC 2026-
 ```
 
 Note: `--from-cache` still requires the positional arguments (origin, destination, date, time, altitude) because they're used for the HTML header and route overlay. The `--from-cache` flag bypasses the past-departure-time check, so old briefings can be regenerated.
+
+After rebuilding, verify the HTML file was created and the briefing renders correctly before reporting success to the user.
 
 ## Output
 
