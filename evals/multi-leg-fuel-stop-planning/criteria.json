@@ -1,0 +1,46 @@
+{
+  "context": "Tests whether the agent correctly handles multi-leg flights with waypoints, resolves preferred airport codes, converts MDT to UTC, and includes all required flags.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Denver as KBJC",
+      "max_score": 15,
+      "description": "Uses KBJC as the origin airport code (Rocky Mountain Metropolitan, the user's preferred Denver airport)"
+    },
+    {
+      "name": "Tonopah as KTPH or correct ICAO",
+      "max_score": 15,
+      "description": "Resolves Tonopah, Nevada to KTPH (Tonopah Airport) and places it as a waypoint between origin and destination"
+    },
+    {
+      "name": "San Carlos as KSQL",
+      "max_score": 15,
+      "description": "Uses KSQL as the destination airport code (San Carlos Airport)"
+    },
+    {
+      "name": "Waypoint ordering",
+      "max_score": 15,
+      "description": "Command has KBJC KTPH KSQL in the correct positional order (origin, waypoint, destination)"
+    },
+    {
+      "name": "Correct UTC time",
+      "max_score": 15,
+      "description": "Departure time converted to 14:00 UTC (8 AM MDT = UTC-6, so 08:00 + 06:00 = 14:00)"
+    },
+    {
+      "name": "Cache flag included",
+      "max_score": 10,
+      "description": "Includes the --cache flag"
+    },
+    {
+      "name": "TAS and altitude correct",
+      "max_score": 10,
+      "description": "Includes --tas 170 and altitude 18000"
+    },
+    {
+      "name": "Correct date",
+      "max_score": 5,
+      "description": "Date is 2026-04-01 in YYYY-MM-DD format"
+    }
+  ]
+}

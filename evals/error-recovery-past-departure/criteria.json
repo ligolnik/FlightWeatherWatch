@@ -1,0 +1,46 @@
+{
+  "context": "Tests whether the agent knows to use --from-cache to bypass the past-departure-time check, and correctly constructs the cache prefix from the route and date.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Uses --from-cache flag",
+      "max_score": 25,
+      "description": "Uses --from-cache to rebuild from cached data, which bypasses the past-departure-time check"
+    },
+    {
+      "name": "Correct cache prefix",
+      "max_score": 20,
+      "description": "Cache prefix is cache_KMQY_KVGT_2026-03-20 (without _charts.json or _llm.json suffix)"
+    },
+    {
+      "name": "Nashville as KMQY",
+      "max_score": 10,
+      "description": "Uses KMQY as the origin airport code"
+    },
+    {
+      "name": "Las Vegas as KVGT",
+      "max_score": 10,
+      "description": "Uses KVGT as the destination airport code (North Las Vegas, the user's preferred Vegas airport)"
+    },
+    {
+      "name": "All positional args present",
+      "max_score": 10,
+      "description": "Includes all positional arguments (KMQY KVGT 2026-03-20 16:00 16000) even with --from-cache"
+    },
+    {
+      "name": "TAS specified",
+      "max_score": 5,
+      "description": "Includes --tas 155"
+    },
+    {
+      "name": "Explains past-time bypass",
+      "max_score": 15,
+      "description": "Notes explain that --from-cache bypasses the past-departure-time check so old briefings can be regenerated"
+    },
+    {
+      "name": "Does not suggest changing the date",
+      "max_score": 5,
+      "description": "Does not suggest faking the departure date to a future date as a workaround"
+    }
+  ]
+}

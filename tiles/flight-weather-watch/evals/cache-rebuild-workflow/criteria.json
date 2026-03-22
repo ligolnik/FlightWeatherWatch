@@ -1,0 +1,41 @@
+{
+  "context": "Tests whether the agent correctly constructs a --from-cache command with the right cache prefix, preferred airport codes, and all required positional arguments.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "from-cache flag with correct prefix",
+      "max_score": 25,
+      "description": "Uses --from-cache cache_KMQY_KEDC_2026-03-16 (the correct prefix without _charts.json or _llm.json suffix)"
+    },
+    {
+      "name": "Nashville as KMQY",
+      "max_score": 15,
+      "description": "Uses KMQY as the origin airport code"
+    },
+    {
+      "name": "Austin as KEDC",
+      "max_score": 15,
+      "description": "Uses KEDC as the destination airport code"
+    },
+    {
+      "name": "All positional args present",
+      "max_score": 15,
+      "description": "Includes all positional arguments (KMQY KEDC 2026-03-16 15:00 12000) even though rebuilding from cache"
+    },
+    {
+      "name": "TAS specified",
+      "max_score": 10,
+      "description": "Includes --tas 170"
+    },
+    {
+      "name": "No --cache flag",
+      "max_score": 10,
+      "description": "Does not include --cache (unnecessary when rebuilding from existing cache)"
+    },
+    {
+      "name": "Explains no API calls",
+      "max_score": 10,
+      "description": "Explanation mentions that --from-cache bypasses fetching and API calls"
+    }
+  ]
+}

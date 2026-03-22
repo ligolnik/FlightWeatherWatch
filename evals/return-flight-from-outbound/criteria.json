@@ -1,0 +1,46 @@
+{
+  "context": "Tests whether the agent correctly constructs a return flight by swapping origin and destination, converting a different local time to UTC, and keeping the same altitude/TAS.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Origin is KBDN",
+      "max_score": 20,
+      "description": "Origin for the return leg is KBDN (Bend Municipal), not KSQL"
+    },
+    {
+      "name": "Destination is KSQL",
+      "max_score": 20,
+      "description": "Destination for the return leg is KSQL (San Carlos), not KBDN"
+    },
+    {
+      "name": "Correct UTC time",
+      "max_score": 20,
+      "description": "Departure time is 21:30 UTC. 2:30 PM PDT = 14:30 local, PDT is UTC-7, so 14:30 + 7 = 21:30 UTC"
+    },
+    {
+      "name": "Same date",
+      "max_score": 10,
+      "description": "Date is 2026-03-30 (same day as outbound)"
+    },
+    {
+      "name": "Same altitude",
+      "max_score": 5,
+      "description": "Altitude is 12000"
+    },
+    {
+      "name": "Same TAS",
+      "max_score": 5,
+      "description": "Includes --tas 160"
+    },
+    {
+      "name": "Cache flag included",
+      "max_score": 10,
+      "description": "Includes the --cache flag"
+    },
+    {
+      "name": "Correct argument order",
+      "max_score": 10,
+      "description": "Command follows positional order: KBDN KSQL 2026-03-30 21:30 12000"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "context": "Tests whether the agent correctly handles DST transitions. November 1, 2026 is the day DST ends. At 7 AM local, clocks have already fallen back, so Pacific Standard Time (UTC-8) applies. The correct UTC time is 15:00.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Correct UTC time after DST fallback",
+      "max_score": 30,
+      "description": "Departure time is 15:00 UTC. On Nov 1 2026 at 7 AM, DST has ended (clocks fell back at 2 AM), so PST (UTC-8) applies: 07:00 + 8 = 15:00 UTC. Using PDT (UTC-7) giving 14:00 is WRONG."
+    },
+    {
+      "name": "San Carlos as KSQL",
+      "max_score": 15,
+      "description": "Uses KSQL as the origin airport code"
+    },
+    {
+      "name": "Denver as KBJC",
+      "max_score": 15,
+      "description": "Uses KBJC as the destination airport code"
+    },
+    {
+      "name": "Correct date",
+      "max_score": 10,
+      "description": "Date is 2026-11-01 in YYYY-MM-DD format"
+    },
+    {
+      "name": "Altitude and TAS correct",
+      "max_score": 10,
+      "description": "Altitude is 14000 and --tas 160 is specified"
+    },
+    {
+      "name": "Cache flag included",
+      "max_score": 10,
+      "description": "Includes the --cache flag"
+    },
+    {
+      "name": "DST reasoning explained",
+      "max_score": 10,
+      "description": "Notes file explains that DST has ended by 7 AM on Nov 1, so PST applies"
+    }
+  ]
+}

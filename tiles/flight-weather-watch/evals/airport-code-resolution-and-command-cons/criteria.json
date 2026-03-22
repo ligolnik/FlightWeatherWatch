@@ -1,0 +1,46 @@
+{
+  "context": "Tests whether the agent correctly resolves Nashville and Austin to the user's preferred ICAO codes (KMQY and KEDC), converts local Central Daylight Time to UTC, uses the correct CLI argument format, and always includes the --cache flag.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Nashville as KMQY",
+      "max_score": 20,
+      "description": "Uses KMQY as the origin airport code (not KBNA, BNA, or any other Nashville code)"
+    },
+    {
+      "name": "Austin as KEDC",
+      "max_score": 20,
+      "description": "Uses KEDC as the destination airport code (not KAUS, AUS, or any other Austin code)"
+    },
+    {
+      "name": "Cache flag included",
+      "max_score": 20,
+      "description": "Includes the --cache flag in the flightweather.py command"
+    },
+    {
+      "name": "Correct UTC time",
+      "max_score": 15,
+      "description": "Departure time converted to 14:00 UTC (9 AM CDT = UTC-5, so 09:00 + 05:00 = 14:00)"
+    },
+    {
+      "name": "Correct date format",
+      "max_score": 10,
+      "description": "Date argument is formatted as YYYY-MM-DD (i.e., 2026-03-28)"
+    },
+    {
+      "name": "Correct altitude format",
+      "max_score": 5,
+      "description": "Altitude passed as an integer (9500), not a string or float"
+    },
+    {
+      "name": "TAS flag used",
+      "max_score": 5,
+      "description": "Includes --tas 145 to specify the aircraft's true airspeed"
+    },
+    {
+      "name": "Correct argument order",
+      "max_score": 5,
+      "description": "Command follows the positional order: ORIGIN DESTINATION DATE TIME_UTC ALTITUDE_FT [options]"
+    }
+  ]
+}
