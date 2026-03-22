@@ -2201,8 +2201,13 @@ def main():
         print("\nFetching winds aloft:")
         winds_text = fetch_winds_aloft(waypoints, hours_until)
 
-        print("\nFetching AFD aviation sections:")
-        afd_data = fetch_afd_aviation(waypoints) if waypoints else []
+        if hours_until <= 48 and waypoints:
+            print("\nFetching AFD aviation sections:")
+            afd_data = fetch_afd_aviation(waypoints)
+        else:
+            afd_data = []
+            if hours_until > 48:
+                print(f"\nAFD: skipped (flight is {hours_until:.0f} hrs out, AFD only useful within ~48 hrs)")
 
         briefing_html, significant_labels, prompts = analyze(
             origin, destination, departure_dt, altitude, chart_data, taf_data, winds_text, airport_names, afd_data, args.model
