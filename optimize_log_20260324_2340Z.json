@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-03-24T23:40:46.833080+00:00",
+  "baseline_avg": 8.5,
+  "final_avg": 8.5,
+  "iterations": 3,
+  "test_set": [
+    "cache_KSQL_KBDN_2026-03-25",
+    "cache_KBDN_KSQL_2026-03-25",
+    "cache_KBJC_KHCR_2026-03-21"
+  ],
+  "model": "claude-sonnet-4-6",
+  "judge_model": "claude-sonnet-4-6",
+  "history": [
+    {
+      "category_targeted": "Altitude Strategy",
+      "reasoning": "The judge consistently docks altitude_strategy for missing minimum safe/MEA altitudes over terrain crossings \u2014 pilots unfamiliar with the route need that number to contextualize why a recommended altitude is correct. Adding an explicit requirement to state the minimum safe crossing altitude ties the altitude recommendation to terrain reality.",
+      "delta": -0.2,
+      "status": "REVERTED"
+    },
+    {
+      "category_targeted": "Clarity & Signal-to-Noise",
+      "reasoning": "The judge consistently docks clarity for the 'If You Go \u2014 Do This' section repeating decision triggers already stated, and for 'Why this happens' explanations padding length without adding decision value for competent pilots. Adding explicit deduplication and brevity constraints to these two sections directly addresses the stated weaknesses.",
+      "delta": -0.13,
+      "status": "REVERTED"
+    },
+    {
+      "category_targeted": "Clarity & Signal-to-Noise",
+      "reasoning": "The judge consistently penalizes the 'If You Go \u2014 Do This' section for repeating decision triggers already stated in 'What changes this call'. Requiring this section to contain only *new* action items (timing, altitude, alternates, fuel, preflight checks) prevents the redundancy the judge flags without removing useful content.",
+      "delta": -0.07,
+      "status": "REVERTED"
+    }
+  ]
+}

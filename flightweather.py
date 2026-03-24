@@ -1614,12 +1614,17 @@ FLIGHT
                         {"role": "system", "content": SYSTEM_PROMPT},
                         {"role": "user", "content": prompt},
                     ]
-                    stream = client.chat.completions.create(
+                    oai_kwargs = dict(
                         model=model,
-                        max_tokens=max_tokens,
                         messages=messages,
                         stream=True,
                     )
+                    # Newer OpenAI models require max_completion_tokens
+                    if model.startswith(("o1", "o3", "o4", "gpt-4.1")):
+                        oai_kwargs["max_completion_tokens"] = max_tokens
+                    else:
+                        oai_kwargs["max_tokens"] = max_tokens
+                    stream = client.chat.completions.create(**oai_kwargs)
                     for chunk in stream:
                         delta = chunk.choices[0].delta if chunk.choices else None
                         if delta and delta.content:
