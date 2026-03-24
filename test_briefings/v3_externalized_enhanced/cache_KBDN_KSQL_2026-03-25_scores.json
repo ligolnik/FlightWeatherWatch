@@ -1,0 +1,76 @@
+{
+  "cache_prefix": "test_briefings/v3_externalized_enhanced/cache_KBDN_KSQL_2026-03-25",
+  "version": "v3",
+  "meta": {
+    "origin": "KBDN",
+    "destination": "KSQL",
+    "departure": "2026-03-25 22:00Z",
+    "altitude_ft": 12000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 8752
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, decision-oriented, correctly identifies primary risk (post-frontal winds and terrain turbulence), and delivers a tiered GO/MARGINAL GO based on pilot experience level. The single-sentence 'most important variable' call is operationally useful. Minor deduction: calling it a 'VMC wind day for the Pacific Northwest leg' is slightly casual and could undersell the 65 kt aloft situation."
+      },
+      "forecast_honesty": {
+        "score": 8,
+        "notes": "Correctly flags TAF unavailability for the flight window, acknowledges the 65 kt RDM decode needs cross-check, and uses calibrated language ('low probability,' 'conditional') throughout. The confidence section at the end is genuinely useful. Slight weakness: the 80% AFD confidence figure is cited repeatedly as if it applies cleanly to Wednesday 22Z, when it was stated for Tuesday's frontal passage window \u2014 that temporal blurring could mislead."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Excellent translation of data into pilot decisions \u2014 timing advice, altitude flexibility, fuel recalculation reminder, alternate selection, and IFR filing rationale are all concrete and actionable. The 'If You Go \u2014 Do This' checklist is genuinely useful rather than boilerplate."
+      },
+      "decision_triggers": {
+        "score": 9,
+        "notes": "Four explicit, quantitative triggers are provided: crosswind >15 kt at KBDN, moderate or greater turbulence over Cascades, KSQL ceiling below 1,500 ft BKN, and any icing accumulation. These are specific, realistic, and pre-loadable before flight. Minor gap: no trigger defined for what to do if the 65 kt RDM winds aloft decode is confirmed on next issuance \u2014 that's a meaningful data point that deserved its own action trigger."
+      },
+      "winds_turbulence": {
+        "score": 9,
+        "notes": "The winds aloft table is well-decoded, the 65 kt flag is handled honestly, the tailwind component math is shown, and turbulence classification (light-to-moderate chop, possible isolated moderate-severe in wave) is correctly tied to the 40-65 kt perpendicular Cascade flow. The rotor zone callout on the eastern (lee) slope is accurate and terrain-aware. Small deduction: no mention of checking SIGMETs or AIRMETs for mountain obscuration or turbulence at briefing time."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Good awareness of KBDN's high desert position east of the Cascades, the Siskiyou crossing, and Bay Area marine layer behavior at arrival. The Cascade crest wave/rotor explanation is correct and specific. Slightly underweights the Siskiyou segment between southern Oregon and northern California \u2014 that terrain can generate its own wave activity at these wind speeds and deserved a sentence."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "Best/worst/escape altitudes are all provided with reasoning. The recommendation to consider 10,000 ft over Oregon with a step-up over California is practical and correctly reasoned. The acknowledgment that 9,000 ft is already 43 kt undermines the 'slightly smoother at 10,000' argument somewhat \u2014 that nuance could have been addressed more directly. Still more useful than most briefings on this point."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "Conclusions are clearly tied to specific sources: WFO PDT AFD, RDM/SAC/SFO winds aloft tables, 18Z/24Z surface progs, MTR AFD, QPF charts. The raw winds aloft decode (2465-06) is shown explicitly, which is excellent. Some of the AFD language is paraphrased rather than quoted, which creates minor uncertainty about whether exact thresholds are accurate or interpreted."
+      },
+      "clarity_signal_noise": {
+        "score": 7,
+        "notes": "Well-organized with headers and tables, and the 'Why this happens' explanatory sidebars are useful for student pilots but add length for experienced pilots. The briefing runs long \u2014 a competent ATP could absorb this in a scan, but a time-constrained pilot might lose key points in the prose. The hazard summary table is a good compression tool; could have been used more aggressively to replace some body text."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like an experienced CFI/dispatcher hybrid briefing \u2014 not robotic, not generic. The 'this is where the flight earns its MARGINAL GO rating' line is exactly how a good briefer talks. Alternates are specific and ranked with reasoning. Timing advice (don't push earlier into afternoon heating, don't delay into the evening) is the kind of tactical insight that separates real briefings from checkbox exercises."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Quantitative, tiered decision triggers that are actually usable preflight and in-flight",
+      "Honest flagging of data gaps (TAF unavailability, 65 kt decode verification) without paralyzing the decision",
+      "Correct terrain-aware turbulence analysis with specific rotor/wave zone identification tied to actual wind values",
+      "Practical 'If You Go' checklist that includes timing, altitude flexibility, fuel recalc, and alternate briefing \u2014 operational rather than boilerplate"
+    ],
+    "key_weaknesses": [
+      "No explicit SIGMET/AIRMET check mentioned \u2014 at 65 kt over the Cascades, an active AIRMET Sierra or Tango is highly likely and should be a primary source, not an omission",
+      "The 80% confidence figure from the PDT AFD is applied somewhat loosely across time windows \u2014 its validity at Wednesday 22Z versus Tuesday frontal passage is conflated",
+      "Siskiyou segment is undertreated \u2014 at these wind speeds it deserves specific mention as a secondary turbulence zone",
+      "Briefing length is a usability issue for a time-constrained pilot; the explanatory 'why this happens' sections could be cut or compressed without losing decision value"
+    ],
+    "red_flags": [
+      "No mention of checking active AIRMETs for mountain obscuration (Sierra) or turbulence (Tango) over the Cascades \u2014 this is a primary go/no-go data source at these wind speeds and its absence is a meaningful gap"
+    ],
+    "would_you_fly": "Yes",
+    "would_you_fly_justification": "The synoptic picture is coherent \u2014 post-frontal high building, no convection, no significant icing signal, VFR both ends. The 65 kt winds aloft over the Cascades are the real variable and the briefing handles them honestly. Filed IFR at 10,000 ft on the Oregon leg, PIREP check in the morning, and KPAO as a filed alternate covers the meaningful risk surface. This is a flyable day with eyes open, not a push-it day.",
+    "single_most_important_improvement": "Add an explicit AIRMET/SIGMET check as a required preflight step and incorporate what active AIRMETs (likely Tango for turbulence over the Cascades) actually say \u2014 at 65 kt over mountainous terrain, that product is more decision-relevant than any single other data source and its complete absence from this briefing is the most significant gap.",
+    "computed_avg": 8.4
+  }
+}

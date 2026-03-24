@@ -1,0 +1,686 @@
+[
+  {
+    "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v1_pre_prompt_rules/cache_KEDC_KBJC_2026-03-19",
+    "version": "v1",
+    "meta": {
+      "origin": "KEDC",
+      "destination": "KBJC",
+      "departure": "2026-03-19 16:00Z",
+      "altitude_ft": 10000,
+      "model": "unknown",
+      "sys_prompt_len": 661
+    },
+    "scores": {
+      "scores": {
+        "executive_summary": {
+          "score": 8,
+          "notes": "Clear MARGINAL GO verdict with honest caveats. Primary risks (frontal timing, icing in NM/CO, mountain wave) are correctly identified and prioritized. Slightly buries the lead on icing severity \u2014 that should be front and center over frontal timing."
+        },
+        "forecast_honesty": {
+          "score": 9,
+          "notes": "Explicitly calls out missing FIP and GTG data, avoids precision it can't support, and correctly frames the briefing around prog charts. Acknowledges uncertainty in frontal timing without hedging to uselessness. Rare and good."
+        },
+        "operational_decision": {
+          "score": 8,
+          "notes": "Pilot can realistically make a go/no-go from this. Fuel stop recommendation at KAMA, alternate strategy, and timing advice are genuinely useful. Block time estimate is practical. Could be slightly sharper on what 'marginal' means for an aircraft without known-ice certification."
+        },
+        "decision_triggers": {
+          "score": 8,
+          "notes": "Hard stops are clearly listed and mostly quantitative (SLD PIREPs, front position at 16Z, crosswind limits, convective SIGMETs). Missing a specific ceiling/wind trigger for KBJC (e.g., 'if TAF shows ceilings below 2,500 AGL or winds > 30G45 at departure time, reconsider'). The triggers are realistic and pre-flight usable."
+        },
+        "winds_turbulence": {
+          "score": 7,
+          "notes": "Correctly identifies post-frontal NW flow, tailwind potential on Austin-Amarillo leg, and mountain wave risk over Raton/front range. Turbulence classified as light-to-moderate chop, which is appropriate. Loses points because no winds aloft data was available and the briefing doesn't fully compensate \u2014 the tailwind/headwind shift analysis is directionally correct but thin."
+        },
+        "terrain_route": {
+          "score": 8,
+          "notes": "Route is clearly understood \u2014 Palmer Divide, Raton Mesa, terrain rise into KBJC, MSL vs AGL awareness near the front range. The escarpment mention for central Texas is accurate. Correctly flags that 10,000 ft MSL is only 4,000-5,000 ft AGL near KBJC. Solid terrain situational awareness throughout."
+        },
+        "altitude_strategy": {
+          "score": 7,
+          "notes": "Recommends staying at 10,000 ft with a descent option to 7,000-8,000 ft if icing encountered, and correctly warns against climbing to 12,000-14,000 ft. However, no discussion of whether 10,000 ft is even legal/practical for a piston over the Rockies terrain, and no mention of MEAs or terrain clearance requirements on the NM/CO segment which could make that 'drop to 7,000 ft' escape harder than presented."
+        },
+        "data_integration": {
+          "score": 7,
+          "notes": "Analysis is tied to 48-hr and 60-hr prog charts, QPF, and surface low tracking \u2014 all appropriate sources. Honestly acknowledges FIP, GTG, TAF, and winds aloft FD are missing. The icing table is a reasonable inference but is presented slightly more confidently than raw prog data supports. Doesn't hallucinate specific values."
+        },
+        "clarity_signal_noise": {
+          "score": 8,
+          "notes": "Well-structured with headers, tables, and a clear action list. The hazard summary table is genuinely useful for a scan. A few sections are slightly verbose (the Rockies moisture paragraph could be trimmed), but overall this is easy to read quickly under time pressure."
+        },
+        "pilot_realism": {
+          "score": 9,
+          "notes": "Reads like an experienced CFII talking to a capable pilot \u2014 not a textbook, not an LLM. 'Down is your friend,' the KAMA fuel stop rationale, the Wednesday night model check, the 'I wouldn't be nervous if the front clears on schedule' line \u2014 all operationally grounded. The tone is appropriately direct without being alarmist."
+        }
+      },
+      "overall_score": 8,
+      "key_strengths": [
+        "Forecast honesty \u2014 explicitly calls out missing data sources (FIP, GTG, winds aloft) rather than fabricating precision",
+        "Operational practicality \u2014 KAMA fuel stop recommendation, alternate strategy, timing advice, and Wednesday night model check are genuinely actionable",
+        "Terrain and route awareness \u2014 demonstrates real understanding of the route's terrain profile and how post-frontal NW flow interacts with it",
+        "Decision triggers are mostly quantitative and pre-flight usable, not generic"
+      ],
+      "key_weaknesses": [
+        "No MEA/terrain clearance discussion for the NM/CO segment \u2014 the 'drop to 7,000 ft' escape route may not be available everywhere and this isn't flagged",
+        "Missing aircraft-specific context \u2014 the entire icing section assumes a piston without known-ice but never explicitly states this limits the go/no-go calculus",
+        "No specific TAF or METAR data cited for KEDC or KBJC \u2014 the briefing works from progs only, and doesn't prompt the pilot to cross-check with actual issued forecasts",
+        "Wind shift and fuel burn impact of the Austin-Amarillo tailwind vs northbound headwind isn't quantified even roughly, leaving fuel planning thin"
+      ],
+      "red_flags": [
+        "The 'drop to 7,000-8,000 ft over NM/CO' icing escape advice does not account for terrain clearance or MEAs on that segment \u2014 this could be dangerous if taken literally near the Raton area without chart verification"
+      ],
+      "would_you_fly": "Needs more data",
+      "would_you_fly_justification": "The briefing correctly identifies this as a marginal situation dependent on frontal timing and icing conditions neither of which are resolvable 48 hours out. The go/no-go can't be made until the morning of with actual FIP data, a current TAF for KBJC, and PIREPs from the NM/CO corridor. The briefing sets up exactly the right framework for that morning check \u2014 but the answer isn't knowable yet, which is itself the correct answer.",
+      "single_most_important_improvement": "Add terrain clearance awareness to the altitude escape strategy \u2014 specifically flag that 'drop to 7,000-8,000 ft' over the Raton/southern Colorado segment requires MEA verification first, and that this escape may not be available everywhere on the route. This is the one piece of advice that could get a pilot in trouble if followed without that caveat.",
+      "computed_avg": 7.9
+    }
+  },
+  {
+    "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v1_pre_prompt_rules/cache_KMQY_KEDC_2026-03-16",
+    "version": "v1",
+    "meta": {
+      "origin": "KMQY",
+      "destination": "KEDC",
+      "departure": "2026-03-16 15:00Z",
+      "altitude_ft": 12000,
+      "model": "unknown",
+      "sys_prompt_len": 661
+    },
+    "scores": {
+      "scores": {
+        "executive_summary": {
+          "score": 8,
+          "notes": "Clear MARGINAL GO with honest reasoning. Primary risks (fuel, icing in climb, time window) are correctly identified and prioritized. Would benefit from a single-sentence lead before the detailed breakdown."
+        },
+        "forecast_honesty": {
+          "score": 7,
+          "notes": "Appropriately acknowledges no KMQY TAF and reasons from synoptic picture. However, the frontal timing is stated with more confidence than warranted at 24-hour range, and the icing table implies quantitative precision that isn't backed by actual CIP/FIP data citations."
+        },
+        "operational_decision": {
+          "score": 9,
+          "notes": "Excellent translation of weather into real-world implications \u2014 fuel planning, timing window, climb hazards, and arrival winds are all connected to actionable decisions. The '70-knot headwind for first 300 nm' instruction is exactly what a time-constrained pilot needs."
+        },
+        "decision_triggers": {
+          "score": 9,
+          "notes": "Strong quantitative triggers: front through Nashville by 12Z, wheels down by 21:30Z, midpoint groundspeed check, 23Z wind ramp as hard gate. These are specific, realistic, and usable. Minor deduction because the icing trigger ('solid IMC 6,000\u201310,000 ft') could be slightly more specific about what action to take."
+        },
+        "winds_turbulence": {
+          "score": 8,
+          "notes": "Winds aloft are correctly interpreted rather than just stated \u2014 the headwind component math and fuel implications are done explicitly. Turbulence is classified as moderate with geographic specificity. The 81-knot wind at 12,000 ft is flagged but the briefing could note that this implies significant wind shear and possible CAT near the jet."
+        },
+        "terrain_route": {
+          "score": 5,
+          "notes": "Weakest section. The route crosses Cumberland Plateau, Tennessee River Valley, and the Highland Rim \u2014 none of these terrain features are mentioned. No discussion of orographic effects on the post-frontal northwest flow over the Tennessee terrain, which is directly relevant to the turbulence forecast."
+        },
+        "altitude_strategy": {
+          "score": 8,
+          "notes": "Best/worst/escape altitudes are provided with sound reasoning. The 8,000 ft option as an icing avoidance strategy is practical. The tradeoff discussion (lighter winds vs. icing risk) is handled well. Missing: no mention of whether 14,000 ft might get on top cleanly."
+        },
+        "data_integration": {
+          "score": 7,
+          "notes": "BNA, HSV, CLL winds aloft are cited with specific values and tied to conclusions. KAUS TAF groups are referenced correctly. However, the icing probability table feels derived from reasoning rather than actual AIRMET/CIP data, and this is not clearly disclosed."
+        },
+        "clarity_signal_noise": {
+          "score": 8,
+          "notes": "Well-structured with headers, tables, and bullet points. Scannable under time pressure. The Sunday night pre-brief section is genuinely useful but adds length \u2014 a pilot reading this Monday morning has to skip past it. Minor organizational issue."
+        },
+        "pilot_realism": {
+          "score": 9,
+          "notes": "Reads like an experienced pilot talking to another pilot \u2014 direct, opinionated, practical. 'Down is your friend,' fuel stop options at KMEM/KJAN, 'bring a jacket' \u2014 these are the touches that make it feel operational rather than algorithmic. The '21:30Z hard gate' is exactly how real pilots think."
+        }
+      },
+      "overall_score": 7.8,
+      "key_strengths": [
+        "Quantitative, time-based decision triggers (21:30Z gate, 12Z front check) that are genuinely usable",
+        "Fuel planning is treated as the primary operational risk with specific numbers \u2014 rare and correct",
+        "Arrival window timing pressure is clearly connected to the headwind problem, creating a coherent risk picture"
+      ],
+      "key_weaknesses": [
+        "Zero terrain awareness along the route \u2014 Cumberland Plateau and Tennessee Valley orographic effects on post-frontal turbulence are completely absent",
+        "Icing probability table implies data-backed precision but is clearly reasoned from synoptic picture without citing AIRMET G or CIP output",
+        "No mention of whether climbing to 14,000\u201316,000 ft might clear both icing and get above the worst turbulence layer"
+      ],
+      "red_flags": [
+        "Icing table presents moderate-high probability for 6,000\u201310,000 ft with no supporting AIRMET or CIP citation \u2014 could mislead pilot into treating it as authoritative",
+        "Terrain interaction with post-frontal northwest flow over Tennessee highlands is unaddressed \u2014 this is a real moderate turbulence driver that is missing from the analysis"
+      ],
+      "would_you_fly": "Needs more data",
+      "would_you_fly_justification": "The briefing makes a compelling case for MARGINAL GO, but I'd want the actual 12Z Monday surface analysis and updated winds aloft before committing. The fuel and timing logic is sound. The icing and turbulence picture over Tennessee needs real AIRMET/PIREP confirmation at briefing time \u2014 the synoptic reasoning is good but not sufficient to accept moderate-high icing risk on a non-FIKI aircraft without current AIRMETs in hand.",
+      "single_most_important_improvement": "Add terrain analysis for the Tennessee/Alabama portion of the route \u2014 specifically how post-frontal northwest flow interacting with the Cumberland Plateau affects turbulence and cloud tops, which directly changes the climb-out risk picture and the 8,000 ft vs 12,000 ft altitude decision.",
+      "computed_avg": 7.8
+    }
+  },
+  {
+    "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v1_pre_prompt_rules/cache_KSQL_KVGT_2026-03-13",
+    "version": "v1",
+    "meta": {
+      "origin": "KSQL",
+      "destination": "KVGT",
+      "departure": "2026-03-13 18:00Z",
+      "altitude_ft": 10500,
+      "model": "unknown",
+      "sys_prompt_len": 661
+    },
+    "scores": {
+      "scores": {
+        "executive_summary": {
+          "score": 8,
+          "notes": "Clear GO with well-identified primary risks (marine layer departure, Sierra wave, just-below-freezing at cruise). Decision-oriented and correctly prioritized. Minor deduction: 'no hard stops' is slightly casual given the icing proximity at 10,500 ft."
+        },
+        "forecast_honesty": {
+          "score": 7,
+          "notes": "Handles marine layer uncertainty reasonably and flags the need to recheck Thursday night. However, the icing analysis is overconfident \u2014 stating 'moisture just isn't there' while also noting you're just below the freezing level transiting the Sierra is a tension that deserves more explicit uncertainty, not resolution by assertion. eTCF reference is fine but slightly name-dropped without specifics."
+        },
+        "operational_decision": {
+          "score": 8,
+          "notes": "Strong \u2014 the pilot can actually make a decision from this. Timing implications (marine layer burn-off), fuel, alternates, and IFR filing are all addressed practically. Block time estimate is useful and grounded."
+        },
+        "decision_triggers": {
+          "score": 7,
+          "notes": "Some quantitative triggers exist (OVC008 or lower at 16Z, SCT010 degrading to OVC) and the icing escape plan (descend to 8,000\u20139,000 ft) is concrete. Missing: explicit wind threshold for Sierra wave concern (e.g., 'if 12,000 ft winds exceed 35 kt, reconsider altitude'), and no PIREP-based go/no-go criteria for turbulence severity."
+        },
+        "winds_turbulence": {
+          "score": 7,
+          "notes": "Winds are interpreted (tailwind component calculated, block time impact noted) rather than just listed \u2014 good. Turbulence classified as light-to-moderate chop over the Sierra. However, 15\u201320 kt perpendicular flow over the Sierra is actually relatively weak for wave generation and the briefing correctly notes this, but then still says 'expect light to moderate chop' without explaining the wave mechanism or why rotor/wave amplitude would be limited \u2014 it's asserted rather than reasoned."
+        },
+        "terrain_route": {
+          "score": 7,
+          "notes": "Sierra Nevada wave hazard is identified and the Mammoth/Bishop area is called out specifically, which shows route awareness. However, the actual Sierra crossing geometry for KSQL\u2192KVGT (crossing likely near Lake Tahoe/Truckee corridor, not Mammoth/Bishop which is 150nm south of the direct route) appears incorrect \u2014 this is a meaningful navigation error that undermines confidence in the terrain analysis."
+        },
+        "altitude_strategy": {
+          "score": 7,
+          "notes": "10,500 ft is accepted with a clear escape (descend for icing, consider 12,500 for tailwinds). The freezing level conflict at 12,500 ft is correctly flagged. Missing: no explicit discussion of MEAs or terrain clearance concerns over the Sierra at 10,500 ft, which matters for a route crossing the range at that altitude."
+        },
+        "data_integration": {
+          "score": 7,
+          "notes": "Winds aloft tables are sourced from actual stations (SFO, LAS) with temps \u2014 good. TAF references are specific (SCT010, 27008KT). Some conclusions feel slightly hand-wavy (e.g., 'eTCF confirms' without chart values, 'surface progs show clear skies' without prog valid time citation). Overall grounded but not airtight."
+        },
+        "clarity_signal_noise": {
+          "score": 8,
+          "notes": "Well-organized with clear headers, tables, and a scannable action list. The 'day before' section is a genuine value-add rather than filler. Slightly verbose in places (the Central US storm dismissal is belabored), but overall good signal-to-noise ratio."
+        },
+        "pilot_realism": {
+          "score": 8,
+          "notes": "Reads like an experienced CFI talking through a flight, not an LLM summarizing weather data. 'Pop through it in 60\u201390 seconds,' 'brief your passengers,' and the Thursday night check routine all feel operational. The tone is appropriately confident without being reckless."
+        }
+      },
+      "overall_score": 7,
+      "key_strengths": [
+        "Decision-oriented structure throughout \u2014 the pilot always knows what the briefing is recommending and why",
+        "Winds aloft interpreted into practical tailwind components and block time impact, not just listed",
+        "Concrete icing escape plan (descend to 8,000\u20139,000 ft) and marine layer decision triggers are usable preflight and in-flight",
+        "Pre-flight timeline (Thursday night check, morning-of update) is genuinely useful operational advice"
+      ],
+      "key_weaknesses": [
+        "Terrain routing error: the KSQL\u2192KVGT direct route crosses the Sierra near the Tahoe/Truckee corridor, not the Mammoth/Bishop area \u2014 this is a ~150nm geographic error that undermines the Sierra hazard analysis",
+        "Icing confidence is slightly overclaimed \u2014 'moisture just isn't there' is stated as fact when the freezing level is literally at cruise altitude; the distinction between wave cloud icing risk and organized precip icing deserved more careful treatment",
+        "No MEA/terrain clearance discussion for Sierra crossing at 10,500 ft, which is operationally relevant for a GA pilot on IFR",
+        "Turbulence severity classification is asserted without showing the wave mechanics reasoning (wind speed, stability, lee side behavior)"
+      ],
+      "red_flags": [
+        "Geographic error: Mammoth/Bishop cited as Sierra crossing zone for a SQL\u2192VGT direct route \u2014 the actual crossing is significantly further north near Tahoe/Truckee; this affects turbulence and terrain avoidance advice",
+        "Icing analysis resolves its own uncertainty ('just below freezing level' + 'moisture not there') without acknowledging that wave clouds can produce icing in clear-air high-pressure regimes \u2014 trace icing dismissal is slightly too casual"
+      ],
+      "would_you_fly": "Yes",
+      "would_you_fly_justification": "The overall meteorological picture is correctly assessed \u2014 high pressure ridge over the route, the major storm system is non-threatening, KVGT arrival will be clear and calm. The marine layer departure and Sierra turbulence are real but manageable nuisances. The geographic error in terrain analysis is concerning for briefing quality but doesn't change the go/no-go outcome on this day. File IFR, check PIREPs over the Sierra Tahoe corridor specifically, and go.",
+      "single_most_important_improvement": "Fix the terrain routing: identify the correct Sierra crossing zone for KSQL\u2192KVGT (Tahoe/Truckee area, not Mammoth/Bishop), verify MEA requirements there at 10,500 ft, and anchor the turbulence and icing analysis to the actual crossing latitude \u2014 this is the briefing's most concrete factual error.",
+      "computed_avg": 7.4
+    }
+  },
+  {
+    "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v2_with_rules/cache_KBDN_KSQL_2026-03-23",
+    "version": "v2",
+    "meta": {
+      "origin": "KBDN",
+      "destination": "KSQL",
+      "departure": "2026-03-23 21:30Z",
+      "altitude_ft": 12000,
+      "model": "claude-sonnet-4-6",
+      "sys_prompt_len": 4906
+    },
+    "scores": {
+      "scores": {
+        "executive_summary": {
+          "score": 9,
+          "notes": "Clear, concise, correctly identifies coastal stratus as primary risk, gives a confident GO with honest caveats. The 21:30Z\u2192~00Z arrival math is immediately useful and grounded."
+        },
+        "forecast_honesty": {
+          "score": 8,
+          "notes": "Appropriately flags the Monterey Bay eddy as a wildcard and acknowledges TAF timing gaps. Slightly overconfident calling icing 'academic' \u2014 near-freezing level in any residual moisture deserves a touch more respect, even if low probability."
+        },
+        "operational_decision": {
+          "score": 9,
+          "notes": "Pilot can clearly decide to go, knows what to watch, when to recheck, and what changes the decision. Fuel, alternates, and timing are all addressed practically."
+        },
+        "decision_triggers": {
+          "score": 8,
+          "notes": "Two hard stops are explicit and one is quantitative (OVC005\u2013010 persisting past 22Z). Would benefit from a quantitative wind trigger for KSQL crosswind limits (e.g., 'if surface winds exceed 20 kts at KSQL, reassess runway options') and a turbulence ride trigger."
+        },
+        "winds_turbulence": {
+          "score": 8,
+          "notes": "Winds are interpreted with route-relevant component breakdown (crosswind vs tailwind by leg), and turbulence is correctly classified as smooth-to-light with terrain context. The eTCF chart reference is a nice specific touch. Minor gap: no mention of what the ~27 kt westerly at SFO/SAC means for the coastal approach segment specifically."
+        },
+        "terrain_route": {
+          "score": 8,
+          "notes": "Cascades lee side rotor flagged correctly and proportioned as low-risk given light winds. Sierra Nevada terrain is mentioned but not analyzed \u2014 the route from Bend to SQL crosses significant northern California terrain that gets one passing mention without specifics."
+        },
+        "altitude_strategy": {
+          "score": 7,
+          "notes": "12,000 ft is accepted without a strong alternatives discussion. No mention of whether 10,000 ft or 14,000 ft might be better for terrain clearance, winds, or icing avoidance. The freezing level straddle at cruise is noted but no 'if you pick up ice, descend to X' altitude is given \u2014 just 'be ready to descend.'"
+        },
+        "data_integration": {
+          "score": 9,
+          "notes": "Conclusions are consistently tied to named sources: PDT AFD, MTR AFD, eTCF charts, winds aloft with station identifiers and temperatures. No hallucinated precision detected. RDM/SAC/SFO winds aloft table is well-sourced and directly usable."
+        },
+        "clarity_signal_noise": {
+          "score": 8,
+          "notes": "Well-structured with headers and tables that are easy to scan. The hazards summary table is genuinely useful. Some repetition between the 'Fly or No' section and the 'Confidence' section \u2014 could be trimmed. 'If You Go \u2014 Do This' list is excellent and rare in briefings."
+        },
+        "pilot_realism": {
+          "score": 9,
+          "notes": "Reads like a knowledgeable CFI talking to a prepared pilot \u2014 not a weather service bulletin. Practical advice is specific (KPAO vs KHAF as alternate reasoning, ATIS timing, IFR filing rationale for terrain not IMC). The closing line lands well without being cute."
+        }
+      },
+      "overall_score": 8,
+      "key_strengths": [
+        "Decision triggers are explicit and tied to named forecast products with specific threshold values",
+        "Winds aloft are interpreted with route-specific component analysis rather than just transcribed",
+        "Pre-flight action checklist with timing (Sunday night vs Monday morning) is rare and highly practical",
+        "Alternate airport reasoning (why KHAF is a bad choice) shows genuine route awareness"
+      ],
+      "key_weaknesses": [
+        "Altitude strategy is thin \u2014 12,000 ft accepted without alternatives, no specific descent altitude given if icing encountered",
+        "Northern California terrain (Shasta, Trinity Alps, Coast Ranges) between Oregon border and Bay Area gets almost no analysis despite being a meaningful portion of the route",
+        "No quantitative crosswind trigger for KSQL despite identifying it as a concern"
+      ],
+      "red_flags": [
+        "Icing dismissed as 'academic' while acknowledging the freezing level is at cruise altitude \u2014 this framing could cause a pilot to lower their guard in any unexpected moisture encounter along the route"
+      ],
+      "would_you_fly": "Yes",
+      "would_you_fly_justification": "The synoptic picture is genuinely benign \u2014 strong ridge, no fronts near route, VFR departure and VFR arrival window. The primary risk (Bay Area marine layer) is correctly timed as a non-issue for a ~00Z arrival. The briefing gives enough specifics to support a confident go decision with a clear set of pre-departure checks. Only hesitation would be confirming the Monday morning satellite picture before departure as suggested.",
+      "single_most_important_improvement": "Add a specific altitude escape plan for the icing straddle: 'If you pick up any trace icing at 12,000 ft, descend to [X] ft where temps at SAC/SFO are +3\u20134\u00b0C' \u2014 right now 'be ready to descend' leaves the pilot without an actual number, which is the one thing they need in that moment.",
+      "computed_avg": 8.3
+    }
+  },
+  {
+    "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v2_with_rules/cache_KBJC_KHCR_2026-03-21",
+    "version": "v2",
+    "meta": {
+      "origin": "KBJC",
+      "destination": "KHCR",
+      "departure": "2026-03-21 15:30Z",
+      "altitude_ft": 18000,
+      "model": "claude-sonnet-4-6",
+      "sys_prompt_len": 4906
+    },
+    "scores": {
+      "scores": {
+        "executive_summary": {
+          "score": 9,
+          "notes": "Clear, concise, correctly identifies mountain wave/terrain turbulence as the primary risk, gives a defensible MARGINAL GO with honest confidence levels. The wind timing caveat is appropriately flagged without burying the lede."
+        },
+        "forecast_honesty": {
+          "score": 8,
+          "notes": "Turbulence intensity uncertainty is explicitly called out as medium confidence, and the afternoon wind timing is flagged as the soft spot in the forecast. Minor deduction: the 06Z winds aloft being used as a proxy for a 15:30Z departure is acknowledged but the actual magnitude of afternoon acceleration is somewhat hand-waved ('could easily be 35\u201345 knots') without a data source."
+        },
+        "operational_decision": {
+          "score": 9,
+          "notes": "Excellent translation of conditions into real-world implications \u2014 fuel burn increase, arrival timing window, alternate selection, and the narrow KHCR arrival corridor are all actionable. A pilot can make a real decision from this briefing."
+        },
+        "decision_triggers": {
+          "score": 8,
+          "notes": "Multiple triggers are provided and some are quantitative (gusts above 25 kt at KBJC before 18Z, KHCR winds 15G25+, arrival after 18Z \u2192 divert). The 'severe turbulence PIREP \u2192 reassess' trigger is slightly soft \u2014 a quantitative altitude band or intensity threshold would sharpen it."
+        },
+        "winds_turbulence": {
+          "score": 8,
+          "notes": "Winds are interpreted well \u2014 headwind component calculated, timing acceleration flagged, and the terrain-driven nature of turbulence correctly explained. GTG and G-AIRMET are both cited. Slight weakness: the FL210 smooth-air claim is stated confidently but not anchored to a specific GTG value or PIREP."
+        },
+        "terrain_route": {
+          "score": 9,
+          "notes": "Strong situational awareness of the Heber Valley bowl geometry, the western ridgeline rotor risk, and the KHCR approach direction recommendation. The Front Range climbout and Wasatch arrival are both specifically addressed, not treated generically."
+        },
+        "altitude_strategy": {
+          "score": 8,
+          "notes": "FL210 as a better ride altitude is correctly recommended with the headwind trade-off noted. The rotor zone framing (FL180 in the wave, FL210+ above it) is directionally correct. A specific altitude ceiling for the worst wave rotor zone would make this more precise."
+        },
+        "data_integration": {
+          "score": 8,
+          "notes": "TAF, AFD, FIP, GTG, G-AIRMET, and GFA are all cited and integrated coherently. The icing table is well-sourced. The 'could easily be 35\u201345 knots by mid-afternoon' upper wind estimate is the one place where a specific model run citation would have strengthened the claim."
+        },
+        "clarity_signal_noise": {
+          "score": 8,
+          "notes": "Well-structured with headers, tables, and a clean action list. Slightly verbose in the hazard summary table \u2014 the 'IMC en route: None significant' row adds little. Overall signal-to-noise ratio is good for a complex mountain routing briefing."
+        },
+        "pilot_realism": {
+          "score": 9,
+          "notes": "Reads like an experienced mountain pilot wrote it \u2014 specific approach geometry advice, realistic alternate selection (KPVU not just 'the nearest airport'), fuel planning flag, and the 'file IFR not because of IMC but because of terrain' rationale are all operationally mature calls."
+        }
+      },
+      "overall_score": 8,
+      "key_strengths": [
+        "Correctly identifies mountain wave/terrain turbulence as the sole meaningful risk and never loses focus on it",
+        "KHCR terrain bowl awareness is exceptional \u2014 approach direction, rotor potential, and the 18Z wind window are all specifically addressed",
+        "Decision triggers are present, partially quantitative, and realistic for preflight use",
+        "KPVU alternate selection is logical and explained, not just listed"
+      ],
+      "key_weaknesses": [
+        "The afternoon upper wind acceleration estimate ('35\u201345 knots by mid-afternoon') is stated without a cited model run \u2014 this is the highest-impact unknown and deserves more rigor",
+        "FL210 smooth-air recommendation is directionally correct but not anchored to GTG data or PIREPs at that level \u2014 slightly overconfident",
+        "The 'severe turbulence PIREP \u2192 reassess' trigger lacks a quantitative threshold (e.g., moderate or greater above FL160 within 50nm of route)"
+      ],
+      "red_flags": [
+        "None critical \u2014 briefing is operationally sound. Minor flag: afternoon wind acceleration magnitude is asserted confidently without a specific data source, which is the one element most likely to affect the go/no-go margin"
+      ],
+      "would_you_fly": "Yes",
+      "would_you_fly_justification": "VMC departure, no icing, no convection, and the turbulence signal is light-to-moderate \u2014 manageable in an appropriate aircraft. The 17:12Z ETA gives real margin ahead of the 18Z KHCR wind increase. The briefing correctly identifies that this is a timing and ride-quality problem, not a hard weather stop. Departing at 15:30Z as planned with IFR filed, FL210 requested, and KPVU fuel-planned is a sound execution.",
+      "single_most_important_improvement": "Nail down the afternoon upper wind acceleration with a specific model source (12Z GFS or RAP at DEN/SLC for 18-21Z) \u2014 right now the 35\u201345 kt estimate is the briefing's only unsupported assertion, and it's the one number most likely to affect fuel planning, timing margin, and the KHCR arrival decision.",
+      "computed_avg": 8.4
+    }
+  },
+  {
+    "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v2_with_rules/cache_KHCR_KSQL_2026-03-21",
+    "version": "v2",
+    "meta": {
+      "origin": "KHCR",
+      "destination": "KSQL",
+      "departure": "2026-03-21 20:00Z",
+      "altitude_ft": 18000,
+      "model": "claude-sonnet-4-6",
+      "sys_prompt_len": 4906
+    },
+    "scores": {
+      "scores": {
+        "executive_summary": {
+          "score": 9,
+          "notes": "Clear, concise, correctly identifies the primary risk as arrival-end coastal stratus rather than en route. MARGINAL GO with explicit reasoning is exactly the right call. Minor ding: 'the MTR forecaster is watching' implies direct access to a human forecaster, which may be imprecise."
+        },
+        "forecast_honesty": {
+          "score": 9,
+          "notes": "Explicitly quantifies forecaster uncertainty at 40\u201350% and acknowledges missing icing chart data. Distinguishes HIGH vs MEDIUM confidence by leg. No false precision \u2014 this is done well throughout."
+        },
+        "operational_decision": {
+          "score": 9,
+          "notes": "A pilot can absolutely make a go/no-go from this. Fuel implications of headwind are called out, alternates are ranked and justified, and the arrival timing risk is translated into a concrete monitoring plan. Actionable from start to finish."
+        },
+        "decision_triggers": {
+          "score": 9,
+          "notes": "Quantitative and specific: BKN005 TAF amendment, ceiling below 1,000 ft on ATIS, winds aloft exceeding 50 kts, any ice accumulation near coast. Triggers are realistic, preflight and in-flight both covered. Could add a fuel-state trigger (e.g., if headwinds exceed X and fuel margin drops below Y, divert early)."
+        },
+        "winds_turbulence": {
+          "score": 8,
+          "notes": "Winds aloft decoded at three stations with headwind component calculated \u2014 good. Turbulence correctly characterized as smooth over UT/NV with conditional light-to-moderate near the Sierra. Minor weakness: no mention of whether mountain wave SIGMETs were checked or what specific Sierra crossing altitude optimization looks like."
+        },
+        "terrain_route": {
+          "score": 8,
+          "notes": "Correctly identifies Sierra Nevada as the terrain hazard, mentions rotor zone concern and wave potential. KHCR density altitude is flagged. Bay Area stratus as a coastal terrain-influenced phenomenon is handled well. Slightly surface-level on Sierra wave mechanics \u2014 doesn't mention whether a lenticular or AIRMET Sierra was present at forecast time."
+        },
+        "altitude_strategy": {
+          "score": 7,
+          "notes": "States going lower won't help with headwinds, and correctly identifies 18,000 ft as likely above the stratus deck on descent. However, there's no discussion of an escape altitude if icing is encountered near the coast, or whether 16,000 ft might clear the frontal cloud band. The descent profile into KSQL through potential IMC at 18K isn't fully addressed."
+        },
+        "data_integration": {
+          "score": 8,
+          "notes": "Conclusions are clearly tied to SLC AFD, MTR AFD, KSFO TAF, winds aloft tables, eTCF, QPF, and surface prog. The explicit citation of data sources throughout is strong. Slight concern: icing charts described as 'not available' but no alternative source (e.g., G-AIRMET, CIP/FIP) was substituted \u2014 small gap."
+        },
+        "clarity_signal_noise": {
+          "score": 8,
+          "notes": "Well-organized with headers, tables, and bullet points. The 'If You Go \u2014 Do This' section is genuinely useful and scannable. A few sections repeat the 40\u201350% confidence figure more than necessary. Overall density is appropriate for a high-altitude IFR cross-country."
+        },
+        "pilot_realism": {
+          "score": 9,
+          "notes": "Reads like an experienced pilot or dispatcher wrote it \u2014 specific airport knowledge (KLVK as the last to go IFR), practical sequencing (check TAF at 18Z, get ATIS 30 min out), and frank language ('This is where the flight gets interesting'). Not generic. The alternate hierarchy logic is exactly what an experienced Bay Area pilot would say."
+        }
+      },
+      "overall_score": 8,
+      "key_strengths": [
+        "Arrival risk correctly identified and quantified with explicit forecaster confidence levels \u2014 not hand-wavy",
+        "Decision triggers are specific, quantitative, and usable both preflight and in-flight",
+        "Alternate airport ranking (KLVK over KOAK/KSJC) reflects real operational knowledge of Bay Area stratus behavior",
+        "Headwind impact translated into concrete fuel planning guidance rather than just being mentioned"
+      ],
+      "key_weaknesses": [
+        "Altitude strategy for the coastal descent is underdeveloped \u2014 no discussion of what altitude to expect to break out of frontal cloud or an escape plan if icing is encountered at 18K on descent",
+        "Sierra wave hazard is flagged but not fully developed \u2014 no mention of checking for active SIGMET Sierra or mountain wave AIRMET, and no specific altitude band advice for the crossing",
+        "Icing chart gap acknowledged but no substitute source cited (G-AIRMET, CIP/FIP) \u2014 leaves a real hole in the icing picture near the California coast"
+      ],
+      "red_flags": [
+        "No explicit descent profile analysis into KSQL through potential IMC \u2014 if the stratus is at 500-1000 ft and the pilot is at 18,000 ft in cloud near the coast, the briefing doesn't address what that descent looks like or at what point to call the divert"
+      ],
+      "would_you_fly": "Yes",
+      "would_you_fly_justification": "The route is genuinely low-risk en route, the arrival risk is correctly characterized and bounded, alternates are solid and well-reasoned, and the decision triggers give the pilot a clear action framework. The MARGINAL GO with KLVK filed as alternate is the correct professional call given the 40-50% stratus timing uncertainty. I'd want a current TAF check at 18Z before departure and I'd carry extra fuel for the headwind \u2014 both of which this briefing explicitly recommends.",
+      "single_most_important_improvement": "Add a descent profile analysis for the KSQL arrival: at what altitude should the pilot expect to enter cloud given the frontal stratus scenario, what is the ILS/RNAV approach ceiling at KSQL, and at what specific point inbound should the pilot commit to the divert versus continuing \u2014 this is the most operationally critical gap given that the primary identified risk is the arrival.",
+      "computed_avg": 8.4
+    }
+  },
+  {
+    "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v2_with_rules/cache_KSQL_KBDN_2026-03-23",
+    "version": "v2",
+    "meta": {
+      "origin": "KSQL",
+      "destination": "KBDN",
+      "departure": "2026-03-23 14:00Z",
+      "altitude_ft": 12000,
+      "model": "claude-sonnet-4-6",
+      "sys_prompt_len": 4906
+    },
+    "scores": {
+      "scores": {
+        "executive_summary": {
+          "score": 9,
+          "notes": "Clear, direct, correctly identifies primary risk (Cascade terrain/turbulence), gives a confident GO with appropriate caveat. Not padded. The one minor miss: doesn't mention the early departure time means crossing Cascades in low-light conditions, which is operationally relevant."
+        },
+        "forecast_honesty": {
+          "score": 8,
+          "notes": "Correctly flags the AFD coverage gap over the Cascade crest, and separates HIGH confidence (go/no-go) from MEDIUM confidence (ride quality). The 'no moisture = no icing' logic is sound but slightly hand-wavy \u2014 a brief mention of why no orographic cloud is expected would strengthen it. No hallucinated precision detected."
+        },
+        "operational_decision": {
+          "score": 9,
+          "notes": "Pilot can absolutely make a decision from this briefing. Risks are translated into real-world implications: timing, altitude, maneuvering speed, alternates, IFR filing rationale. The IFR-for-terrain recommendation is practically useful and not generic."
+        },
+        "decision_triggers": {
+          "score": 8,
+          "notes": "The 35\u201340 kt winds-aloft threshold for reconsidering altitude/timing is a concrete, usable trigger. G-AIRMET check is specified. Missing: a ceiling or visibility floor trigger for KBDN arrival, and no explicit 'turn back' or divert trigger if turbulence exceeds expectations en route. Good but not complete."
+        },
+        "winds_turbulence": {
+          "score": 8,
+          "notes": "Winds are interpreted, not just listed \u2014 crosswind/tailwind/headwind implications are drawn out for each leg. Turbulence is correctly classified as mechanical/terrain-driven and labeled conditional. The note that wave mechanics aren't fully resolved at forecast range is honest. Could quantify expected chop better (e.g., light-to-moderate vs. isolated moderate) rather than leaving it open-ended."
+        },
+        "terrain_route": {
+          "score": 8,
+          "notes": "Cascade crossing is correctly identified as the terrain crux. Cascade crest elevation (~9\u201310k ft) is cited and used in the altitude reasoning. The note about local wind modification at KBDN is a nice practical touch. Slightly underweights the Sierra Nevada crossing early in the route \u2014 27 kt westerlies crossing the Sierra at 12,000 ft could also produce chop before the Cascades."
+        },
+        "altitude_strategy": {
+          "score": 7,
+          "notes": "12,000 ft is confirmed as the right call for terrain clearance. Mentions descending to 10,000 ft as a turbulence escape but correctly flags the terrain constraint. What's missing: a discussion of whether 14,000 ft might be smoother (above wave rotor) or whether there's a meaningful performance penalty. The escape altitude logic is present but not fully developed."
+        },
+        "data_integration": {
+          "score": 8,
+          "notes": "Conclusions are grounded in specific data points \u2014 SFO/SAC/RDM winds aloft values, TAF conditions, AFD language, surface prog position. The eTCF reference is appropriate. No hallucinated METARs or PIREPs. The 06Z winds aloft being used for a 14Z\u201316:30Z flight is noted implicitly but not explicitly flagged as a timing gap \u2014 that's a minor miss."
+        },
+        "clarity_signal_noise": {
+          "score": 8,
+          "notes": "Well-organized, scannable headers, tables are used appropriately and not over-used. The 'What Forecasters Are Saying' section adds mild redundancy with the executive summary. 'Don't overthink it' closing is punchy and appropriate. Slightly long overall but nothing egregiously padded."
+        },
+        "pilot_realism": {
+          "score": 9,
+          "notes": "Reads like a real experienced briefer \u2014 the IFR-for-terrain advice, the Va over ridgelines reminder, the 'file KRDM as a formality' framing, and the confidence split between go/no-go vs. ride quality all feel operationally grounded. Avoids LLM hedging language almost entirely."
+        }
+      },
+      "overall_score": 8,
+      "key_strengths": [
+        "Executive summary is clean, decision-oriented, and correctly identifies the primary risk without burying the lede",
+        "Winds aloft are interpreted with route-specific implications at each waypoint rather than just recited",
+        "Confidence tiering (HIGH for go/no-go, MEDIUM for ride quality) is honest and practically useful",
+        "IFR filing recommendation is well-reasoned and not generic \u2014 terrain + darkness argument is sound",
+        "Actionable pre-flight checklist with specific data items (RDM winds aloft threshold, G-AIRMET timing) rather than vague 'check the weather' advice"
+      ],
+      "key_weaknesses": [
+        "Sierra Nevada crossing at 27 kt westerlies is underweighted \u2014 potential for mechanical turbulence before the Cascades is not addressed",
+        "06Z winds aloft data being applied to a 14Z\u201316:30Z flight window is not explicitly flagged as a temporal gap \u2014 could matter if flow accelerates through the day",
+        "No arrival decision trigger (e.g., if KBDN METAR shows unexpected winds above X or visibility below Y, go direct to KRDM)",
+        "Altitude escape strategy is incomplete \u2014 no discussion of whether FL140+ would be smoother above wave rotor, leaving the pilot with only a downward escape option"
+      ],
+      "red_flags": [
+        "Minor: Sierra Nevada mechanical turbulence potential with 27 kt westerlies is not mentioned \u2014 same flow crossing earlier high terrain before the Cascades",
+        "Minor: Freezing level at 12,000 ft over terrain with no explicit orographic cloud discussion \u2014 the 'no moisture' assertion is correct for this setup but the reasoning could be tightened"
+      ],
+      "would_you_fly": "Yes",
+      "would_you_fly_justification": "Pacific High firmly in control, both AFDs clean, no system weather within several hundred miles. The Cascade terrain turbulence with 25\u201327 kt westerlies at cruise altitude is a real consideration but entirely manageable. The IFR filing recommendation is correct for this route and time of day. Only meaningful pre-flight action is verifying winds aloft haven't amplified overnight. This flight goes.",
+      "single_most_important_improvement": "Add a brief Sierra Nevada turbulence note for the first third of the route \u2014 the same 27 kt westerly flow that concerns you over the Cascades is also crossing the Sierra Nevada, and that's the first terrain interaction the pilot will encounter. Ignoring it leaves a gap in the ride quality picture and could surprise a pilot who was told to expect smooth air until the Cascades.",
+      "computed_avg": 8.2
+    }
+  },
+  {
+    "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v3_externalized_enhanced/cache_KBDN_KSQL_2026-03-30",
+    "version": "v3",
+    "meta": {
+      "origin": "KBDN",
+      "destination": "KSQL",
+      "departure": "2026-03-30 21:30Z",
+      "altitude_ft": 12000,
+      "model": "claude-sonnet-4-6",
+      "sys_prompt_len": 8134
+    },
+    "scores": {
+      "scores": {
+        "executive_summary": {
+          "score": 9,
+          "notes": "Clear, decision-oriented, correctly identifies marine layer at KSQL as primary risk, and gives a usable MARGINAL GO with a meaningful IFR vs VFR distinction. The KSQL no-instrument-approach point is called out immediately \u2014 that's the right instinct."
+        },
+        "forecast_honesty": {
+          "score": 10,
+          "notes": "Exemplary. Every section explicitly acknowledges the 6+ day range, absence of TAFs/FIP/GTG products, and distinguishes synoptic-based inference from actual forecast data. Confidence levels are labeled per hazard, not applied globally."
+        },
+        "operational_decision": {
+          "score": 9,
+          "notes": "The briefing answers the actual question a pilot needs answered: route is benign, arrival is the threat, KSQL has no approach, here are real alternates with reasoning. Fuel planning callout is specific and correct. Minor gap: no explicit MEA/terrain clearance check noted for the route."
+        },
+        "decision_triggers": {
+          "score": 8,
+          "notes": "Triggers are present and mostly quantitative \u2014 OVC below 1,000 ft at arrival, winds aloft >40 knots westerly, trough deepening. Could be slightly sharper (e.g., explicit VFR ceiling/vis minimums at KSQL vs. legal minimums vs. practical minimums), but overall well above average."
+        },
+        "winds_turbulence": {
+          "score": 7,
+          "notes": "Turbulence is classified (light-moderate chop near terrain, smooth cruise) and terrain interaction is correctly identified at the Cascade departure. However, no actual winds aloft numbers are available and the briefing acknowledges this \u2014 the qualitative reasoning is sound but the section is necessarily thin. Coast Range descent turbulence mechanism is underexplained."
+        },
+        "terrain_route": {
+          "score": 8,
+          "notes": "Cascade mechanical turbulence on departure, Coast Range on approach, and Bay Area marine interface are all correctly identified. The advice to stay east of peaks on departure is practical. Does not address the specific valley/terrain routing over the Sacramento Valley or Shasta area, which is a minor gap for a real route brief."
+        },
+        "altitude_strategy": {
+          "score": 8,
+          "notes": "Best band (10,000\u201312,000 ft), worst band (6,000\u20138,000 ft near Cascade crest), and escape options (climb to 14,000 ft or descend below marine layer) are all provided with correct reasoning. The 14,000 ft escape is noted without an oxygen callout \u2014 that's a minor miss for a VFR pilot."
+        },
+        "data_integration": {
+          "score": 8,
+          "notes": "Conclusions are explicitly tied to extended prog charts and climatology, and the briefing is transparent about what data is and isn't available. No hallucinated precision. Would score higher if it had cited specific chart times or prog model names rather than generic 'Day 6 extended prog.'"
+        },
+        "clarity_signal_noise": {
+          "score": 8,
+          "notes": "Well-structured with headers, tables, and bullet points that allow scanning. The tables add real value. Slightly long overall \u2014 the 'Day Before' section and 'If You Go' section overlap somewhat \u2014 but nothing is egregiously repetitive. A time-constrained pilot can extract the key points quickly."
+        },
+        "pilot_realism": {
+          "score": 9,
+          "notes": "Reads like a real CFII/IFR briefer, not an LLM summary. The KSQL-no-approach point, the earlier departure timing suggestion, the KHWD-over-KPAO alternate reasoning, and the fuel planning callout are all the kind of practical specifics an experienced pilot would give. Tone is appropriately direct."
+        }
+      },
+      "overall_score": 8,
+      "key_strengths": [
+        "Exceptional forecast honesty \u2014 every claim is explicitly qualified by data availability and forecast range",
+        "Correctly identifies KSQL's lack of instrument approach as the operative risk, not the en route segment",
+        "Alternates are specific and meaningfully differentiated (KHWD vs KPAO reasoning is exactly right)",
+        "Earlier departure timing suggestion is high-value, practical advice that directly addresses the primary risk",
+        "Decision triggers are quantitative and actionable, not generic"
+      ],
+      "key_weaknesses": [
+        "No oxygen advisory for the 14,000 ft escape altitude escape option \u2014 material omission for a VFR pilot",
+        "Coast Range descent turbulence mechanism is underexplained relative to the Cascade departure analysis",
+        "Route-specific terrain (Sacramento Valley, Shasta corridor, I-5 alignment) is not addressed \u2014 briefing treats the interior segment as a featureless overwater leg",
+        "No mention of NOTAM check for KSQL or SFO Bravo airspace coordination, which is operationally relevant"
+      ],
+      "red_flags": [
+        "None critical \u2014 briefing correctly avoids overconfidence and explicitly labels all synoptic-based inferences as such"
+      ],
+      "would_you_fly": "Needs more data",
+      "would_you_fly_justification": "At 6+ days out this briefing correctly cannot and does not make a final call \u2014 it provides a solid planning framework. The MARGINAL GO designation is appropriate contingent on TAF review. I would not make a final decision without KSFO/KSQL TAF coverage of the arrival window and current-day METARs showing marine layer trend. If the TAF shows OVC008 at arrival time, this is a NO-GO to KSQL VFR and requires replanning to KSJC or an earlier wheels-up time.",
+      "single_most_important_improvement": "Add an explicit oxygen advisory when recommending the 14,000 ft escape altitude \u2014 for a VFR pilot without supplemental O2, that escape route may not be legally or physiologically available, which changes the turbulence contingency planning entirely.",
+      "computed_avg": 8.4
+    }
+  },
+  {
+    "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v3_externalized_enhanced/cache_KSQL_KBDN_2026-03-30",
+    "version": "v3",
+    "meta": {
+      "origin": "KSQL",
+      "destination": "KBDN",
+      "departure": "2026-03-30 14:00Z",
+      "altitude_ft": 12000,
+      "model": "claude-sonnet-4-6",
+      "sys_prompt_len": 8134
+    },
+    "scores": {
+      "scores": {
+        "executive_summary": {
+          "score": 8,
+          "notes": "Clear MARGINAL GO call with correct primary risk identified (Pacific trough timing uncertainty). Slightly wordy for an executive summary but decision-oriented and honest about forecast maturity."
+        },
+        "forecast_honesty": {
+          "score": 9,
+          "notes": "Consistently and correctly flags 6-day limitations \u2014 no false precision on winds aloft, TAFs, or icing. Explicitly acknowledges absence of winds aloft data and icing products. One of the stronger elements of this briefing."
+        },
+        "operational_decision": {
+          "score": 8,
+          "notes": "A pilot can make a real provisional decision from this. Timing, alternates, fuel, and IFR filing recommendation are all practical. Slightly diminished by the lack of actual winds aloft numbers, but that's a data limitation, not a briefing failure."
+        },
+        "decision_triggers": {
+          "score": 8,
+          "notes": "Triggers are specific and usable \u2014 BKN/OVC below 3,000 ft, winds gusting above 25 kt, trough position over Oregon, SIGMET for moderate-severe wave. Could add a quantitative winds aloft trigger (e.g., >40 kt at 12K over the Cascades) but overall well above average for this category."
+        },
+        "winds_turbulence": {
+          "score": 7,
+          "notes": "Correctly identifies Cascade crossing as the turbulence zone and categorizes it as light-to-moderate under ridge, worse if trough accelerates. However, 15\u201330 kt SW estimate is acknowledged as unconfirmed, and there's no discussion of jet stream position or whether 12,000 ft puts the pilot in or below any shear layer."
+        },
+        "terrain_route": {
+          "score": 8,
+          "notes": "Good awareness of KBDN's high desert bowl position, downslope westerly flow off the Cascades, and runway orientation crosswind implications. Correctly flags terrain-level moisture risk in the 8,000\u201310,000 ft band. Doesn't explicitly address the Central Valley or northern Sierra crossing, which are benign here but worth a one-liner."
+        },
+        "altitude_strategy": {
+          "score": 7,
+          "notes": "10,000\u201312,000 ft recommended with solid reasoning; escape to valley floor called out correctly. Missing: no mention of whether 12,000 ft requires supplemental oxygen for the aircraft type, and no discussion of MEAs along the IFR route (which was recommended) to validate altitude choice."
+        },
+        "data_integration": {
+          "score": 7,
+          "notes": "Reasoning is grounded in synoptic prog charts and QPF, which is appropriate at this range. No hallucinated METARs or TAFs. Slightly hand-wavy on the 'moderate winds likely 15\u201330 kt' estimate \u2014 should be flagged more clearly as model-inference rather than actual winds aloft product."
+        },
+        "clarity_signal_noise": {
+          "score": 7,
+          "notes": "Well-organized with headers and tables. Some sections are longer than needed \u2014 the icing table adds value, the 'Other Hazards' summary table is partially redundant with earlier prose. The 'If You Go' checklist is genuinely useful and scannable."
+        },
+        "pilot_realism": {
+          "score": 8,
+          "notes": "Reads like an experienced CFI briefing \u2014 practical IFR filing recommendation, PIREP-seeking advice, top off fuel at KSQL, KRDM as primary alternate. Avoids LLM hedging loops. Departure timing rationale (ahead of heating and afternoon wind increase) is operationally sound."
+        }
+      },
+      "overall_score": 77,
+      "key_strengths": [
+        "Consistently honest about 6-day forecast limitations without becoming useless \u2014 correctly frames this as 'provisional plan, not committed go'",
+        "Decision triggers are specific and quantitative enough to be actionable at preflight and night-before checks",
+        "Terrain awareness of KBDN's Cascade lee position and downslope wind risk is accurate and practical",
+        "The 'If You Go' checklist is genuinely operational \u2014 time-phased, specific, and correctly prioritizes IFR filing for terrain structure not expected IMC"
+      ],
+      "key_weaknesses": [
+        "No mention of jet stream position or 12,000 ft relationship to shear layer \u2014 relevant for turbulence severity assessment over the Cascades",
+        "Missing MEA verification for the recommended IFR route (KSQL\u2013KBDN over Cascades terrain) \u2014 recommending IFR without confirming MEAs are compatible with 12,000 ft is a gap",
+        "The 15\u201330 kt wind estimate should be more explicitly labeled as synoptic inference, not forecast product \u2014 the distinction matters for pilot trust calibration",
+        "No mention of oxygen requirement at 12,000 ft or aircraft capability assumption \u2014 relevant for practical altitude strategy"
+      ],
+      "red_flags": [
+        "None critical. Minor: '15\u201330 kt from the southwest at 12,000 ft' is presented with slightly more confidence than the data supports \u2014 should be flagged as rough synoptic inference, not a winds aloft product estimate."
+      ],
+      "would_you_fly": "Needs more data",
+      "would_you_fly_justification": "The briefing correctly identifies this as a 6-day provisional plan. At this range, MARGINAL GO is the right call, but the actual fly/no-fly decision requires the 24\u201348 hour update the briefing specifies. The synoptic picture is favorable enough to keep the trip on the table, but the Pacific trough timing uncertainty is real and the Cascade crossing at 12,000 ft with unknown winds aloft is not trivial. Would re-evaluate with updated progs, TAFs, and winds aloft forecast the day before.",
+      "single_most_important_improvement": "Add jet stream position and 12,000 ft shear layer context \u2014 knowing whether the planned altitude is below, in, or above any jet-induced shear over the Cascades is the most operationally significant missing piece for turbulence severity assessment on this route.",
+      "computed_avg": 7.7
+    }
+  }
+]

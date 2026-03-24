@@ -1,0 +1,73 @@
+{
+  "cache_prefix": "test_briefings/v3_externalized_enhanced/cache_KSQL_KBDN_2026-03-25",
+  "version": "v3",
+  "meta": {
+    "origin": "KSQL",
+    "destination": "KBDN",
+    "departure": "2026-03-25 14:00Z",
+    "altitude_ft": 12000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 8752
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, decision-oriented, correctly identifies the primary stacked risk (wave/icing/winds over Cascades), and delivers a usable tiered GO/NO-GO by equipment type. The one small deduction: 'MARGINAL GO' slightly undersells the severity of 50-kt mountain wave for a non-professional crew in a light single \u2014 could be more explicit that 'marginal' requires specific capability, not just IFR currency."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Confidence tiering (High/Medium/Low) is genuinely useful and correctly placed \u2014 wave turbulence severity flagged as low-confidence, icing band placement flagged as medium, departure flagged as high. Acknowledges the winds aloft data is slightly stale (06Z valid, 14Z departure). No hallucinated precision."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Directly translates hazards into operational consequences: fuel stop at KSAC, ~30-40 min added block time, gust-factor technique on approach, IFR filing rationale. This is genuinely usable for preflight planning, not just situational awareness."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Triggers are present and mostly quantitative (20G30 crosswind, moderate icing at FL120, ceiling under 1,000 ft / vis under 3 SM). The turbulence trigger ('moderate-or-greater below FL140') is good but could be sharper \u2014 what EDR value or specific pirep language constitutes 'moderate'? The triggers are realistic and actionable but slightly inconsistent in specificity."
+      },
+      "winds_turbulence": {
+        "score": 9,
+        "notes": "RDM 245/50 kt at FL120 is correctly flagged as the key number and the physical mechanism (pressure gradient steepening, lee-side rotor) is explained accurately without being academic. Light-to-moderate / moderate-isolated characterization is appropriate given GTG data. The 18,000 ft tailwind note (257/76 kt) is a nice altitude strategy hook."
+      },
+      "terrain_route": {
+        "score": 9,
+        "notes": "Demonstrates real route awareness \u2014 correctly identifies the Cascade crest crossing as the wave generation zone and KBDN's lee-side position as the rotor/descent problem area. The approach advice ('progressive descent from the east if possible') is tactically sound and specific to the terrain geometry."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "FL150-FL170 as best altitude is correctly argued (above icing peak, above rotor zone, tailwind benefit). Worst altitude band (8,000-10,000 ft) correctly identified as rotor zone. The tradeoff of aggressive descent from FL150 into Bend is acknowledged but not fully developed \u2014 what does that descent profile look like, and does it put you back through the icing/rotor band on the way down?"
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "Conclusions are tied to specific data sources (FIP charts, G-AIRMET, GTG EDR values, PDT AFD, TAF FM groups, winds aloft table). The PDT AFD reference with confidence percentage is a nice touch. Minor gap: the GTG EDR 30-50 cited but not cross-referenced to a specific time slice \u2014 slightly hand-wavy on exactly which chart time drove the turbulence call."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-structured with headers, tables, and scannable bullet points. The 'If You Go \u2014 Do This' section is genuinely useful rather than boilerplate. Minor issue: the briefing is long, and some of the icing narrative repeats the same conclusion (non-ice-equipped = no-go) three or four times. Could trim 15% without losing anything."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like an experienced CFI/dispatch combined product \u2014 practical advice on runway selection, gust factor technique, fuel stop at KSAC, and filing FL150 instead of 12,000. 'Thursday looks significantly calmer' is a useful strategic note. Avoids LLM hedging language almost entirely. The crosswind math for runway 16/34 vs. 260 wind direction is correct and operationally specific."
+      }
+    },
+    "overall_score": 9,
+    "key_strengths": [
+      "Correctly identifies RDM 245/50 kt at FL120 as the single driving number and traces it through to every downstream consequence (icing, wave, headwind, arrival turbulence) \u2014 this is integrated analysis, not a list of hazards.",
+      "Tiered GO/NO-GO by aircraft capability is exactly right and avoids the common trap of issuing a single verdict that doesn't account for equipment differences.",
+      "Decision triggers are specific and actionable, and the 'If You Go' section gives real-world technique (gust factor, progressive descent, fuel at KSAC) that a time-constrained pilot can actually use."
+    ],
+    "key_weaknesses": [
+      "The descent from FL150 or FL170 into KBDN is the unresolved tactical problem \u2014 flying above the icing and rotor band is great until you have to come down through it, and that descent profile through the wave layer is not addressed with the same rigor as the cruise portion.",
+      "Icing NO-GO conclusion for non-ice-equipped aircraft is stated repeatedly without meaningfully adding information after the first statement \u2014 this repetition dilutes the signal and adds length."
+    ],
+    "red_flags": [
+      "None critical. Minor: winds aloft data acknowledged as slightly stale (06Z valid for a 14Z departure) \u2014 briefing handles this correctly by flagging it, but a pilot relying on this should confirm with updated 12Z data before departure."
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing makes the right call \u2014 MARGINAL GO for ice-equipped IFR, NO-GO otherwise \u2014 but I would not commit without the morning pireps from the Cascade corridor and the updated 12Z winds aloft showing whether RDM is still 50 kt or has moderated post-frontal. The 50-kt mountain wave combined with the icing band at exactly cruise altitude is a real stacking problem, not a theoretical one. With good pireps showing light-or-less icing and light-to-moderate turbulence on the corridor, I'd go in an ice-equipped aircraft at FL150. With moderate icing or severe turbulence pireps, I'd wait for the afternoon clearance or file to KRDM instead.",
+    "single_most_important_improvement": "Address the descent from cruise altitude (FL150 or FL120) into KBDN explicitly \u2014 the wave/rotor layer doesn't disappear on descent, and a pilot needs to know whether to plan a high-and-fast descent from the east, request a specific approach that avoids the steepest terrain, or expect to punch back through the icing band on the way down. This is the gap between a solid enroute analysis and a complete arrival plan.",
+    "computed_avg": 8.6
+  }
+}
