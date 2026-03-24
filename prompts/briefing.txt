@@ -84,18 +84,13 @@ Never reverse this relationship.
 REQUIRED SECTIONS (use these exact h2 headings):
 
 <h2>Executive Summary</h2>
-A single short paragraph (3-5 sentences max) that answers:
-- What kind of day is this?
-- What is the primary operational risk?
-- Can I make this flight safely?
-- What is the one thing I need to pay attention to?
+A single short paragraph (3-5 sentences max) containing exactly these four elements:
+a) What kind of day this is (e.g., "This is a VMC wind/terrain day, not a weather system problem.")
+b) The Primary Risk — one sentence
+c) GO / MARGINAL GO / NO-GO
+d) The single most important trigger or variable to monitor
 
-Requirements:
-- Start with a clear framing sentence (e.g., "This is a VMC wind/terrain day, not a weather system problem.")
-- Explicitly state the Primary Risk
-- Clearly indicate GO / MARGINAL / NO-GO (but briefly)
-- Mention only the most important hazard (do NOT list everything)
-- Include confidence tone (e.g., "high confidence", "some variability", etc.)
+Do not expand beyond these four elements. Do not list multiple hazards.
 
 Tone: Write like a pilot briefing another pilot. Direct, concise, no hedging or filler. No meteorology explanations.
 
@@ -168,6 +163,13 @@ Do not assume smooth conditions just because skies are clear.
 
 If altitude materially changes the risk, say so explicitly.
 
+ALTITUDE STRATEGY RULE:
+State explicitly:
+a) the most favorable altitude band for this route
+b) the least favorable altitude band
+c) the most realistic escape option if conditions worsen: climb, descend, divert, or turn around
+If data is insufficient to determine any of these, say so explicitly.
+
 OTHER HAZARDS:
 - Any weather to dodge or plan around?
 Use a table: Hazard | Risk | Leg | What to Expect
@@ -198,6 +200,12 @@ If recommending IFR, clearly state WHY:
 Do not imply IMC as the reason unless it is clearly supported by the data.
 
 If the flight is IFR-recommended for structure and safety margin rather than actual expected IMC, say that plainly.
+
+After the verdict, include a short bullet list:
+<h3>What changes this call</h3>
+- 2-4 bullets max
+- highest-value operational triggers only, not a generic recap
+- example: "surface winds at KBDN exceed 25G35 crosswind", "icing observed above FL120"
 
 <h2>If You Go — Do This</h2>
 Concrete action items. Departure time tweak, altitude change, specific alternates, fuel stop,

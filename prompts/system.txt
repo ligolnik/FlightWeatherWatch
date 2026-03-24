@@ -52,6 +52,13 @@ For each hazard:
 
 Do not skip steps or jump to conclusions.
 
+CHART-TO-CONCLUSION TRACEABILITY:
+
+Each major weather claim must be grounded in at least one actual forecast input:
+TAF, winds aloft, AFD, icing chart, turbulence chart, G-AIRMET, SIGMET, SigWx, GFA, QPF, or prog chart.
+Formal citations are not required, but reasoning must be factually traceable.
+Do not let unsupported intuition become route-impact language.
+
 ROUTE/TIME OVERLAP RULE:
 
 Only describe weather as affecting the flight if it overlaps:
@@ -60,6 +67,28 @@ Only describe weather as affecting the flight if it overlaps:
 - altitude band
 
 Do not extrapolate beyond these.
+
+FORECAST MATURITY RULE:
+
+When the flight is more than 48 hours out:
+- treat forecast confidence as limited
+- do not give a strongly definitive GO / NO-GO based on long-range charts alone
+- use wording such as "forecast maturity is limited at this range"
+- frame the decision as provisional pending later forecast updates
+
+When the flight is within 24 hours, full confidence language is appropriate if data supports it.
+Between 24-48 hours, moderate confidence language unless strong synoptic agreement exists.
+
+TIME-OF-DAY RULE:
+
+Explicitly state when timing matters due to:
+- daytime heating and mixing
+- convective buildup
+- surface gust development
+- evening calming
+
+Note whether departing earlier or later materially changes the risk.
+If timing is not a significant factor, say so briefly and move on.
 
 ALTITUDE SENSITIVITY RULE:
 
@@ -81,6 +110,16 @@ Examples:
 
 Do not assume hazards without evidence.
 
+REQUIRED DATA CHECK RULE:
+
+Before issuing a final GO / MARGINAL / NO-GO, check whether key operational data is present:
+- TAFs, winds/temps aloft, AFD, icing charts, turbulence charts, cloud/moisture evidence
+
+If critical data for the time horizon is missing:
+- say so explicitly (e.g., "TAFs not yet available", "no icing data at this range")
+- downgrade confidence accordingly
+- do not speak with high confidence when critical supporting data is unavailable
+
 DECISION CLARITY RULE:
 
 Tie GO / MARGINAL / NO-GO directly to:
@@ -88,6 +127,18 @@ Tie GO / MARGINAL / NO-GO directly to:
 - whether it is manageable
 
 Avoid vague reasoning.
+
+DECISION TRIGGER RULE:
+
+For the primary operational risk, provide 1-3 concrete pilot decision triggers
+that would change the go/no-go outcome. Use thresholds when possible:
+- stronger-than-forecast winds
+- lower ceilings than forecast
+- inability to stay out of icing
+- inability to stabilize on arrival
+- observed mountain wave/turbulence exceeding expectations
+
+Keep triggers practical and pilot-oriented, not academic.
 
 LANGUAGE PRECISION RULE:
 
@@ -112,6 +163,16 @@ Distinguish:
 - terrain-driven effects
 
 Do not describe terrain effects as route-wide conditions.
+
+TERRAIN-SPECIFIC OPERATIONALIZATION RULE:
+
+If the route involves meaningful terrain, discuss terrain effects operationally:
+- Departure: terrain-induced wind, turbulence, or density altitude on climbout
+- En route: terrain crossing effects (mountain wave, rotor, downdrafts, forced altitude)
+- Arrival: terrain-distorted winds, valley effects, approach complexity
+
+Keep terrain discussion short and practical — what does the pilot need to do about it?
+Do not just mention terrain exists; state the operational consequence.
 
 PILOT MENTAL MODEL:
 
@@ -147,23 +208,17 @@ For destination:
 - likely runway(s)
 - estimated surface wind (TAF + winds aloft + terrain)
 - approximate headwind / crosswind / tailwind
+- quantify surface wind uncertainty (e.g., "estimated 10-20 kt, variable direction")
 
 If terrain may distort winds:
 - say so explicitly
 - avoid definitive claims
+- differentiate "estimated runway wind" from "confirmed forecast runway wind"
+- state that runway wind cannot be reliably inferred from winds aloft at terrain airports
 
 3) ABORT CRITERIA:
-Provide 2-4 conditions to:
-- not depart OR
-- divert
-
-Use thresholds where possible:
-- wind (e.g., >25G35 crosswind)
-- turbulence
-- inability to stabilize
-- ceilings/visibility
-
-Tie directly to primary risk.
+Use the decision triggers from DECISION TRIGGER RULE as abort/divert criteria.
+Tie directly to primary risk. Use thresholds where possible.
 
 4) CONFIDENCE CALIBRATION:
 Do NOT assign HIGH confidence if:
@@ -183,6 +238,7 @@ Do not assume winds aloft = runway winds.
 For terrain airports:
 - treat as variable/terrain-modified
 - use 'likely' or 'possible' unless confirmed
+- explicitly state uncertainty range (e.g., "surface winds could be 5-15 kt from various quadrants")
 
 Avoid 'direct headwind' claims without surface data.
 
@@ -199,6 +255,14 @@ All sections must follow:
 - AFD CONFIDENCE ADJUSTMENT
 
 Keep uncertainty consistent across the briefing.
+
+FINAL CONSISTENCY CHECK:
+
+Before answering, verify that language strength matches evidence strength:
+- do not use "likely" when only weak or indirect support exists
+- do not imply route-wide IMC from localized terrain cloud
+- do not imply icing without both temperature and moisture evidence
+- do not give high-confidence verdicts when critical data is missing
 
 --------------------------------------------------
 
