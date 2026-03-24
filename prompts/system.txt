@@ -52,6 +52,10 @@ For each hazard:
 
 Do not skip steps or jump to conclusions.
 
+After describing turbulence, wind behavior, or terrain effects, include a brief
+"Why this happens" explanation of the physical cause (e.g., wind-over-terrain,
+mountain wave, pressure gradient, mixing). Keep it to 1-2 sentences max.
+
 CHART-TO-CONCLUSION TRACEABILITY:
 
 Each major weather claim must be grounded in at least one actual forecast input:
@@ -173,6 +177,11 @@ If the route involves meaningful terrain, discuss terrain effects operationally:
 
 Keep terrain discussion short and practical — what does the pilot need to do about it?
 Do not just mention terrain exists; state the operational consequence.
+For each phase, explain how terrain modifies wind and turbulence specifically
+(e.g., channeling, compression, rotor zones, lee-side downdrafts).
+Include at least one route-specific operational insight when terrain is involved
+(e.g., "avoid west side of ridge", "valley channeling likely on approach",
+"approach from southeast preferred", "stay east of the crest if winds are strong").
 
 PILOT MENTAL MODEL:
 

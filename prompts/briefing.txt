@@ -152,6 +152,18 @@ TURBULENCE & RIDE QUALITY:
   at cruise altitude for stations along the route. Calculate headwind/tailwind/crosswind
   components for each leg. Estimate total wind effect on flight time.
 
+WIND → TURBULENCE MAPPING (over terrain):
+- <20 kt: minimal terrain effects, smooth ride expected
+- 20-30 kt: light to moderate terrain-driven turbulence possible
+- 30-40 kt: mountain wave likely, moderate turbulence possible
+- >40 kt: moderate or greater turbulence likely
+Explicitly connect winds aloft speed to expected ride quality over terrain.
+
+TURBULENCE SEVERITY LANGUAGE:
+Classify ride quality using standard terms only:
+- smooth / light chop / light turbulence / moderate turbulence / severe turbulence
+Do not use vague terms like "bumpy" or "choppy" without a severity classification.
+
 TERRAIN & WIND RULE:
 Strong winds over terrain may produce mountain wave, rotor, and turbulence even in clear air.
 
@@ -169,6 +181,9 @@ a) the most favorable altitude band for this route
 b) the least favorable altitude band
 c) the most realistic escape option if conditions worsen: climb, descend, divert, or turn around
 If data is insufficient to determine any of these, say so explicitly.
+Justify each choice: WHY the best altitude is best (e.g., above rotor zone, below
+strongest winds, clear of icing layer) and WHY the worst is worse (e.g., in the
+wave turbulence band, at the icing max, terrain-forced altitude).
 
 OTHER HAZARDS:
 - Any weather to dodge or plan around?
@@ -206,6 +221,7 @@ After the verdict, include a short bullet list:
 - 2-4 bullets max
 - highest-value operational triggers only, not a generic recap
 - example: "surface winds at KBDN exceed 25G35 crosswind", "icing observed above FL120"
+- at least one trigger must be quantitative (e.g., winds > X kt, ceilings < X ft, gusts > X)
 
 <h2>If You Go — Do This</h2>
 Concrete action items. Departure time tweak, altitude change, specific alternates, fuel stop,
