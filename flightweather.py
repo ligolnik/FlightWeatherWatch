@@ -23,6 +23,7 @@ import re
 import sys
 import time
 import webbrowser
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -509,6 +510,7 @@ def draw_route_on_chart(b64_data, media_type, waypoints):
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return base64.standard_b64encode(buf.getvalue()).decode("utf-8")
+
 
 
 def resolve_route_coords(airports):
@@ -1507,6 +1509,7 @@ def _is_openai_model(model):
     return model.startswith(("gpt-", "o1", "o3", "o4"))
 
 
+
 def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data=None, winds_text="", airport_names=None, afd_data=None, model="claude-sonnet-4-6"):
     """
     Single-pass LLM query: operational briefing + chart classification.
@@ -1835,13 +1838,21 @@ def main():
 
         chart_list = (all_charts(altitude) if args.all
                       else select_charts(max(hours_until, 0), altitude))
-        print(f"\nFetching {len(chart_list)} chart(s):")
+        print(f"\nFetching {len(chart_list)} chart(s) in parallel:")
 
-        chart_data = []
-        for fhr, url, label in chart_list:
-            result = fetch_chart(url, label, forecast_hr=fhr)
-            if result:
-                chart_data.append(result)
+        # Fetch all charts concurrently, preserving original order
+        chart_data_map = {}
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = {
+                executor.submit(fetch_chart, url, label, fhr): i
+                for i, (fhr, url, label) in enumerate(chart_list)
+            }
+            for future in as_completed(futures):
+                i = futures[future]
+                result = future.result()
+                if result:
+                    chart_data_map[i] = result
+        chart_data = [chart_data_map[i] for i in sorted(chart_data_map)]
 
         if not chart_data:
             sys.exit("Error: Could not fetch any charts. Check your internet connection.")
