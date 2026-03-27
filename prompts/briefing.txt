@@ -99,5 +99,10 @@ If timing is not a factor, omit.
 State High / Medium / Low and what forecast elements could still change the call.
 Do not assign High if terrain-driven effects dominate or critical data is missing.
 
+FACTUAL ACCURACY:
+Do not guess airport characteristics (towered/non-towered, airspace class, runway
+count, elevation) unless you are certain. If unsure, omit rather than state incorrectly.
+Use only the airport names and data provided in the FLIGHT header.
+
 Respond with HTML using: h2, h3, h4, p, ul, ol, li, strong, em, blockquote, table, thead, tbody, tr, th, td, code, hr.
 No html/head/body/style/script tags.
