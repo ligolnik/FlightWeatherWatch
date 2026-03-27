@@ -89,18 +89,28 @@ def score_briefing(html, meta, model="claude-sonnet-4-6"):
         f"Altitude: {meta['altitude_ft']:,} ft\n"
     )
 
+    import time as _time
     client = anthropic.Anthropic()
-    response = client.messages.create(
-        model=model,
-        max_tokens=4096,
-        system=judge_prompt,
-        messages=[
-            {
-                "role": "user",
-                "content": f"{route_context}\n---\n\nBRIEFING TO EVALUATE:\n\n{html}",
-            }
-        ],
-    )
+    for _attempt in range(5):
+        try:
+            response = client.messages.create(
+                model=model,
+                max_tokens=4096,
+                system=judge_prompt,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"{route_context}\n---\n\nBRIEFING TO EVALUATE:\n\n{html}",
+                    }
+                ],
+            )
+            break
+        except anthropic.RateLimitError:
+            wait = 30 * (_attempt + 1)
+            print(f" rate limited, waiting {wait}s ...", end="", flush=True)
+            _time.sleep(wait)
+    else:
+        return {"scores": {}, "computed_avg": 0, "error": "rate_limited"}
 
     text = response.content[0].text
 

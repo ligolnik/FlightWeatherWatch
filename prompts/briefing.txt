@@ -224,8 +224,14 @@ After the verdict, include a short bullet list:
 - at least one trigger must be quantitative (e.g., winds > X kt, ceilings < X ft, gusts > X)
 
 <h2>If You Go — Do This</h2>
-Concrete action items. Departure time tweak, altitude change, specific alternates, fuel stop,
+Concrete action items. Altitude change, specific alternates, fuel stop,
 what forecast products to check the night before and morning of.
+
+TIMING RULE:
+If departure timing materially changes the risk picture (terrain-driven convection,
+frontal passage, diurnal wind cycle, marine layer burn-off), state the best and worst
+departure windows with a one-sentence reason each. If timing is not a significant
+factor for this flight, omit — do not pad with generic "earlier is better" advice.
 
 <h2>Confidence</h2>
 State your confidence level (High / Medium / Low) and what forecast elements could still change the go/no-go picture.
