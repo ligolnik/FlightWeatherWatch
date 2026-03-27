@@ -544,6 +544,128 @@ def resolve_route_coords(airports):
 
 
 # ---------------------------------------------------------------------------
+# A/FD (Airport/Facility Directory) data from FAA NASR CSV
+# ---------------------------------------------------------------------------
+
+_FAA_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "faa_data")
+
+
+def _load_afd_csv(filename, faa_id):
+    """Load rows matching faa_id from a FAA CSV file."""
+    path = os.path.join(_FAA_DATA_DIR, filename)
+    if not os.path.exists(path):
+        return []
+    import csv
+    rows = []
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            if row["ARPT_ID"].strip() == faa_id:
+                rows.append(row)
+    return rows
+
+
+def lookup_afd(icao):
+    """Look up A/FD data for an airport. Returns formatted text or empty string."""
+    faa_id = icao.lstrip("K") if icao.startswith("K") and len(icao) == 4 else icao
+    if not os.path.isdir(_FAA_DATA_DIR):
+        return ""
+
+    # APT_BASE
+    base_rows = _load_afd_csv("APT_BASE.csv", faa_id)
+    if not base_rows:
+        return ""
+    base = base_rows[0]
+
+    name = base["ARPT_NAME"].strip()
+    city = base["CITY"].strip()
+    state = base["STATE_NAME"].strip()
+    elev = base["ELEV"].strip()
+    towered = base["TWR_TYPE_CODE"].strip() == "ATCT"
+    tower_str = "Towered" if towered else "Non-towered"
+
+    # Hours
+    att_rows = _load_afd_csv("APT_ATT.csv", faa_id)
+    hours = att_rows[0]["HOUR"].strip() if att_rows else ""
+
+    lines = [f"{icao} — {name}, {city}, {state}"]
+    hours_str = f" | Hours: {hours}" if hours else ""
+    lines.append(f"  {tower_str} | Elev {elev} ft{hours_str}")
+
+    # Runways
+    rwy_rows = _load_afd_csv("APT_RWY.csv", faa_id)
+    end_rows = _load_afd_csv("APT_RWY_END.csv", faa_id)
+    light_map = {"HIGH": "HIRL", "MED": "MIRL", "LOW": "LIRL"}
+    vgsi_map = {
+        "P2L": "PAPI-2L", "P2R": "PAPI-2R", "P4L": "PAPI-4L", "P4R": "PAPI-4R",
+        "V2L": "VASI-2L", "V2R": "VASI-2R", "V4L": "VASI-4L",
+    }
+
+    for rwy in rwy_rows:
+        rwy_id = rwy["RWY_ID"].strip()
+        if rwy_id.startswith("H"):
+            continue
+        length = rwy["RWY_LEN"].strip()
+        width = rwy["RWY_WIDTH"].strip()
+        surface = rwy["SURFACE_TYPE_CODE"].strip().lower()
+        lights = rwy.get("RWY_LGT_CODE", "").strip()
+        rwy_line = f"  Rwy {rwy_id}: {length}x{width} ft, {surface}"
+        if lights:
+            rwy_line += f", {light_map.get(lights, lights)}"
+        lines.append(rwy_line)
+
+        # Runway end details (ILS, VGSI)
+        for end in end_rows:
+            if end["RWY_ID"].strip() != rwy_id:
+                continue
+            end_id = end["RWY_END_ID"].strip()
+            parts = []
+            ils = end.get("ILS_TYPE", "").strip()
+            if ils:
+                parts.append("ILS")
+            vgsi = end.get("VGSI_CODE", "").strip()
+            if vgsi:
+                parts.append(vgsi_map.get(vgsi, vgsi))
+            displaced = end.get("DSPLCD_THRESHOLD", "").strip()
+            if displaced:
+                parts.append(f"displaced {displaced} ft")
+            if parts:
+                lines.append(f"    {end_id}: {', '.join(parts)}")
+
+    # Remarks — filter to operationally relevant
+    rmk_rows = _load_afd_csv("APT_RMK.csv", faa_id)
+    skip_kw = ["SURVEYED", "GEODETIC", "FLIGHT NOTIFICATION", "ADCUS",
+               "OWNER", "DIR OF", "EXISTED PRIOR", "PCR VALUE", "PCN"]
+    remarks = []
+    for rmk in rmk_rows:
+        text = rmk.get("REMARK", "").strip()
+        if not text:
+            continue
+        if any(kw in text for kw in skip_kw):
+            continue
+        # Skip heli-only remarks
+        if text.startswith("HEL ") and "FIXED" not in text:
+            continue
+        remarks.append(text)
+
+    if remarks:
+        lines.append("  Remarks:")
+        for r in remarks:
+            lines.append(f"    - {r}")
+
+    return "\n".join(lines)
+
+
+def fetch_afd_for_airports(airports):
+    """Look up A/FD data for a list of ICAO airports. Returns formatted text block."""
+    sections = []
+    for icao in airports:
+        text = lookup_afd(icao)
+        if text:
+            sections.append(text)
+    return "\n\n".join(sections) if sections else ""
+
+
+# ---------------------------------------------------------------------------
 # TAF fetching
 # ---------------------------------------------------------------------------
 
@@ -1587,11 +1709,15 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
         if afd_lines:
             afd_section = "\n  Area Forecast Discussion — AVIATION:\n" + "\n\n".join(afd_lines) + "\n"
 
-    # Airport names — prevents LLM from guessing wrong names
-    names_section = ""
-    if airport_names:
+    # A/FD data — factual airport info prevents LLM from guessing
+    afd_facility_section = ""
+    facility_text = fetch_afd_for_airports([origin.upper(), destination.upper()])
+    if facility_text:
+        afd_facility_section = f"\n  Airport Facility Data (A/FD):\n{facility_text}\n"
+    elif airport_names:
+        # Fallback to just names if no FAA data available
         name_lines = "\n".join(f"    {k} = {v}" for k, v in airport_names.items())
-        names_section = f"\n  Airport Names (use these exact names):\n{name_lines}\n"
+        afd_facility_section = f"\n  Airport Names:\n{name_lines}\n"
 
     flight_header = f"""
 FLIGHT
@@ -1600,7 +1726,7 @@ FLIGHT
   Departure    : {dep_day} {dep_str} UTC
   Planned Alt  : {altitude_ft:,} ft MSL
   Charts       : {len(chart_data)} weather charts
-{names_section}{taf_section}{winds_section}{afd_section}"""
+{afd_facility_section}{taf_section}{winds_section}{afd_section}"""
 
     label_list = "\n".join(f"  - {l}" for l in chart_labels)
 
