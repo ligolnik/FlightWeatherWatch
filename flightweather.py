@@ -548,6 +548,54 @@ def resolve_route_coords(airports):
 # ---------------------------------------------------------------------------
 
 _FAA_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "faa_data")
+_FAA_MAX_AGE_DAYS = 30  # NASR updates every 28 days
+
+
+def _ensure_faa_data():
+    """Download FAA NASR APT CSV data if missing or stale (>30 days old)."""
+    marker = os.path.join(_FAA_DATA_DIR, "APT_BASE.csv")
+    if os.path.exists(marker):
+        age_days = (time.time() - os.path.getmtime(marker)) / 86400
+        if age_days < _FAA_MAX_AGE_DAYS:
+            return True
+
+    try:
+        print("Updating FAA airport data ...", end=" ", flush=True)
+
+        # Find the current NASR cycle date from the subscription page
+        r = httpx.get(
+            "https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/",
+            timeout=15, follow_redirects=True,
+        )
+        cycles = re.findall(r'NASR_Subscription/(\d{4}-\d{2}-\d{2})', r.text)
+        if not cycles:
+            print("could not find NASR cycle date")
+            return False
+
+        # Use the most recent cycle
+        cycle_date = sorted(set(cycles), reverse=True)[0]
+        # Convert 2026-03-19 -> 19_Mar_2026
+        from datetime import datetime as _dt
+        d = _dt.strptime(cycle_date, "%Y-%m-%d")
+        date_str = d.strftime("%d_%b_%Y")  # e.g. "19_Mar_2026"
+
+        zip_url = f"https://nfdc.faa.gov/webContent/28DaySub/extra/{date_str}_APT_CSV.zip"
+        r2 = httpx.get(zip_url, timeout=30, follow_redirects=True)
+        r2.raise_for_status()
+
+        import zipfile
+        import io
+        os.makedirs(_FAA_DATA_DIR, exist_ok=True)
+        with zipfile.ZipFile(io.BytesIO(r2.content)) as zf:
+            for name in zf.namelist():
+                if name.endswith(".csv"):
+                    zf.extract(name, _FAA_DATA_DIR)
+
+        print(f"done (cycle {cycle_date}).")
+        return True
+    except Exception as exc:
+        print(f"failed ({exc})")
+        return False
 
 
 def _load_afd_csv(filename, faa_id):
@@ -657,6 +705,7 @@ def lookup_afd(icao):
 
 def fetch_afd_for_airports(airports):
     """Look up A/FD data for a list of ICAO airports. Returns formatted text block."""
+    _ensure_faa_data()
     sections = []
     for icao in airports:
         text = lookup_afd(icao)
