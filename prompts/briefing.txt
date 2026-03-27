@@ -5,8 +5,6 @@ for this specific flight route ({origin} → {destination}).
 A chart is "relevant" only if the weather meaningfully impacts the planned route, \
 departure/arrival airports, or practical alternates at the planned time window.
 
-Do not include charts showing distant, weak, non-overlapping, or merely possible weather \
-with no meaningful route impact.
 Charts showing no meaningful weather impact along the route go in the reference pile.
 
 Output this EXACT format on the FIRST line (no markdown code fences):
@@ -19,226 +17,87 @@ THEN a blank line, then the pilot briefing below.
 
 ---
 
-PILOT BRIEFING — the main briefing a pilot actually reads.
-
-This is what a weather-savvy CFI would tell you over the phone before your flight.
-Write in plain pilot language. No meteorology lectures. Answer the questions pilots actually ask:
-"Can I get out?", "Will I hit ice at {altitude}?", "What's it doing when I get there?",
-"Should I just wait until tomorrow?". Be direct. Be opinionated. Ground it in what the charts show.
-
-Focus ONLY on the day before and the day/time of the flight.
-If TAFs are provided above, use them for specific ceiling/visibility/wind forecasts at departure and arrival.
-AREA FORECAST DISCUSSION (AFD) INTEGRATION:
-
-AFD USAGE RULE:
-Use AFD only as supporting context, not primary evidence.
-
-AFD may be used to:
-- confirm or increase confidence in hazards already supported by charts
-- highlight forecaster concerns (winds, timing, uncertainty)
-- identify terrain-driven effects (mountain wave, downslope winds, mixing)
-
-AFD must NOT be used to:
-- introduce new hazards not supported by charts or forecast data
-- override chart-based evidence
-- justify "likely" conditions on its own
-
-AFD EXTRACTION:
-If AFD is provided, extract ONLY the following:
-- Key concerns (winds, clouds, precipitation, timing)
-- Forecaster confidence (high / low / uncertain)
-- Any mention of terrain effects (wave, downslope, mixing)
-- Any "if/then" trigger conditions that could change the forecast
-Summarize these in 2-4 concise bullet points before using them in the briefing.
-
-AFD FRAMING:
-When using AFD-derived insights, explicitly identify them as forecaster input.
-Use phrases such as:
-- "Forecaster discussion suggests..."
-- "AFD highlights..."
-- "Forecaster confidence is..."
-Do NOT blend AFD conclusions indistinguishably with chart-based evidence.
-
-AFD CONFIDENCE ADJUSTMENT:
-Use AFD primarily to adjust confidence, not severity.
-- If AFD expresses uncertainty, disagreement, or timing sensitivity:
-  -> reduce confidence level in the briefing
-- If AFD strongly confirms conditions:
-  -> increase confidence, but do NOT increase hazard severity without chart support
-
-AFD TRIGGER CONDITIONS:
-Translate any AFD "if/then" statements into pilot-relevant decision triggers.
-Examples:
-- "If surface winds mix down earlier..." -> potential for stronger gusts at destination
-- "If cloud cover increases..." -> potential for reduced ceilings
-Use these triggers to inform:
-- arrival risk discussion
-- timing considerations
-- abort/diversion criteria
-
-AFD PRIORITY:
-Charts and forecast data define WHAT conditions exist.
-AFD explains HOW CONFIDENT those conditions are and WHAT MIGHT CHANGE.
-Never reverse this relationship.
-
 REQUIRED SECTIONS (use these exact h2 headings):
 
 <h2>Executive Summary</h2>
-A single short paragraph (3-5 sentences max) containing exactly these four elements:
+One short paragraph with exactly:
 a) What kind of day this is (e.g., "This is a VMC wind/terrain day, not a weather system problem.")
-b) The Primary Risk — one sentence
+b) Primary Risk: one sentence
 c) GO / MARGINAL GO / NO-GO
-d) The single most important trigger or variable to monitor
+d) The single most important trigger to monitor
 
-Do not expand beyond these four elements. Do not list multiple hazards.
-
-Tone: Write like a pilot briefing another pilot. Direct, concise, no hedging or filler. No meteorology explanations.
-
-Do NOT: repeat detailed data (no TAF strings, no tables), list multiple hazards, or use vague language.
-
-A pilot should be able to read ONLY this paragraph and understand the go/no-go and why.
+Do not expand beyond these four elements. A pilot should read only this and know the call.
 
 <h2>The Day Before — What to Watch</h2>
-What's the situation the evening before? What weather check should the pilot do that night?
-Tell them what to look for and what would change the go/no-go. Keep it short and practical.
+Short practical re-check list for the evening before.
+What to look for and what would change the go/no-go.
 
 <h2>Leaving {origin} — Departure at {dep_str}</h2>
-Will they get out? What are conditions like on the ground and climbing out?
-Talk about what they'll see: are they punching through a layer, is it clear, is there a front nearby?
-Winds on the runway, ceilings, visibility — pilot language, not METAR codes.
-
-IMC / CEILING RULE:
-Only state "likely IMC" if:
-- TAFs show BKN/OVC ceilings at or below likely climb altitudes, OR
-- cloud/icing products show a continuous saturated/cloud-bearing layer overlapping the route and timing.
-
-If neither is present:
-- do NOT say "likely IMC"
-- instead describe cloud layers, coverage, and where IMC could occur, if at all.
-
-Clearly distinguish:
-- widespread departure IMC
+Describe departure ceiling/visibility/wind. State whether this is:
+- VMC departure
 - brief layer penetration
-- localized terrain cloud
-- mostly VMC with pockets of cloud
+- likely departure IMC (only if TAFs show BKN/OVC at or below climb altitudes)
+
+Use pilot language, not METAR codes.
 
 <h2>The Ride at {altitude} ft</h2>
-What's the flight actually going to be like at {altitude} ft?
 
-ICING ANALYSIS (you have FIP charts at multiple altitudes — use them):
-- Am I above or below the freezing level at {altitude} ft? Where is the freezing level?
-- What's the worst icing band? Which altitude range has the highest icing probability?
-- What's the best cruise altitude to avoid or minimize icing along this route?
-- If I pick up ice, where's my escape altitude — up or down?
-- Any SLD risk? SLD is a hard no-go for most GA aircraft.
-Use a mini table for the vertical icing picture: Altitude | Icing Prob | Notes
+WINDS ALOFT:
+If winds/temps data is provided, decode and present actual winds at cruise altitude
+for stations along the route. Calculate headwind/tailwind/crosswind components.
 
-ICING INTERPRETATION RULE:
-Icing requires BOTH temperature AND moisture.
-If icing charts show little or no icing probability, assume limited moisture even if temperatures are favorable.
+RIDE QUALITY:
+Classify using standard terms only:
+smooth / light chop / light turbulence / moderate turbulence / severe turbulence
 
-Do not infer widespread icing without a clear icing signal.
-State clearly whether icing is:
-- WIDESPREAD
-- LOCALIZED
-- CONDITIONAL
-- LOW CONFIDENCE
-
-If no SLD signal is shown, say that explicitly. If SLD risk exists, treat it as a hard stop for most GA aircraft.
-
-TURBULENCE & RIDE QUALITY:
-- Smooth or bumpy? Where are the rough spots?
-- Winds aloft: If winds/temps data is provided above, decode and present the actual winds
-  at cruise altitude for stations along the route. Calculate headwind/tailwind/crosswind
-  components for each leg. Estimate total wind effect on flight time.
-
-WIND → TURBULENCE MAPPING (over terrain):
-- <20 kt: minimal terrain effects, smooth ride expected
-- 20-30 kt: light to moderate terrain-driven turbulence possible
+Wind-over-terrain reference:
+- <20 kt: minimal terrain effects
+- 20-30 kt: light to moderate terrain turbulence possible
 - 30-40 kt: mountain wave likely, moderate turbulence possible
 - >40 kt: moderate or greater turbulence likely
-Explicitly connect winds aloft speed to expected ride quality over terrain.
 
-TURBULENCE SEVERITY LANGUAGE:
-Classify ride quality using standard terms only:
-- smooth / light chop / light turbulence / moderate turbulence / severe turbulence
-Do not use vague terms like "bumpy" or "choppy" without a severity classification.
+ICING:
+Include a vertical icing table: Altitude | Icing Prob | Notes
+State: freezing level, worst icing band, SLD risk (or explicitly no SLD signal).
 
-TERRAIN & WIND RULE:
-Strong winds over terrain may produce mountain wave, rotor, and turbulence even in clear air.
-
-Treat this as:
-- LOCALIZED or CONDITIONAL hazard unless widespread turbulence guidance supports broader impact.
-
-Do not ignore terrain-driven turbulence.
-Do not assume smooth conditions just because skies are clear.
-
-If altitude materially changes the risk, say so explicitly.
-
-ALTITUDE STRATEGY RULE:
+ALTITUDE STRATEGY:
 State explicitly:
-a) the most favorable altitude band for this route
-b) the least favorable altitude band
-c) the most realistic escape option if conditions worsen: climb, descend, divert, or turn around
-If data is insufficient to determine any of these, say so explicitly.
-Justify each choice: WHY the best altitude is best (e.g., above rotor zone, below
-strongest winds, clear of icing layer) and WHY the worst is worse (e.g., in the
-wave turbulence band, at the icing max, terrain-forced altitude).
+a) best altitude band and why
+b) worst altitude band and why
+c) escape option if conditions worsen: climb, descend, divert, or turn around
 
-OTHER HAZARDS:
-- Any weather to dodge or plan around?
-Use a table: Hazard | Risk | Leg | What to Expect
-Incorporate findings from icing (FIP), turbulence (GTG), G-AIRMET, SIGMET, SigWx, and QPF charts.
-Heavy QPF near the route means IMC, potential icing, and possible convection.
+HAZARD TABLE:
+Hazard | Risk | Leg | What to Expect
+Incorporate icing (FIP), turbulence (GTG), G-AIRMET, SIGMET, SigWx, and QPF findings.
 
 <h2>Getting Into {destination}</h2>
-What does the pilot walk into on arrival? Estimate block time and describe arrival conditions.
-Is there a front nearby? Are ceilings dropping? Is it a non-event? Pick good alternates.
+Describe expected arrival conditions. Estimate block time.
+Include: runway wind estimate with uncertainty, practical alternates.
+Distinguish: non-event VMC arrival / terrain-localized issue / broader weather issue.
 
-When discussing arrival conditions, distinguish between:
-- widespread en route cloud/IMC
-- terrain-localized cloud near arrival
-- a non-event VMC arrival
-
-Do not imply route-wide IMC unless supported by overlapping forecast evidence.
+For terrain airports: do not assume winds aloft = runway winds.
+State uncertainty explicitly.
 
 <h2>Fly or No</h2>
-Bottom line up front. Start with a clear verdict: GO / MARGINAL GO / NO-GO.
-Hard stops first. Then the stuff to watch. Be opinionated — this is what the pilot needs.
+Verdict first: GO / MARGINAL GO / NO-GO.
+Hard stops, then watch items.
 
-IFR JUSTIFICATION RULE:
-If recommending IFR, clearly state WHY:
-- IMC (clouds/visibility)
-- terrain / altitude / routing complexity
-- workload / safety margin
+If recommending IFR, state why: IMC, terrain complexity, or workload/safety margin.
 
-Do not imply IMC as the reason unless it is clearly supported by the data.
-
-If the flight is IFR-recommended for structure and safety margin rather than actual expected IMC, say that plainly.
-
-After the verdict, include a short bullet list:
 <h3>What changes this call</h3>
 - 2-4 bullets max
-- highest-value operational triggers only, not a generic recap
-- example: "surface winds at KBDN exceed 25G35 crosswind", "icing observed above FL120"
-- at least one trigger must be quantitative (e.g., winds > X kt, ceilings < X ft, gusts > X)
+- at least one quantitative trigger (winds > X kt, ceilings < X ft)
 
 <h2>If You Go — Do This</h2>
-Concrete action items. Altitude change, specific alternates, fuel stop,
-what forecast products to check the night before and morning of.
+Concrete action items only: altitude, alternates, fuel, what to check morning-of.
 
-TIMING RULE:
-If departure timing materially changes the risk picture (terrain-driven convection,
-frontal passage, diurnal wind cycle, marine layer burn-off), state the best and worst
-departure windows with a one-sentence reason each. If timing is not a significant
-factor for this flight, omit — do not pad with generic "earlier is better" advice.
+If departure timing materially changes risk (convection, frontal passage, diurnal winds,
+marine layer), state best and worst windows with a one-sentence reason each.
+If timing is not a factor, omit.
 
 <h2>Confidence</h2>
-State your confidence level (High / Medium / Low) and what forecast elements could still change the go/no-go picture.
-
-When the data signal is weak, mixed, or terrain-localized, preserve that uncertainty in the wording.
-Do not convert "possible" into "likely" unless the forecast evidence clearly supports it.
-Operational tone is encouraged, but accuracy and uncertainty preservation come first.
+State High / Medium / Low and what forecast elements could still change the call.
+Do not assign High if terrain-driven effects dominate or critical data is missing.
 
 Respond with HTML using: h2, h3, h4, p, ul, ol, li, strong, em, blockquote, table, thead, tbody, tr, th, td, code, hr.
 No html/head/body/style/script tags.
