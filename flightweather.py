@@ -2260,6 +2260,23 @@ def main():
         briefing_html = briefing_html[:exec_match.start()] + briefing_html[exec_match.end():]
         briefing_html = briefing_html.lstrip("\n")
 
+    # Extract Route Hazards table and place it right after exec summary, before TAFs
+    hazards_match = re.search(
+        r'(<h2>Route Hazards</h2>.*?)(?=<h2>)',
+        briefing_html, re.DOTALL
+    )
+    if hazards_match:
+        exec_summary_html += (
+            '  <section>\n'
+            '    <div class="section-label">Route Hazards</div>\n'
+            '    <div class="briefing">\n'
+            + hazards_match.group(1)
+            + '\n    </div>\n'
+            '  </section>\n'
+        )
+        briefing_html = briefing_html[:hazards_match.start()] + briefing_html[hazards_match.end():]
+        briefing_html = briefing_html.lstrip("\n")
+
     now_utc = datetime.now(timezone.utc)
     html = HTML_TEMPLATE.format(
         origin=origin,
