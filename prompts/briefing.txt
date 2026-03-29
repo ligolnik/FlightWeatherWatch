@@ -28,6 +28,12 @@ d) The single most important trigger to monitor
 
 Do not expand beyond these four elements. A pilot should read only this and know the call.
 
+<h2>Route Hazards</h2>
+Hazard table covering the entire route — a quick-scan reference before reading details.
+Hazard | Risk | Leg | What to Expect
+Incorporate icing (FIP), turbulence (GTG), G-AIRMET, SIGMET, SigWx, and QPF findings.
+If no significant hazards exist, say so in one line instead of an empty table.
+
 <h2>The Day Before — What to Watch</h2>
 Short practical re-check list for the evening before.
 What to look for and what would change the go/no-go.
@@ -65,10 +71,6 @@ State explicitly:
 a) best altitude band and why
 b) worst altitude band and why
 c) escape option if conditions worsen: climb, descend, divert, or turn around
-
-HAZARD TABLE:
-Hazard | Risk | Leg | What to Expect
-Incorporate icing (FIP), turbulence (GTG), G-AIRMET, SIGMET, SigWx, and QPF findings.
 
 <h2>Getting Into {destination}</h2>
 Describe expected arrival conditions. Estimate block time.
