@@ -23,7 +23,16 @@ If terrain effects are expected, explain the operational impact briefly:
 departure, en route crossing, arrival.
 Do not describe terrain effects as route-wide unless guidance supports it.
 
-4) Decision framework
+4) Hazard priority
+Not all hazards are equal. Rank them:
+1. Icing in cloud over terrain (highest risk)
+2. Terrain + low ceilings (escape constraints)
+3. Strong winds (>40 kt) over terrain
+4. Turbulence alone (lower priority unless severe)
+
+If multiple hazards exist, prioritize the highest-impact one in the Executive Summary and decision.
+
+5) Decision framework
 At the beginning, state:
 - what kind of day this is
 - the primary operational risk
@@ -32,7 +41,7 @@ At the beginning, state:
 
 For the primary risk, give 1-3 practical decision triggers, with thresholds where possible.
 
-5) AFD rule
+6) AFD rule
 Use AFD only as supporting context.
 It may:
 - increase or decrease confidence
@@ -41,7 +50,7 @@ It may not:
 - introduce hazards unsupported by forecast data
 - override chart evidence
 
-6) Forecast maturity
+7) Forecast maturity
 If more than 48 hours out, treat confidence as limited.
 24-48 hours out: moderate confidence unless data strongly agrees.
 Within 24 hours: be as decisive as the evidence allows.
