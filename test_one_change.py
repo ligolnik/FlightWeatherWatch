@@ -48,6 +48,7 @@ ALL_FLIGHTS = [
     "cache_KMQY_KEDC_2026-03-16",
     "cache_KEDC_KBJC_2026-03-19",
     "cache_KSQL_KVGT_2026-03-13",
+    "cache_KSQL_KCOS_2026-03-30",
 ]
 
 CATEGORIES = [
