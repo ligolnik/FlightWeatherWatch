@@ -29,12 +29,28 @@ from typing import Optional
 
 import math
 
+import io
+import threading
+
 import httpx
 import anthropic
 try:
     import openai as _openai_mod
 except ImportError:
     _openai_mod = None
+
+# ---------------------------------------------------------------------------
+# Thread-safe logging helper for parallel fetches
+# ---------------------------------------------------------------------------
+
+def _log(msg, log=None, end="\n"):
+    """Print or buffer a log message. If log is a list, append instead of printing."""
+    if log is not None:
+        # Buffer: combine msg + end (simulate print behavior)
+        log.append(msg + end)
+    else:
+        print(msg, end=end, flush=True)
+
 
 # Load .env if present (keeps API key out of the environment)
 _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
@@ -795,11 +811,11 @@ def _taf_covers_time(taf_text, target_dt):
     return in_range
 
 
-def _fetch_single_taf(icao, target_dt=None):
+def _fetch_single_taf(icao, target_dt=None, log=None):
     """Fetch TAF for one airport. Falls back to nearest TAF station.
     If target_dt is provided, only returns TAF if it covers that time.
     """
-    print(f"  TAF {icao} ... ", end="", flush=True)
+    _log(f"  TAF {icao} ... ", log=log, end="")
     try:
         r = httpx.get(f"{AWC_API}/taf", params={"ids": icao, "format": "raw"}, timeout=10)
         taf_text = r.text.strip()
@@ -808,13 +824,13 @@ def _fetch_single_taf(icao, target_dt=None):
 
     if taf_text and taf_text.startswith("TAF"):
         if target_dt and not _taf_covers_time(taf_text, target_dt):
-            print("not yet valid for flight time")
+            _log("not yet valid for flight time", log=log)
             return {"icao": icao, "taf": None, "note": "TAF not yet available for flight time"}
-        print("OK")
+        _log("OK", log=log)
         return {"icao": icao, "taf": taf_text, "note": None}
 
     # No TAF — search nearby
-    print("not available, searching nearby ... ", end="", flush=True)
+    _log("not available, searching nearby ... ", log=log, end="")
     nearby_icao, dist = _find_nearby_taf_station(icao)
     if nearby_icao:
         try:
@@ -825,13 +841,13 @@ def _fetch_single_taf(icao, target_dt=None):
             taf_text = ""
         if taf_text and taf_text.startswith("TAF"):
             if target_dt and not _taf_covers_time(taf_text, target_dt):
-                print(f"{nearby_icao} not yet valid for flight time")
+                _log(f"{nearby_icao} not yet valid for flight time", log=log)
                 return {"icao": nearby_icao, "taf": None,
                         "note": f"TAF not yet available for flight time (nearest: {nearby_icao}, {dist:.0f} nm)"}
-            print(f"using {nearby_icao} ({dist:.0f} nm)")
+            _log(f"using {nearby_icao} ({dist:.0f} nm)", log=log)
             return {"icao": nearby_icao, "taf": taf_text,
                     "note": f"Nearest TAF to {icao} ({dist:.0f} nm)"}
-    print("none found")
+    _log("none found", log=log)
     return {"icao": icao, "taf": None, "note": "No TAF available"}
 
 
@@ -869,14 +885,14 @@ def compute_route_legs(airports, waypoint_coords, departure_dt, tas_kts):
     return legs
 
 
-def fetch_tafs(airports, route_legs):
+def fetch_tafs(airports, route_legs, log=None):
     """Fetch TAFs for all airports on the route.
 
     Returns list of dicts: [{"icao", "taf", "note", "role", "eta", "nm"}, ...]
     """
     results = []
     for leg in route_legs:
-        entry = _fetch_single_taf(leg["icao"], target_dt=leg["eta"])
+        entry = _fetch_single_taf(leg["icao"], target_dt=leg["eta"], log=log)
         entry["role"] = leg["role"]
         entry["eta"] = leg["eta"].strftime("%Y-%m-%d %H:%MZ")
         entry["eta_dt"] = leg["eta"]  # keep datetime for internal use
@@ -931,7 +947,7 @@ def _extract_aviation_section(afd_text):
     return None
 
 
-def fetch_afd_aviation(waypoint_coords):
+def fetch_afd_aviation(waypoint_coords, log=None):
     """Fetch AFD AVIATION sections for WFOs covering departure and arrival.
 
     waypoint_coords: list of (lon, lat) tuples — first is departure, last is arrival.
@@ -952,20 +968,20 @@ def fetch_afd_aviation(waypoint_coords):
         wfo = _get_wfo_for_coords(lat, lon)
         if not wfo or wfo in seen_wfos:
             if wfo and wfo in seen_wfos:
-                print(f"  AFD {wfo} ({role}) ... same WFO as departure, skipping")
+                _log(f"  AFD {wfo} ({role}) ... same WFO as departure, skipping", log=log)
             else:
-                print(f"  AFD ({role}) ... could not determine WFO")
+                _log(f"  AFD ({role}) ... could not determine WFO", log=log)
             continue
         seen_wfos.add(wfo)
 
-        print(f"  AFD {wfo} ({role}) ... ", end="", flush=True)
+        _log(f"  AFD {wfo} ({role}) ... ", log=log, end="")
         raw = _fetch_afd_text(wfo)
         aviation = _extract_aviation_section(raw)
         if aviation:
             results.append({"wfo": wfo, "role": role, "text": aviation})
-            print("OK")
+            _log("OK", log=log)
         else:
-            print("no AVIATION section found")
+            _log("no AVIATION section found", log=log)
 
     return results
 
@@ -974,7 +990,7 @@ def fetch_afd_aviation(waypoint_coords):
 # Winds aloft
 # ---------------------------------------------------------------------------
 
-def fetch_winds_aloft(waypoint_coords, hours_until):
+def fetch_winds_aloft(waypoint_coords, hours_until, log=None):
     """Fetch winds/temps aloft for stations near the route.
 
     Returns a formatted text block for the LLM prompt, or empty string.
@@ -992,7 +1008,7 @@ def fetch_winds_aloft(waypoint_coords, hours_until):
     else:
         return ""  # No winds aloft beyond 24hrs
 
-    print(f"  Winds aloft (FD {fcst}hr) ... ", end="", flush=True)
+    _log(f"  Winds aloft (FD {fcst}hr) ... ", log=log, end="")
 
     try:
         r = httpx.get(f"{AWC_API}/windtemp",
@@ -1000,11 +1016,11 @@ def fetch_winds_aloft(waypoint_coords, hours_until):
                       timeout=10)
         raw = r.text.strip()
     except Exception:
-        print("FAILED")
+        _log("FAILED", log=log)
         return ""
 
     if not raw or "error" in raw[:50].lower():
-        print("FAILED")
+        _log("FAILED", log=log)
         return ""
 
     # Parse the product — extract header + station lines
@@ -1026,7 +1042,7 @@ def fetch_winds_aloft(waypoint_coords, hours_until):
             station_lines[sid] = line
 
     if not station_lines:
-        print("no data")
+        _log("no data", log=log)
         return ""
 
     # Find stations within ~100nm of route waypoints
@@ -1037,7 +1053,7 @@ def fetch_winds_aloft(waypoint_coords, hours_until):
                        timeout=10)
         all_stations = r2.json()
     except Exception:
-        print("station lookup failed")
+        _log("station lookup failed", log=log)
         return ""
 
     # Filter to stations that are in the winds aloft data and near the route
@@ -1060,7 +1076,7 @@ def fetch_winds_aloft(waypoint_coords, hours_until):
     route_stations.sort(key=lambda x: x[1])
 
     if not route_stations:
-        print("no stations near route")
+        _log("no stations near route", log=log)
         return ""
 
     # Build formatted text
@@ -1072,7 +1088,7 @@ def fetch_winds_aloft(waypoint_coords, hours_until):
     for sid, dist, line in route_stations[:15]:  # max 15 stations
         result_lines.append(line)
 
-    print(f"{len(route_stations)} stations")
+    _log(f"{len(route_stations)} stations", log=log)
     return "\n".join(result_lines)
 
 
@@ -2049,17 +2065,42 @@ def main():
             eta_str = leg["eta"].strftime("%H:%MZ")
             print(f"  {leg['icao']:6s} {leg['role']:10s} ETA {eta_str}  ({leg['cum_nm']:.0f} nm)")
 
+        # Fetch TAFs, winds aloft, and AFD in parallel with buffered output
+        taf_log = []
+        winds_log = []
+        afd_log = []
+        taf_data = []
+        winds_text = ""
+        afd_data = []
+        fetch_afd = hours_until <= 48 and waypoints
+
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            taf_future = pool.submit(fetch_tafs, airports, route_legs, taf_log)
+            winds_future = pool.submit(fetch_winds_aloft, waypoints, hours_until, winds_log)
+            if fetch_afd:
+                afd_future = pool.submit(fetch_afd_aviation, waypoints, afd_log)
+            else:
+                afd_future = None
+
+            taf_data = taf_future.result()
+            winds_text = winds_future.result()
+            if afd_future is not None:
+                afd_data = afd_future.result()
+
+        # Print buffered output in section order
         print("\nFetching TAFs:")
-        taf_data = fetch_tafs(airports, route_legs)
+        for msg in taf_log:
+            print(msg, end="")
 
         print("\nFetching winds aloft:")
-        winds_text = fetch_winds_aloft(waypoints, hours_until)
+        for msg in winds_log:
+            print(msg, end="")
 
-        if hours_until <= 48 and waypoints:
+        if fetch_afd:
             print("\nFetching AFD aviation sections:")
-            afd_data = fetch_afd_aviation(waypoints)
+            for msg in afd_log:
+                print(msg, end="")
         else:
-            afd_data = []
             if hours_until > 48:
                 print(f"\nAFD: skipped (flight is {hours_until:.0f} hrs out, AFD only useful within ~48 hrs)")
 
