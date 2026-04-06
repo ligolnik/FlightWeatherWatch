@@ -1441,6 +1441,10 @@ HTML_TEMPLATE = """\
 </head>
 <body>
 
+<div class="disclaimer" style="background:#b91c1c;color:#fff;text-align:center;padding:6px 12px;font-size:0.85rem;font-weight:600;">
+  NOT FOR FLIGHT PLANNING — obtain an official preflight weather briefing before departure.
+</div>
+
 <header>
   <div class="header-top">
     <h1>{route_display}</h1>
