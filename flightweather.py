@@ -1972,7 +1972,7 @@ def main():
         print("Warning: >7 days out — extended prog reliability is very low.")
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    dep_str_safe = departure_dt.strftime("%Y-%m-%d")
+    dep_str_safe = departure_dt.strftime("%Y-%m-%d_%H%MZ")
     cache_prefix = f"cache_{origin}_{destination}_{dep_str_safe}"
 
     if args.from_cache:
@@ -2343,8 +2343,9 @@ def main():
         briefing_html=briefing_html,
     )
 
+    dep_stamp = time_str.replace(":", "")
     gen_stamp = now_utc.strftime("%Y%m%d_%H%MZ")
-    fname = f"briefing_{origin}_{destination}_{date_str}_{gen_stamp}.html"
+    fname = f"briefing_{origin}_{destination}_{date_str}_{dep_stamp}Z_{gen_stamp}.html"
     out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), fname)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
