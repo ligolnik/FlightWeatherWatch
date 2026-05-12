@@ -1,0 +1,75 @@
+{
+  "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v2_with_rules/cache_KBJC_KHCR_2026-03-21",
+  "version": "v2",
+  "meta": {
+    "origin": "KBJC",
+    "destination": "KHCR",
+    "departure": "2026-03-21 15:30Z",
+    "altitude_ft": 18000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 4906
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, correctly identifies mountain wave/terrain turbulence as the primary risk, gives a defensible MARGINAL GO with honest confidence levels. The wind timing caveat is appropriately flagged without burying the lede."
+      },
+      "forecast_honesty": {
+        "score": 8,
+        "notes": "Turbulence intensity uncertainty is explicitly called out as medium confidence, and the afternoon wind timing is flagged as the soft spot in the forecast. Minor deduction: the 06Z winds aloft being used as a proxy for a 15:30Z departure is acknowledged but the actual magnitude of afternoon acceleration is somewhat hand-waved ('could easily be 35\u201345 knots') without a data source."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Excellent translation of conditions into real-world implications \u2014 fuel burn increase, arrival timing window, alternate selection, and the narrow KHCR arrival corridor are all actionable. A pilot can make a real decision from this briefing."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Multiple triggers are provided and some are quantitative (gusts above 25 kt at KBJC before 18Z, KHCR winds 15G25+, arrival after 18Z \u2192 divert). The 'severe turbulence PIREP \u2192 reassess' trigger is slightly soft \u2014 a quantitative altitude band or intensity threshold would sharpen it."
+      },
+      "winds_turbulence": {
+        "score": 8,
+        "notes": "Winds are interpreted well \u2014 headwind component calculated, timing acceleration flagged, and the terrain-driven nature of turbulence correctly explained. GTG and G-AIRMET are both cited. Slight weakness: the FL210 smooth-air claim is stated confidently but not anchored to a specific GTG value or PIREP."
+      },
+      "terrain_route": {
+        "score": 9,
+        "notes": "Strong situational awareness of the Heber Valley bowl geometry, the western ridgeline rotor risk, and the KHCR approach direction recommendation. The Front Range climbout and Wasatch arrival are both specifically addressed, not treated generically."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "FL210 as a better ride altitude is correctly recommended with the headwind trade-off noted. The rotor zone framing (FL180 in the wave, FL210+ above it) is directionally correct. A specific altitude ceiling for the worst wave rotor zone would make this more precise."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "TAF, AFD, FIP, GTG, G-AIRMET, and GFA are all cited and integrated coherently. The icing table is well-sourced. The 'could easily be 35\u201345 knots by mid-afternoon' upper wind estimate is the one place where a specific model run citation would have strengthened the claim."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-structured with headers, tables, and a clean action list. Slightly verbose in the hazard summary table \u2014 the 'IMC en route: None significant' row adds little. Overall signal-to-noise ratio is good for a complex mountain routing briefing."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like an experienced mountain pilot wrote it \u2014 specific approach geometry advice, realistic alternate selection (KPVU not just 'the nearest airport'), fuel planning flag, and the 'file IFR not because of IMC but because of terrain' rationale are all operationally mature calls."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Correctly identifies mountain wave/terrain turbulence as the sole meaningful risk and never loses focus on it",
+      "KHCR terrain bowl awareness is exceptional \u2014 approach direction, rotor potential, and the 18Z wind window are all specifically addressed",
+      "Decision triggers are present, partially quantitative, and realistic for preflight use",
+      "KPVU alternate selection is logical and explained, not just listed"
+    ],
+    "key_weaknesses": [
+      "The afternoon upper wind acceleration estimate ('35\u201345 knots by mid-afternoon') is stated without a cited model run \u2014 this is the highest-impact unknown and deserves more rigor",
+      "FL210 smooth-air recommendation is directionally correct but not anchored to GTG data or PIREPs at that level \u2014 slightly overconfident",
+      "The 'severe turbulence PIREP \u2192 reassess' trigger lacks a quantitative threshold (e.g., moderate or greater above FL160 within 50nm of route)"
+    ],
+    "red_flags": [
+      "None critical \u2014 briefing is operationally sound. Minor flag: afternoon wind acceleration magnitude is asserted confidently without a specific data source, which is the one element most likely to affect the go/no-go margin"
+    ],
+    "would_you_fly": "Yes",
+    "would_you_fly_justification": "VMC departure, no icing, no convection, and the turbulence signal is light-to-moderate \u2014 manageable in an appropriate aircraft. The 17:12Z ETA gives real margin ahead of the 18Z KHCR wind increase. The briefing correctly identifies that this is a timing and ride-quality problem, not a hard weather stop. Departing at 15:30Z as planned with IFR filed, FL210 requested, and KPVU fuel-planned is a sound execution.",
+    "single_most_important_improvement": "Nail down the afternoon upper wind acceleration with a specific model source (12Z GFS or RAP at DEN/SLC for 18-21Z) \u2014 right now the 35\u201345 kt estimate is the briefing's only unsupported assertion, and it's the one number most likely to affect fuel planning, timing margin, and the KHCR arrival decision.",
+    "computed_avg": 8.4
+  }
+}

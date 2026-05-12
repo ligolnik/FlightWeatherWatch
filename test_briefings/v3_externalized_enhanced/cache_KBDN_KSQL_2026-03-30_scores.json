@@ -1,0 +1,77 @@
+{
+  "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v3_externalized_enhanced/cache_KBDN_KSQL_2026-03-30",
+  "version": "v3",
+  "meta": {
+    "origin": "KBDN",
+    "destination": "KSQL",
+    "departure": "2026-03-30 21:30Z",
+    "altitude_ft": 12000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 8134
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, decision-oriented, correctly identifies marine layer at KSQL as primary risk, and gives a usable MARGINAL GO with a meaningful IFR vs VFR distinction. The KSQL no-instrument-approach point is called out immediately \u2014 that's the right instinct."
+      },
+      "forecast_honesty": {
+        "score": 10,
+        "notes": "Exemplary. Every section explicitly acknowledges the 6+ day range, absence of TAFs/FIP/GTG products, and distinguishes synoptic-based inference from actual forecast data. Confidence levels are labeled per hazard, not applied globally."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "The briefing answers the actual question a pilot needs answered: route is benign, arrival is the threat, KSQL has no approach, here are real alternates with reasoning. Fuel planning callout is specific and correct. Minor gap: no explicit MEA/terrain clearance check noted for the route."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Triggers are present and mostly quantitative \u2014 OVC below 1,000 ft at arrival, winds aloft >40 knots westerly, trough deepening. Could be slightly sharper (e.g., explicit VFR ceiling/vis minimums at KSQL vs. legal minimums vs. practical minimums), but overall well above average."
+      },
+      "winds_turbulence": {
+        "score": 7,
+        "notes": "Turbulence is classified (light-moderate chop near terrain, smooth cruise) and terrain interaction is correctly identified at the Cascade departure. However, no actual winds aloft numbers are available and the briefing acknowledges this \u2014 the qualitative reasoning is sound but the section is necessarily thin. Coast Range descent turbulence mechanism is underexplained."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Cascade mechanical turbulence on departure, Coast Range on approach, and Bay Area marine interface are all correctly identified. The advice to stay east of peaks on departure is practical. Does not address the specific valley/terrain routing over the Sacramento Valley or Shasta area, which is a minor gap for a real route brief."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "Best band (10,000\u201312,000 ft), worst band (6,000\u20138,000 ft near Cascade crest), and escape options (climb to 14,000 ft or descend below marine layer) are all provided with correct reasoning. The 14,000 ft escape is noted without an oxygen callout \u2014 that's a minor miss for a VFR pilot."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "Conclusions are explicitly tied to extended prog charts and climatology, and the briefing is transparent about what data is and isn't available. No hallucinated precision. Would score higher if it had cited specific chart times or prog model names rather than generic 'Day 6 extended prog.'"
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-structured with headers, tables, and bullet points that allow scanning. The tables add real value. Slightly long overall \u2014 the 'Day Before' section and 'If You Go' section overlap somewhat \u2014 but nothing is egregiously repetitive. A time-constrained pilot can extract the key points quickly."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a real CFII/IFR briefer, not an LLM summary. The KSQL-no-approach point, the earlier departure timing suggestion, the KHWD-over-KPAO alternate reasoning, and the fuel planning callout are all the kind of practical specifics an experienced pilot would give. Tone is appropriately direct."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Exceptional forecast honesty \u2014 every claim is explicitly qualified by data availability and forecast range",
+      "Correctly identifies KSQL's lack of instrument approach as the operative risk, not the en route segment",
+      "Alternates are specific and meaningfully differentiated (KHWD vs KPAO reasoning is exactly right)",
+      "Earlier departure timing suggestion is high-value, practical advice that directly addresses the primary risk",
+      "Decision triggers are quantitative and actionable, not generic"
+    ],
+    "key_weaknesses": [
+      "No oxygen advisory for the 14,000 ft escape altitude escape option \u2014 material omission for a VFR pilot",
+      "Coast Range descent turbulence mechanism is underexplained relative to the Cascade departure analysis",
+      "Route-specific terrain (Sacramento Valley, Shasta corridor, I-5 alignment) is not addressed \u2014 briefing treats the interior segment as a featureless overwater leg",
+      "No mention of NOTAM check for KSQL or SFO Bravo airspace coordination, which is operationally relevant"
+    ],
+    "red_flags": [
+      "None critical \u2014 briefing correctly avoids overconfidence and explicitly labels all synoptic-based inferences as such"
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "At 6+ days out this briefing correctly cannot and does not make a final call \u2014 it provides a solid planning framework. The MARGINAL GO designation is appropriate contingent on TAF review. I would not make a final decision without KSFO/KSQL TAF coverage of the arrival window and current-day METARs showing marine layer trend. If the TAF shows OVC008 at arrival time, this is a NO-GO to KSQL VFR and requires replanning to KSJC or an earlier wheels-up time.",
+    "single_most_important_improvement": "Add an explicit oxygen advisory when recommending the 14,000 ft escape altitude \u2014 for a VFR pilot without supplemental O2, that escape route may not be legally or physiologically available, which changes the turbulence contingency planning entirely.",
+    "computed_avg": 8.4
+  }
+}

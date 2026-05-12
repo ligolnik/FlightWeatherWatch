@@ -1,0 +1,73 @@
+{
+  "cache_prefix": "cache_KSJC_KBUR_2026-04-09_2300Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KSJC",
+    "destination": "KBUR",
+    "departure": "2026-04-09 23:00Z",
+    "altitude_ft": 21000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, correctly identifies KSJC departure as primary risk, gives a usable GO with the right caveat. The single-trigger callout at the end of the summary is exactly what a time-constrained pilot needs."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Explicitly acknowledges wind data is slightly outside the valid use window, flags cut-off low timing uncertainty, and notes model spread. The medium-high confidence section at the end is honest and calibrated \u2014 not a cop-out disclaimer."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "A pilot can absolutely act on this. Risks are translated into timing, fuel, alternate, and runway selection. The 22Z\u201301Z best window and the 'avoid 10Z\u201314Z Friday' are immediately actionable."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Triggers are present and most are quantitative: 300 ft OVC / \u00be SM, FL210 winds exceeding 45 kt, BKN below 1,500 ft at KBUR. Minor ding: the G-AIRMET icing trigger is qualitative ('any new issuance') and the RVR 600 ft hard stop could be tightened to specific aircraft minimums. Overall solid."
+      },
+      "winds_turbulence": {
+        "score": 9,
+        "notes": "Winds are interpreted, not just listed \u2014 the left quartering tailwind on a 280\u00b0 leg is called out explicitly. Turbulence is correctly classified as smooth to light chop with terrain-wave awareness near the Transverse Ranges. The 30\u201340 kt mountain wave threshold discussion is correct and not overblown."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Coastal range and Transverse Range wave potential are addressed appropriately. Marine layer behavior near KSJC vs. inland dynamics is handled correctly. Slight gap: no mention of the V25/J route terrain corridor specifics or the coastal mountains near SBA that could affect the mid-route ride."
+      },
+      "altitude_strategy": {
+        "score": 9,
+        "notes": "Best/worst/escape altitudes are explicitly labeled and the reasoning is specific to this route and these conditions. The 'climb through icing zone promptly, don't loiter' advice and the FL230/FL250 escape option over the Transverse Ranges are practical and correct."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "References TAF FM groups by name, cites G-AIRMET icing and turbulence products, GTG, GFA clouds, and AFD by ARTCC. Winds aloft table with interpolated FL210 values is grounded. Minor issue: the FL210 interpolation between FL180 and FL240 is reasonable but the methodology isn't stated \u2014 could be linear or eyeballed."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-organized with headers and tables. The icing table is useful. The briefing is long but mostly earns its length \u2014 very little padding. The 'What Changes This Call' and 'If You Go' sections are scannable and actionable. Could trim the icing table slightly without losing value."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like an experienced instrument pilot wrote it, not a document generator. Runway selection logic, noise abatement mention, KVNY TPA conflict note, and the 'costs nothing to have an alternate ready' line all feel operationally authentic. Avoids LLM throat-clearing."
+      }
+    },
+    "overall_score": 9,
+    "key_strengths": [
+      "Decision triggers are quantitative and usable \u2014 the ceiling/visibility thresholds and the FL210 wind limit are specific enough to act on",
+      "Winds are interpreted with direction math done for the pilot \u2014 tailwind component explicitly identified on the 280\u00b0 leg",
+      "Departure timing window (22Z\u201301Z best, avoid 10Z\u201314Z Friday) is the kind of specific guidance pilots actually need",
+      "Confidence section is honest and calibrated without being wishy-washy \u2014 correctly identifies the source of uncertainty as marine layer timing, not en route conditions"
+    ],
+    "key_weaknesses": [
+      "Mid-route terrain (coastal ranges near SBA, the SBA\u2013BUR transition) gets light treatment \u2014 a sentence on whether any SIGMET/AIRMET history exists for that corridor would add value",
+      "Hard stop for equipment minimums references 200 ft OVC / RVR 600 but doesn't anchor to a specific approach \u2014 ILS 30L at KSJC has 200-\u00bd minimums, stating that explicitly would close the loop",
+      "FL210 wind interpolation methodology is unstated \u2014 minor but a strict evaluator would want to know if it's linear or based on a forecast model product"
+    ],
+    "red_flags": [],
+    "would_you_fly": "Yes",
+    "would_you_fly_justification": "The en route segment is genuinely clean \u2014 no active icing, minimal turbulence, favorable winds. The departure risk is real but correctly scoped: it's an IFR departure into a broken marine layer, not a convective or icing trap. The TAF FM092000 group supports a BKN070 ceiling at 23Z, the arrival is VMC, and the approaching low doesn't bite until well after block-in. For an IFR-current crew in an equipped aircraft, this is a routine go. The monitoring checklist (21Z TAF update, evening METAR trend, 00Z winds aloft) is correct and sufficient.",
+    "single_most_important_improvement": "Anchor the KSJC hard stop to a specific approach: state the ILS 30L DA/RVR minimums explicitly and confirm the aircraft meets them, so the pilot knows exactly what 'verify equipment/minimums' means in practice rather than having to look it up under pressure.",
+    "computed_avg": 8.6
+  }
+}

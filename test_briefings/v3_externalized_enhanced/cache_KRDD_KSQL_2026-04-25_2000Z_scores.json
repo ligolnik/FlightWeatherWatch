@@ -1,0 +1,76 @@
+{
+  "cache_prefix": "cache_KRDD_KSQL_2026-04-25_2000Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KRDD",
+    "destination": "KSQL",
+    "departure": "2026-04-25 20:00Z",
+    "altitude_ft": 7500,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, correctly identifies marine layer at KSQL as primary risk, gives a usable MARGINAL GO with a specific single trigger to watch. Slightly wordy for an executive summary but the signal is strong and actionable."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Explicitly calls out missing TAFs, missing FD winds, missing icing/turbulence products, and that all estimates are pattern-based. Confidence levels are tiered and realistic. No false precision \u2014 this is done correctly."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Translates every risk into real-world implications: KSQL runway length, obstruction proximity, no fuel on field, tower hours, divert sequencing. A pilot can actually build a go/no-go framework from this briefing."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Several quantitative triggers present (OVC below 800/1000 ft, winds >25/30/40 kt, KRDD OVC below 3,000 ft at 19Z) and they're realistic. Loses one point because the KRDD residual moisture trigger and the trough-stall trigger are qualitative and slightly vague compared to the others."
+      },
+      "winds_turbulence": {
+        "score": 7,
+        "notes": "Correctly interprets wind pattern (NW post-frontal flow, transitioning to westerly near the coast), classifies turbulence severity appropriately as light chop to occasional light, and correctly rules out mountain wave at these wind speeds. Docked because all wind numbers are estimated \u2014 no actual FD data \u2014 and the briefing would benefit from being more explicit that the 15\u201325 kt estimate carries low confidence."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Good awareness of the Coast Range/Diablo Range as the mechanical turbulence zone, correct identification of KSQL obstructions (750 ft towers west of runway), and appropriate divert sequencing to SFO/OAK. Does not explicitly address the terrain transition from Sacramento Valley to the range or the Bay crossing geometry, but operationally nothing is missed."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "Best/worst/escape altitudes are all present with correct reasoning. The recommendation to stay at 7,500 through the Coast Range and not descend early is exactly right. The escape option (climb back, declare, vectors to ILS) is practical and non-generic. Loses a point for not discussing 9,500 ft as a proactive alternative if winds are running higher."
+      },
+      "data_integration": {
+        "score": 7,
+        "notes": "Reasoning is well-grounded in synoptic pattern and diurnal logic, and the briefing is honest about what data is absent. However, there is no actual TAF, METAR, or FD data cited anywhere \u2014 it's entirely pattern inference. The reasoning is sound but no hard data anchors any conclusion, which caps this score."
+      },
+      "clarity_signal_noise": {
+        "score": 7,
+        "notes": "Well-organized with headers, a hazard table, and action items. However, it is long \u2014 the icing section in particular is overdone for a non-factor, and some sections repeat the marine layer caveat multiple times. A time-constrained pilot would benefit from tighter prose, especially in the middle sections."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like an experienced CFI/dispatcher briefing: specific alternates with frequencies, fuel advice tied to no fuel at KSQL, IFR currency recommendation, tower hours cross-check, and the timing note about 20Z being the diurnal sweet spot is genuinely useful practical knowledge. Avoids generic LLM filler almost entirely."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Honest and explicit about missing data (no TAFs, no FD winds) without becoming paralyzed by it \u2014 still provides actionable pattern-based guidance",
+      "Diurnal timing analysis for Bay Area marine layer is correct and operationally specific \u2014 noting 20Z departure as the sweet spot is real-world knowledge",
+      "Alternates are fully briefed with practical details (SFO ILS, OAK Class C, no fuel at KSQL), not just names on a list",
+      "Decision triggers are mostly quantitative and cover departure, en route, and arrival phases"
+    ],
+    "key_weaknesses": [
+      "No actual weather data (TAF, METAR, FD) cited anywhere \u2014 the entire briefing is pattern inference, which is acknowledged but means every number is an estimate with low traceability",
+      "Icing section is overwritten for a non-factor \u2014 wastes the reader's time on a hazard explicitly rated as not significant",
+      "Marine layer uncertainty is repeated in nearly every section, creating noise; one consolidated treatment would be cleaner",
+      "Wind estimates (15\u201325 kt NW, 10\u201320 kt westerly) are stated without confidence intervals despite the explicit acknowledgment that no FD data exists"
+    ],
+    "red_flags": [
+      "No actual forecast data (TAF/FD/METAR) was available or cited \u2014 all numerical estimates are pattern-derived. This is acknowledged, but a pilot must understand the entire briefing rests on synoptic inference, not verified forecast products."
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing correctly identifies this as a MARGINAL GO pending data confirmation. I would not commit to departure without a valid KSFO/KOAK TAF and actual FD winds \u2014 both of which will be available day-of. The pattern assessment is sound and the flight is likely doable, but KSQL's constraints (short runway, no instrument approach, obstructions) mean the marine layer question needs a real forecast answer, not a pattern estimate, before wheels up. Pull the 12Z Saturday TAFs and FD winds, and this becomes a high-confidence GO or a clean scrub.",
+    "single_most_important_improvement": "Add actual forecast data. Even placeholder TAF text, a closest-available FD winds table, or a current METAR snapshot would transform this from a well-reasoned pattern briefing into a verifiable preflight product. The structure and reasoning are excellent \u2014 anchor them to real numbers.",
+    "computed_avg": 8.1
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v1_pre_prompt_rules/cache_KMQY_KEDC_2026-03-16",
+  "version": "v1",
+  "meta": {
+    "origin": "KMQY",
+    "destination": "KEDC",
+    "departure": "2026-03-16 15:00Z",
+    "altitude_ft": 12000,
+    "model": "unknown",
+    "sys_prompt_len": 661
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 8,
+        "notes": "Clear MARGINAL GO with honest reasoning. Primary risks (fuel, icing in climb, time window) are correctly identified and prioritized. Would benefit from a single-sentence lead before the detailed breakdown."
+      },
+      "forecast_honesty": {
+        "score": 7,
+        "notes": "Appropriately acknowledges no KMQY TAF and reasons from synoptic picture. However, the frontal timing is stated with more confidence than warranted at 24-hour range, and the icing table implies quantitative precision that isn't backed by actual CIP/FIP data citations."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Excellent translation of weather into real-world implications \u2014 fuel planning, timing window, climb hazards, and arrival winds are all connected to actionable decisions. The '70-knot headwind for first 300 nm' instruction is exactly what a time-constrained pilot needs."
+      },
+      "decision_triggers": {
+        "score": 9,
+        "notes": "Strong quantitative triggers: front through Nashville by 12Z, wheels down by 21:30Z, midpoint groundspeed check, 23Z wind ramp as hard gate. These are specific, realistic, and usable. Minor deduction because the icing trigger ('solid IMC 6,000\u201310,000 ft') could be slightly more specific about what action to take."
+      },
+      "winds_turbulence": {
+        "score": 8,
+        "notes": "Winds aloft are correctly interpreted rather than just stated \u2014 the headwind component math and fuel implications are done explicitly. Turbulence is classified as moderate with geographic specificity. The 81-knot wind at 12,000 ft is flagged but the briefing could note that this implies significant wind shear and possible CAT near the jet."
+      },
+      "terrain_route": {
+        "score": 5,
+        "notes": "Weakest section. The route crosses Cumberland Plateau, Tennessee River Valley, and the Highland Rim \u2014 none of these terrain features are mentioned. No discussion of orographic effects on the post-frontal northwest flow over the Tennessee terrain, which is directly relevant to the turbulence forecast."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "Best/worst/escape altitudes are provided with sound reasoning. The 8,000 ft option as an icing avoidance strategy is practical. The tradeoff discussion (lighter winds vs. icing risk) is handled well. Missing: no mention of whether 14,000 ft might get on top cleanly."
+      },
+      "data_integration": {
+        "score": 7,
+        "notes": "BNA, HSV, CLL winds aloft are cited with specific values and tied to conclusions. KAUS TAF groups are referenced correctly. However, the icing probability table feels derived from reasoning rather than actual AIRMET/CIP data, and this is not clearly disclosed."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-structured with headers, tables, and bullet points. Scannable under time pressure. The Sunday night pre-brief section is genuinely useful but adds length \u2014 a pilot reading this Monday morning has to skip past it. Minor organizational issue."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like an experienced pilot talking to another pilot \u2014 direct, opinionated, practical. 'Down is your friend,' fuel stop options at KMEM/KJAN, 'bring a jacket' \u2014 these are the touches that make it feel operational rather than algorithmic. The '21:30Z hard gate' is exactly how real pilots think."
+      }
+    },
+    "overall_score": 7.8,
+    "key_strengths": [
+      "Quantitative, time-based decision triggers (21:30Z gate, 12Z front check) that are genuinely usable",
+      "Fuel planning is treated as the primary operational risk with specific numbers \u2014 rare and correct",
+      "Arrival window timing pressure is clearly connected to the headwind problem, creating a coherent risk picture"
+    ],
+    "key_weaknesses": [
+      "Zero terrain awareness along the route \u2014 Cumberland Plateau and Tennessee Valley orographic effects on post-frontal turbulence are completely absent",
+      "Icing probability table implies data-backed precision but is clearly reasoned from synoptic picture without citing AIRMET G or CIP output",
+      "No mention of whether climbing to 14,000\u201316,000 ft might clear both icing and get above the worst turbulence layer"
+    ],
+    "red_flags": [
+      "Icing table presents moderate-high probability for 6,000\u201310,000 ft with no supporting AIRMET or CIP citation \u2014 could mislead pilot into treating it as authoritative",
+      "Terrain interaction with post-frontal northwest flow over Tennessee highlands is unaddressed \u2014 this is a real moderate turbulence driver that is missing from the analysis"
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing makes a compelling case for MARGINAL GO, but I'd want the actual 12Z Monday surface analysis and updated winds aloft before committing. The fuel and timing logic is sound. The icing and turbulence picture over Tennessee needs real AIRMET/PIREP confirmation at briefing time \u2014 the synoptic reasoning is good but not sufficient to accept moderate-high icing risk on a non-FIKI aircraft without current AIRMETs in hand.",
+    "single_most_important_improvement": "Add terrain analysis for the Tennessee/Alabama portion of the route \u2014 specifically how post-frontal northwest flow interacting with the Cumberland Plateau affects turbulence and cloud tops, which directly changes the climb-out risk picture and the 8,000 ft vs 12,000 ft altitude decision.",
+    "computed_avg": 7.8
+  }
+}

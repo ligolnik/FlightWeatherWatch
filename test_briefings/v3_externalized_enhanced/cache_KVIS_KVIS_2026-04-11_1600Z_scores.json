@@ -1,0 +1,74 @@
+{
+  "cache_prefix": "cache_KVIS_KVIS_2026-04-11_1600Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KVIS",
+    "destination": "KVIS",
+    "departure": "2026-04-11 16:00Z",
+    "altitude_ft": 3500,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, correctly identifies marine layer/stratus as the primary risk, gives a usable CONDITIONAL GO with an explicit single trigger. Rare to see this done this cleanly at 4-day range."
+      },
+      "forecast_honesty": {
+        "score": 10,
+        "notes": "Exemplary handling of forecast uncertainty \u2014 explicitly acknowledges no TAF, no winds aloft product, no AIRMET data applicable at this range, and correctly scopes confidence to the synoptic level only. Confidence ladder (Low now \u2192 Medium Friday PM \u2192 High Saturday AM) is a practical, honest touch."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Pilot can make a clear planning decision and knows exactly what to check and when. Timing advice (best/worst departure windows), alternate identification, and ILS callout are all directly usable. Minor deduction: the flight is ~23 minutes local \u2014 some of the alternate/fuel discussion is slightly padded for what is functionally a pattern-area flight."
+      },
+      "decision_triggers": {
+        "score": 9,
+        "notes": "Triggers are explicit, quantitative (ceiling below 1,000 ft AGL, vis below 3 SM, winds aloft above 30 kt, front within 200 nm), and tied to specific actions. Hard stops are clearly labeled. Could add a quantitative trigger for the Pacific trough position, but that's a minor gap."
+      },
+      "winds_turbulence": {
+        "score": 7,
+        "notes": "Correctly handles absence of winds aloft data at 4-day range and gives a reasonable synoptic-based estimate (10\u201320 kt westerly) with appropriate low confidence flagging. Turbulence analysis is thin but correctly scoped \u2014 light chop from afternoon heating and mechanical mixing are noted. Not much more can be said honestly at this range."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Accurately characterizes flat Central Valley terrain, correctly dismisses terrain-driven turbulence/wave concerns, and notes the marine layer advection mechanism. The briefing clearly understands this is a San Joaquin Valley flight, not a mountain route. KFAT as alternate is geographically correct and operationally appropriate."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "Best/worst/escape bands are clearly articulated and correctly reasoned for the environment. The note that climbing is not an escape from stratus is practically correct and the kind of thing an experienced CFI would say. Slight deduction: for a 23-minute local flight at 3,500 ft, the altitude strategy section is a bit over-engineered, but the content is sound."
+      },
+      "data_integration": {
+        "score": 9,
+        "notes": "Conclusions are consistently tied to identified data sources (Day 4 prog, climatology, AFD recommendation, ILS plate reference). No hallucinated precision \u2014 the briefing never invents specific TAF data or wind numbers that don't exist. This is the correct behavior at 4-day range."
+      },
+      "clarity_signal_noise": {
+        "score": 7,
+        "notes": "Well-organized with good headers and tables, easy to scan. However, it is verbose for what is a 23-minute local flight in a benign synoptic environment. The icing section (table plus paragraph) is overkill when icing is explicitly not a factor. Some consolidation of the 'Day Before' and 'If You Go' sections would reduce redundancy."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a competent CFII talking through a planning brief, not a template fill-in. Practical callouts (ILS Rwy 30 plate up, KFAT dialed in, self-announce on CTAF, stratus typically clears by 1800\u20132000Z) are operationally authentic. The '4-day range means X' framing is exactly how a professional briefer handles this."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Outstanding forecast honesty \u2014 correctly scopes every data limitation at 4-day range without becoming useless. The confidence ladder is a genuinely useful planning construct.",
+      "Decision triggers are quantitative, specific, and action-linked \u2014 ceiling/vis numbers, wind threshold, and front proximity all translated into explicit go/no-go/modify actions.",
+      "Correctly identifies the one real threat (valley stratus at 1600Z local) and builds the entire decision framework around it rather than listing generic hazards."
+    ],
+    "key_weaknesses": [
+      "Verbosity is the main flaw \u2014 for a 23-minute local flight in a benign pattern, the briefing runs long. The icing table, repeated alternate discussions, and some redundancy between sections could be cut by 30% without losing decision value.",
+      "Winds and turbulence analysis, while honestly handled, is thin on interpretation \u2014 a brief note on what light westerly flow at 3,500 ft means for the specific departure runway (Rwy 30) would add real operational value.",
+      "The 'Pacific system within 200 nm' trigger is vague for a planning-stage tool \u2014 a more specific reference (e.g., 'if the Day 5 prog shows a trough axis crossing the Sierra') would sharpen it."
+    ],
+    "red_flags": [
+      "None material. No overconfidence, no missing primary risk, no terrain misunderstanding, no hallucinated data. The verbosity is a quality issue, not a safety issue."
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "Correct answer at 4-day range for a morning local flight in spring Central Valley. The briefing itself reaches this conclusion properly \u2014 no TAF, no current METAR, no way to call valley stratus behavior. The synoptic picture is benign enough that this is likely a go, but the 1600Z departure time lands squarely in the stratus window and cannot be cleared until Friday evening at earliest. CONDITIONAL GO is the right call and the briefing executes it well.",
+    "single_most_important_improvement": "Tighten the briefing by at least 25-30% \u2014 consolidate the 'Day Before' and 'If You Go' sections, cut the icing table (one sentence suffices when icing is not a factor), and reduce repeated alternate references. For a 23-minute local flight, decision density matters more than comprehensiveness. Every extra sentence a pilot has to read in preflight is cognitive load that should be earned.",
+    "computed_avg": 8.5
+  }
+}

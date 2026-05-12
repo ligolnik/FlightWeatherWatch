@@ -1,0 +1,74 @@
+{
+  "cache_prefix": "cache_KVIS_KVIS_2026-04-11_2200Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KVIS",
+    "destination": "KVIS",
+    "departure": "2026-04-11 22:00Z",
+    "altitude_ft": 3500,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, direct, correctly identifies tule fog/stratus as the primary hazard, explicitly flags the 112-hour limitation, and delivers a usable CONDITIONAL GO with a single primary trigger. Not padded."
+      },
+      "forecast_honesty": {
+        "score": 10,
+        "notes": "Exceptional. Explicitly distinguishes between climatological inference and actual forecast products at every turn. Acknowledges absence of TAFs, winds aloft, AIRMETs, and icing products without hedging excessively \u2014 states what is known and what isn't with appropriate confidence levels."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "A pilot can extract a real action plan: check Friday TAF, watch Friday night METAR trends, reassess Thursday/Friday, know your hard stops. Practical timing advice (best/worst window) adds genuine operational value."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Hard stops are quantitative and realistic (ceiling \u22641,000 ft AGL, vis <3 SM, winds aloft >35 kt). The TAF-based downgrade trigger (BKN below 1,500 ft or vis <5 SM) is actionable. Minor weakness: no trigger differentiating IFR-equipped vs. VFR-only pilot, which matters for this airport/route combination."
+      },
+      "winds_turbulence": {
+        "score": 7,
+        "notes": "Appropriately caveated as pattern inference only. Correctly anticipates light chop from afternoon thermals and notes the Sierra wave is irrelevant at 3,500 ft without strong winds. Loses points because there's no actual winds aloft data to interpret \u2014 but the briefing handles this honestly rather than fabricating numbers."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Correctly identifies KVIS as flat valley terrain at 292 ft MSL, dismisses terrain entrapment concern, and notes that the Sierra interaction is not a factor at this altitude and wind regime. Local-flight context is well understood. Slightly generic since no specific route details were provided, but that's a briefing input limitation, not a briefing error."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "3,500 ft as planned is correctly validated: above surface haze, below any icing concern, in smooth air over flat terrain. Escape strategy (descend, land at KVIS below you) is simple and correct. The 'worst altitude band' section is thin but appropriately so given no convection is forecast."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "Conclusions are consistently tied to Day 5\u20137 extended progs, climatological knowledge of San Joaquin Valley tule fog, and field-specific information (ILS Rwy 30, MALSR, tower hours, PAPI availability). No hallucinated precision \u2014 every estimate is labeled as such. KFAT as the logical alternate is correct and grounded."
+      },
+      "clarity_signal_noise": {
+        "score": 7,
+        "notes": "Well-organized and scannable. The icing table is slightly over-engineered for a non-factor hazard \u2014 two rows saying essentially the same thing. The 'If You Go' checklist is mildly repetitive of earlier content. Core message is never buried, which matters most."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a CFI/dispatcher hybrid who has actually operated in the San Joaquin Valley. Specific callouts (tule fog timing, 22:00Z as 3 PM PDT being the best valley window, the CTAF note about tower hours, Friday night METAR as a leading indicator) are exactly what an experienced valley pilot thinks about. Not generic."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Exceptional forecast honesty \u2014 correctly frames the entire briefing as planning-level and never overstates confidence or fabricates precision from non-existent data products",
+      "Tule fog/valley stratus identified as the correct primary hazard with climatological context and timing logic specific to the San Joaquin Valley",
+      "Actionable reassessment timeline (Thursday evening, Friday TAF, Saturday morning METARs) gives the pilot a real decision ladder rather than a single-point assessment"
+    ],
+    "key_weaknesses": [
+      "Decision triggers do not differentiate between IFR-certificated and VFR-only pilot \u2014 the hard stops and alternates discussion assumes some instrument capability but never states it explicitly",
+      "Icing section is padded \u2014 two table rows and a paragraph to say 'not a factor' adds length without value",
+      "Winds aloft section, while honest, provides no actionable estimate range with confidence interval \u2014 even a climatological '3,000 ft winds in April average X\u2013Y kt from the W/NW at KVIS' would add more value than the current pattern inference"
+    ],
+    "red_flags": [
+      "None significant. The briefing correctly handles all major hazard classes for this route and altitude, and does not overreach its data."
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing correctly concludes that no GO/NO-GO decision is possible at 112 hours for a tule fog-prone airport. The CONDITIONAL GO is appropriate at this range \u2014 no system threat is visible \u2014 but the actual fly/no-fly call must wait for Friday TAF and Saturday morning METAR. That is the correct answer, not a weakness.",
+    "single_most_important_improvement": "Add explicit pilot-certification-dependent decision logic: the hard stop triggers and alternate planning (KFAT ILS) implicitly assume an IFR-capable pilot and aircraft. A VFR-only pilot faces a harder ceiling/vis threshold and no legal alternate option \u2014 the briefing should branch on this since it materially changes the risk calculus for the same weather conditions.",
+    "computed_avg": 8.3
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "cache_prefix": "cache_KVIS_KSQL_2026-04-12_1800Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KVIS",
+    "destination": "KSQL",
+    "departure": "2026-04-12 18:00Z",
+    "altitude_ft": 6500,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, correctly identifies primary risks (marine layer at KSQL, trough uncertainty, terrain chop), gives a usable MARGINAL GO with a specific tilt-to-NO-GO trigger. Slightly long but nothing buried."
+      },
+      "forecast_honesty": {
+        "score": 10,
+        "notes": "Exemplary. Explicitly states no TAFs, no winds aloft, no icing products are valid for the flight window. Confidence section is direct and calibrated. No false precision anywhere \u2014 pattern-based inferences are clearly labeled as such."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Translates synoptic uncertainty into real-world implications: fuel buffer sizing, alternate identification, timing of marine layer burn-off, short-field arrival demands. A pilot can act on this. Minor gap: doesn't quantify aircraft-type assumptions (e.g., 120-140 kt implies a specific class \u2014 fine, but unstated)."
+      },
+      "decision_triggers": {
+        "score": 9,
+        "notes": "Strong. Multiple quantitative triggers: KSQL ceiling below 1,000 ft / 3 SM, winds aloft above 30-35 kt, frontal passage within 2 hours, any route SIGMET. The 'What changes this call' section is genuinely useful and not generic. Minor deduction: no explicit ceiling floor for KVIS departure (though departure risk is correctly assessed as low)."
+      },
+      "winds_turbulence": {
+        "score": 8,
+        "notes": "Correctly interprets absence of data, provides pattern-based wind range (20-35 kt SW vs 10-15 kt NW), classifies turbulence by zone (smooth valley, light-to-moderate ridges, moderate if >30 kt), and correctly identifies lee rotor risk over the Diablo/Coast Range. Deduction: rotor zone description is accurate but slightly generic \u2014 could note that 6,500 ft puts you only 3,000 ft above ridgetops, which is close in a strong-flow scenario."
+      },
+      "terrain_route": {
+        "score": 9,
+        "notes": "Demonstrates real route awareness: Diablo/Coast Range crossing, ridgetop elevations, San Joaquin Valley VMC vs Bay coastal IMC split, KSQL dike and power line hazards called out explicitly. Correctly identifies the escape option (turn back to SJC/valley if coast is IMC). Nothing generic here."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "Catches the hemispheric VFR cruising altitude error (6,500 ft is eastbound, not westbound) and self-corrects to 7,500 ft \u2014 that's a meaningful catch most briefings miss. Worst band and escape options are practical. Minor deduction: doesn't fully explore whether 5,500 ft (lower but also valid westbound) might reduce terrain chop exposure vs 7,500 ft in strong-flow conditions."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "Briefing is transparent about what data exists vs what is inferred. References extended progs, Day 6-7 500mb pattern, AFD (HNX/MTR), and correctly directs the pilot to specific FD reporting stations (FresnoFAT, SJC, OAK). No hallucinated METARs or phantom TAFs. Slight deduction: KVIS airport hours cited (1600-0200Z) without a source note \u2014 minor but adds false precision flavor."
+      },
+      "clarity_signal_noise": {
+        "score": 7,
+        "notes": "Well-organized with headers and tables. However, it is long \u2014 the icing table and some repeated fuel/alternate advice could be trimmed without losing decision value. A time-constrained pilot will find the key points but has to work slightly harder than necessary."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a CFII who has actually been into KSQL. KSQL short-field specifics (dike, power lines, right traffic), NorCal Approach context, KSJC vs KOAK alternate logic, and the re-brief timing advice (Friday evening, 24-36 hr out) are all operationally grounded. Avoids LLM throat-clearing. One minor slip: 'This is a non-event VMC arrival' phrasing is slightly casual but not wrong."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Exceptional forecast honesty \u2014 explicitly flags every missing data source without hedging or papering over gaps",
+      "Quantitative decision triggers are specific and usable, not boilerplate",
+      "Catches the FAR 91.159 hemispheric altitude error and self-corrects \u2014 a detail that matters",
+      "KSQL arrival context (dike, power lines, short field, NorCal Approach) shows genuine route familiarity",
+      "Re-brief cadence and 'planning framework only' framing are exactly right for a 5-day extended forecast"
+    ],
+    "key_weaknesses": [
+      "Briefing is too long \u2014 icing table and some repeated alternate/fuel advice add length without proportional decision value",
+      "5,500 ft as an alternative westbound VFR altitude is introduced but not evaluated against 7,500 ft for turbulence or terrain clearance tradeoffs",
+      "Departure hard-stop criteria are underdeveloped relative to arrival criteria \u2014 low risk departure is correctly assessed, but the threshold for reconsidering even that is absent"
+    ],
+    "red_flags": [
+      "None critical. KVIS airport hours cited without source \u2014 minor false precision risk but not operationally misleading."
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing correctly concludes MARGINAL GO pending day-prior check. At 5 days, the right answer is exactly this \u2014 not flyable or not-flyable, but 'build the framework and re-evaluate at 24-36 hours.' The briefing gives the pilot the right re-brief checklist. I would not make a final call until TAFs and FD winds are in hand Saturday evening, which is precisely what the briefing instructs.",
+    "single_most_important_improvement": "Tighten the briefing by 25-30% \u2014 consolidate the icing table into one sentence, eliminate the repeated alternate/fuel reminders in 'If You Go,' and sharpen the rotor zone discussion to note that 6,500 ft is only ~3,000 ft above the Diablo ridgeline in a 30+ kt flow scenario, which is operationally marginal. The content quality is high; the density needs work.",
+    "computed_avg": 8.6
+  }
+}

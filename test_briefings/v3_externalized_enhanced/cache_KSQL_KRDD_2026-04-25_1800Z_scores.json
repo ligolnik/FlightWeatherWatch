@@ -1,0 +1,76 @@
+{
+  "cache_prefix": "cache_KSQL_KRDD_2026-04-25_1800Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KSQL",
+    "destination": "KRDD",
+    "departure": "2026-04-25 18:00Z",
+    "altitude_ft": 6500,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear MARGINAL GO with the primary risk (deteriorating ceilings at KRDD ahead of approaching Pacific system) correctly identified upfront. The single most important trigger is stated explicitly and quantitatively in the summary itself \u2014 rare and useful."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Explicitly acknowledges missing TAFs, no winds aloft data, no FIP products, and the 48-hour forecast uncertainty. Confidence section is appropriately humble without being useless. No false precision \u2014 estimates are labeled as estimates."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "A pilot can genuinely make a decision from this briefing. Timing windows (depart 16\u201317Z, avoid 20Z+), alternates with distances, IFR currency as a binary factor, and the 'closing window' framing all translate directly into preflight actions."
+      },
+      "decision_triggers": {
+        "score": 9,
+        "notes": "Multiple quantitative triggers are provided: OVC below 1,500 ft or vis below 3 SM = NO-GO, ceilings below 2,500 ft BKN at 19Z = VFR NO-GO, KRDD OVC at or below 2,000 ft by 14Z = day is done, winds aloft above 35 kt = reassess altitude. These are specific, actionable, and correctly sequenced across the preflight timeline."
+      },
+      "winds_turbulence": {
+        "score": 7,
+        "notes": "Honest about missing FD winds data and provides a reasonable synoptic-based estimate (15\u201325 kt SW from 220\u2013250\u00b0). Ride quality assessment is sensible for the route and altitude. Loses points because the Coast Range characterization slightly undersells potential for light-moderate chop in stronger prefrontal flow \u2014 could have noted that if SW flow exceeds 25 kt, the Altamont/Diablo Range gap flows could produce mechanical turbulence below 8,000 ft."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Good awareness of the Sacramento Valley escape geometry, valley channeling effect at KRDD, and the relatively benign terrain of the Bay-to-valley crossing at 6,500 ft. Correctly notes the Coast Range is not a significant wave barrier at this altitude. Minor gap: no mention of the Sutter Buttes area or low-level flow patterns north of Sacramento that can create localized wind anomalies near KRDD on southerly prefrontal flow."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "Best/worst/escape altitudes are clearly stated with correct reasoning. The logic of staying at 6,500 ft to remain below the freezing level while above valley terrain is sound. The warning against 8,000\u201310,000 ft without ice protection in prefrontal moisture is exactly right. Would benefit from a note about whether 4,500 ft is viable as a lower backup if ceilings drop."
+      },
+      "data_integration": {
+        "score": 7,
+        "notes": "Conclusions are consistently tied to named products (30-hr prog, 36-hr prog, QPF Day 2, AFD). However, the briefing is working with limited input data and some reasoning is climatology-based rather than product-based \u2014 which is honestly disclosed. The AFD reference for runway markings is a nice operational touch. Would score higher if actual METAR/TAF values or specific product timestamps were quoted."
+      },
+      "clarity_signal_noise": {
+        "score": 7,
+        "notes": "Well-structured with headers, tables, and bullet points. Scannable. However, it is long \u2014 the icing section repeats the 'not a factor at 6,500 ft' conclusion three times, and some material in 'If You Go' overlaps with earlier trigger sections. A tighter pilot could cut 20% without losing anything actionable."
+      },
+      "pilot_realism": {
+        "score": 8,
+        "notes": "Reads like an experienced CFI talking to a sharp private pilot \u2014 practical, specific, appropriately urgent without being alarmist. 'The valley is your friend' and 'this is how trips end badly' are the kind of plain-language framing that real briefers use. Slight LLM tendency toward exhaustive enumeration, but the operational instincts are correct throughout."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Quantitative decision triggers are embedded early and consistently throughout \u2014 not buried at the end",
+      "Forecast uncertainty is honestly disclosed at every relevant point without making the briefing useless",
+      "Alternates are given with distances and ranked by utility as the system approaches \u2014 genuinely actionable",
+      "The 'closing window' framing correctly captures the time-pressure dynamic of this flight and drives the pilot toward a morning recheck rather than a static go/no-go"
+    ],
+    "key_weaknesses": [
+      "No actual FD winds data means the en route wind and headwind analysis is synoptic estimation only \u2014 the briefing should more aggressively direct the pilot to pull OAK/RBL winds aloft immediately rather than just noting the gap",
+      "Icing section is repetitive \u2014 the 'not a factor' conclusion is restated multiple times across the table and bullet list",
+      "The Coast Range and Altamont corridor turbulence risk in prefrontal southwesterly flow is slightly underplayed \u2014 Bay Area mechanical chop at 6,500 ft in 25+ kt SW flow is more than a nuisance for some airframes",
+      "No mention of what aircraft type/capability is assumed \u2014 the IFR currency discussion implies a single-engine piston but the briefing would shift meaningfully for a non-FIKI aircraft vs. one with TKS"
+    ],
+    "red_flags": [
+      "None critical \u2014 the briefing correctly identifies the primary risk and does not overstate confidence. Minor flag: freezing level of 8,000\u201312,000 ft is a wide range that could be tightened with a single AFD area forecast check, and the briefing does not direct the pilot to do this specifically."
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing correctly calls this MARGINAL GO pending Saturday morning TAF confirmation. At 48 hours out with no valid TAFs for the flight window and no actual winds aloft data, the honest answer is that this flight cannot be committed to yet. The framework for making the decision Saturday morning is solid \u2014 but the decision itself must wait for 06Z\u201312Z TAFs and Friday evening model trends. If Saturday morning shows KRDD TAF holding VMC through 20Z and the system timing unchanged, this is a workable flight filed IFR with fuel to KCIC. If the TAF shows any IFR conditions before 20Z, it is a no-go or significantly earlier departure.",
+    "single_most_important_improvement": "Add a concrete Saturday morning go/no-go checklist \u2014 a 3-item pass/fail list the pilot runs at 13Z Saturday before touching the airplane. Right now the triggers are scattered across multiple sections; consolidating them into a single 'Green light requires ALL of the following' block would make the briefing immediately more usable under time pressure.",
+    "computed_avg": 8.1
+  }
+}

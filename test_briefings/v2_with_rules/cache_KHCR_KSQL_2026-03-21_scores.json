@@ -1,0 +1,75 @@
+{
+  "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v2_with_rules/cache_KHCR_KSQL_2026-03-21",
+  "version": "v2",
+  "meta": {
+    "origin": "KHCR",
+    "destination": "KSQL",
+    "departure": "2026-03-21 20:00Z",
+    "altitude_ft": 18000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 4906
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, correctly identifies the primary risk as arrival-end coastal stratus rather than en route. MARGINAL GO with explicit reasoning is exactly the right call. Minor ding: 'the MTR forecaster is watching' implies direct access to a human forecaster, which may be imprecise."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Explicitly quantifies forecaster uncertainty at 40\u201350% and acknowledges missing icing chart data. Distinguishes HIGH vs MEDIUM confidence by leg. No false precision \u2014 this is done well throughout."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "A pilot can absolutely make a go/no-go from this. Fuel implications of headwind are called out, alternates are ranked and justified, and the arrival timing risk is translated into a concrete monitoring plan. Actionable from start to finish."
+      },
+      "decision_triggers": {
+        "score": 9,
+        "notes": "Quantitative and specific: BKN005 TAF amendment, ceiling below 1,000 ft on ATIS, winds aloft exceeding 50 kts, any ice accumulation near coast. Triggers are realistic, preflight and in-flight both covered. Could add a fuel-state trigger (e.g., if headwinds exceed X and fuel margin drops below Y, divert early)."
+      },
+      "winds_turbulence": {
+        "score": 8,
+        "notes": "Winds aloft decoded at three stations with headwind component calculated \u2014 good. Turbulence correctly characterized as smooth over UT/NV with conditional light-to-moderate near the Sierra. Minor weakness: no mention of whether mountain wave SIGMETs were checked or what specific Sierra crossing altitude optimization looks like."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Correctly identifies Sierra Nevada as the terrain hazard, mentions rotor zone concern and wave potential. KHCR density altitude is flagged. Bay Area stratus as a coastal terrain-influenced phenomenon is handled well. Slightly surface-level on Sierra wave mechanics \u2014 doesn't mention whether a lenticular or AIRMET Sierra was present at forecast time."
+      },
+      "altitude_strategy": {
+        "score": 7,
+        "notes": "States going lower won't help with headwinds, and correctly identifies 18,000 ft as likely above the stratus deck on descent. However, there's no discussion of an escape altitude if icing is encountered near the coast, or whether 16,000 ft might clear the frontal cloud band. The descent profile into KSQL through potential IMC at 18K isn't fully addressed."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "Conclusions are clearly tied to SLC AFD, MTR AFD, KSFO TAF, winds aloft tables, eTCF, QPF, and surface prog. The explicit citation of data sources throughout is strong. Slight concern: icing charts described as 'not available' but no alternative source (e.g., G-AIRMET, CIP/FIP) was substituted \u2014 small gap."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-organized with headers, tables, and bullet points. The 'If You Go \u2014 Do This' section is genuinely useful and scannable. A few sections repeat the 40\u201350% confidence figure more than necessary. Overall density is appropriate for a high-altitude IFR cross-country."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like an experienced pilot or dispatcher wrote it \u2014 specific airport knowledge (KLVK as the last to go IFR), practical sequencing (check TAF at 18Z, get ATIS 30 min out), and frank language ('This is where the flight gets interesting'). Not generic. The alternate hierarchy logic is exactly what an experienced Bay Area pilot would say."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Arrival risk correctly identified and quantified with explicit forecaster confidence levels \u2014 not hand-wavy",
+      "Decision triggers are specific, quantitative, and usable both preflight and in-flight",
+      "Alternate airport ranking (KLVK over KOAK/KSJC) reflects real operational knowledge of Bay Area stratus behavior",
+      "Headwind impact translated into concrete fuel planning guidance rather than just being mentioned"
+    ],
+    "key_weaknesses": [
+      "Altitude strategy for the coastal descent is underdeveloped \u2014 no discussion of what altitude to expect to break out of frontal cloud or an escape plan if icing is encountered at 18K on descent",
+      "Sierra wave hazard is flagged but not fully developed \u2014 no mention of checking for active SIGMET Sierra or mountain wave AIRMET, and no specific altitude band advice for the crossing",
+      "Icing chart gap acknowledged but no substitute source cited (G-AIRMET, CIP/FIP) \u2014 leaves a real hole in the icing picture near the California coast"
+    ],
+    "red_flags": [
+      "No explicit descent profile analysis into KSQL through potential IMC \u2014 if the stratus is at 500-1000 ft and the pilot is at 18,000 ft in cloud near the coast, the briefing doesn't address what that descent looks like or at what point to call the divert"
+    ],
+    "would_you_fly": "Yes",
+    "would_you_fly_justification": "The route is genuinely low-risk en route, the arrival risk is correctly characterized and bounded, alternates are solid and well-reasoned, and the decision triggers give the pilot a clear action framework. The MARGINAL GO with KLVK filed as alternate is the correct professional call given the 40-50% stratus timing uncertainty. I'd want a current TAF check at 18Z before departure and I'd carry extra fuel for the headwind \u2014 both of which this briefing explicitly recommends.",
+    "single_most_important_improvement": "Add a descent profile analysis for the KSQL arrival: at what altitude should the pilot expect to enter cloud given the frontal stratus scenario, what is the ILS/RNAV approach ceiling at KSQL, and at what specific point inbound should the pilot commit to the divert versus continuing \u2014 this is the most operationally critical gap given that the primary identified risk is the arrival.",
+    "computed_avg": 8.4
+  }
+}

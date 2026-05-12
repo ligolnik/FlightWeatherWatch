@@ -1,0 +1,77 @@
+{
+  "cache_prefix": "cache_KBUR_KSJC_2026-04-21_0045Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KBUR",
+    "destination": "KSJC",
+    "departure": "2026-04-21 00:45Z",
+    "altitude_ft": 20000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, decision-oriented, correctly identifies icing and IMC arrival as primary risks, gives a usable MARGINAL GO with aircraft-type qualification and a specific numerical trigger. Minor quibble: 'barely flyable' framing is slightly editorial but operationally honest."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Explicitly cites \u00b12\u20133 hour frontal timing uncertainty, acknowledges cloud top uncertainty near the front, and ties confidence upgrade conditions to specific data updates. Doesn't pretend the FIP or TAF is gospel. Confidence section at the end is genuinely useful."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Pilot can absolutely make a decision from this. Fuel add, alternate strategy, departure timing nudge, ATIS timing, aircraft equipment requirements \u2014 all addressed in practical terms. The 'departing earlier may catch KSJC before the front' recommendation is exactly the right tactical thinking."
+      },
+      "decision_triggers": {
+        "score": 9,
+        "notes": "Multiple quantitative triggers present: ceiling <300 ft OVC, vis <3/4 SM, winds >30G40 kt, FIP icing probability >35% at FL210. Hard stops are separated from watch items. These are realistic and usable preflight and in-flight. Slight deduction because the in-flight 'icing encountered at FL210' trigger could be more explicit (e.g., accumulation rate or time-based)."
+      },
+      "winds_turbulence": {
+        "score": 9,
+        "notes": "Winds are interpreted, not just listed \u2014 headwind component quantified on each leg, net fuel/time impact calculated, temperature noted for icing correlation. Turbulence severity correctly classified as light chop with localized light-to-moderate near terrain and frontal zone. Terrain interaction (coastal range, wave potential) is raised appropriately without overstating confidence."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Transverse Ranges, Santa Lucia, and Diablo ranges are mentioned with correct context. Inland vs. coastal airmass distinction correctly used for alternate selection. Slight shortfall: the specific terrain-induced turbulence zones along the coastal range crossing (e.g., near SBA to Paso Robles corridor) could have been more precisely located given the 45-70 kt southerly flow."
+      },
+      "altitude_strategy": {
+        "score": 9,
+        "notes": "Best/worst/escape altitudes clearly stated with correct reasoning tied to actual FIP data and G-AIRMET tops. The 'do not descend if icing encountered \u2014 climb to FL240' guidance is correct and non-obvious. The warning against FL100-150 is appropriately emphatic."
+      },
+      "data_integration": {
+        "score": 9,
+        "notes": "TAF, FIP, G-AIRMET, GTG, GFA, and winds aloft are all cited and cross-referenced. Conclusions trace back to specific products. Temperature at altitude is tied to icing analysis. Only minor gap: no pirep data cited, though for a late-night departure pirep recency may be legitimately limited."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-structured, scannable tables, clear headers. The KBUR noise curfew note is unnecessary padding. A few sections (alternates list) repeat content from earlier in the briefing. Overall signal-to-noise is high but not perfect \u2014 a 10% trim would tighten it meaningfully."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a real chief pilot or dispatch briefing \u2014 not an AI summary. Practical advice on ATIS timing, departure window optimization, KFAT vs. KOAK alternate logic, and crosswind runway selection all reflect genuine operational experience. Avoids hedge-everything LLM tone effectively."
+      }
+    },
+    "overall_score": 9,
+    "key_strengths": [
+      "Quantitative decision triggers are specific, realistic, and separated into hard stops vs. watch items \u2014 immediately usable",
+      "Frontal timing uncertainty is explicitly acknowledged and propagated through the entire analysis rather than buried in a footnote",
+      "Altitude strategy is correctly inverted (climb to escape, not descend) with reasoning tied to actual FIP layer data",
+      "Alternate strategy correctly identifies that Bay Area alternates are not independent of the primary destination under this synoptic setup",
+      "Departure timing recommendation (push earlier to catch KSJC pre-front) is exactly the kind of tactical advice an experienced pilot would give"
+    ],
+    "key_weaknesses": [
+      "Terrain-induced turbulence zones along the coastal range are mentioned but not precisely located \u2014 the SBA-to-Monterey corridor under 45-70 kt southerly flow deserved more specific treatment",
+      "No pirep data cited at any point \u2014 even acknowledging 'no recent pireps along route at this hour' would add honest texture",
+      "Minor redundancy in alternates discussion (repeated across two sections) adds length without adding information",
+      "In-flight icing encounter trigger lacks a time-based or accumulation-rate threshold \u2014 'if you enter cloud at FL210' is the trigger, but how long before you divert is not addressed"
+    ],
+    "red_flags": [
+      "None critical. The briefing correctly identifies primary risk, provides decision triggers, and does not overstate data confidence."
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing correctly lands on MARGINAL GO contingent on aircraft equipment and a 2300Z TAF check. With an ice-certified aircraft I would want to see the updated KSJC TAF at 2300Z and confirm ceiling is holding at or above BKN030 before committing. If that TAF holds, I go at 0000-0015Z (slightly earlier than filed) to maximize the pre-frontal ceiling window. If it degrades to OVC010-015, I delay or cancel. The briefing gives me exactly the information I need to make that call \u2014 which is the right outcome for a preflight brief.",
+    "single_most_important_improvement": "Add a specific in-flight icing encounter protocol with a time or accumulation threshold: e.g., 'If you accumulate any visible ice at FL210 for more than 60-90 seconds without sublimation, treat as an immediate escape scenario \u2014 climb to FL240 or declare and divert to KMOD/KFAT. Do not continue toward the Bay Area into heavier frontal cloud.' The current guidance says climb to escape but doesn't give the pilot a clear threshold for when the encounter has crossed from 'trace, continue monitoring' to 'act now.'",
+    "computed_avg": 8.8
+  }
+}

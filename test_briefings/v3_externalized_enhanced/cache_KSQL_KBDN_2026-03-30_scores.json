@@ -1,0 +1,76 @@
+{
+  "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v3_externalized_enhanced/cache_KSQL_KBDN_2026-03-30",
+  "version": "v3",
+  "meta": {
+    "origin": "KSQL",
+    "destination": "KBDN",
+    "departure": "2026-03-30 14:00Z",
+    "altitude_ft": 12000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 8134
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 8,
+        "notes": "Clear MARGINAL GO call with correct primary risk identified (Pacific trough timing uncertainty). Slightly wordy for an executive summary but decision-oriented and honest about forecast maturity."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Consistently and correctly flags 6-day limitations \u2014 no false precision on winds aloft, TAFs, or icing. Explicitly acknowledges absence of winds aloft data and icing products. One of the stronger elements of this briefing."
+      },
+      "operational_decision": {
+        "score": 8,
+        "notes": "A pilot can make a real provisional decision from this. Timing, alternates, fuel, and IFR filing recommendation are all practical. Slightly diminished by the lack of actual winds aloft numbers, but that's a data limitation, not a briefing failure."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Triggers are specific and usable \u2014 BKN/OVC below 3,000 ft, winds gusting above 25 kt, trough position over Oregon, SIGMET for moderate-severe wave. Could add a quantitative winds aloft trigger (e.g., >40 kt at 12K over the Cascades) but overall well above average for this category."
+      },
+      "winds_turbulence": {
+        "score": 7,
+        "notes": "Correctly identifies Cascade crossing as the turbulence zone and categorizes it as light-to-moderate under ridge, worse if trough accelerates. However, 15\u201330 kt SW estimate is acknowledged as unconfirmed, and there's no discussion of jet stream position or whether 12,000 ft puts the pilot in or below any shear layer."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Good awareness of KBDN's high desert bowl position, downslope westerly flow off the Cascades, and runway orientation crosswind implications. Correctly flags terrain-level moisture risk in the 8,000\u201310,000 ft band. Doesn't explicitly address the Central Valley or northern Sierra crossing, which are benign here but worth a one-liner."
+      },
+      "altitude_strategy": {
+        "score": 7,
+        "notes": "10,000\u201312,000 ft recommended with solid reasoning; escape to valley floor called out correctly. Missing: no mention of whether 12,000 ft requires supplemental oxygen for the aircraft type, and no discussion of MEAs along the IFR route (which was recommended) to validate altitude choice."
+      },
+      "data_integration": {
+        "score": 7,
+        "notes": "Reasoning is grounded in synoptic prog charts and QPF, which is appropriate at this range. No hallucinated METARs or TAFs. Slightly hand-wavy on the 'moderate winds likely 15\u201330 kt' estimate \u2014 should be flagged more clearly as model-inference rather than actual winds aloft product."
+      },
+      "clarity_signal_noise": {
+        "score": 7,
+        "notes": "Well-organized with headers and tables. Some sections are longer than needed \u2014 the icing table adds value, the 'Other Hazards' summary table is partially redundant with earlier prose. The 'If You Go' checklist is genuinely useful and scannable."
+      },
+      "pilot_realism": {
+        "score": 8,
+        "notes": "Reads like an experienced CFI briefing \u2014 practical IFR filing recommendation, PIREP-seeking advice, top off fuel at KSQL, KRDM as primary alternate. Avoids LLM hedging loops. Departure timing rationale (ahead of heating and afternoon wind increase) is operationally sound."
+      }
+    },
+    "overall_score": 77,
+    "key_strengths": [
+      "Consistently honest about 6-day forecast limitations without becoming useless \u2014 correctly frames this as 'provisional plan, not committed go'",
+      "Decision triggers are specific and quantitative enough to be actionable at preflight and night-before checks",
+      "Terrain awareness of KBDN's Cascade lee position and downslope wind risk is accurate and practical",
+      "The 'If You Go' checklist is genuinely operational \u2014 time-phased, specific, and correctly prioritizes IFR filing for terrain structure not expected IMC"
+    ],
+    "key_weaknesses": [
+      "No mention of jet stream position or 12,000 ft relationship to shear layer \u2014 relevant for turbulence severity assessment over the Cascades",
+      "Missing MEA verification for the recommended IFR route (KSQL\u2013KBDN over Cascades terrain) \u2014 recommending IFR without confirming MEAs are compatible with 12,000 ft is a gap",
+      "The 15\u201330 kt wind estimate should be more explicitly labeled as synoptic inference, not forecast product \u2014 the distinction matters for pilot trust calibration",
+      "No mention of oxygen requirement at 12,000 ft or aircraft capability assumption \u2014 relevant for practical altitude strategy"
+    ],
+    "red_flags": [
+      "None critical. Minor: '15\u201330 kt from the southwest at 12,000 ft' is presented with slightly more confidence than the data supports \u2014 should be flagged as rough synoptic inference, not a winds aloft product estimate."
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing correctly identifies this as a 6-day provisional plan. At this range, MARGINAL GO is the right call, but the actual fly/no-fly decision requires the 24\u201348 hour update the briefing specifies. The synoptic picture is favorable enough to keep the trip on the table, but the Pacific trough timing uncertainty is real and the Cascade crossing at 12,000 ft with unknown winds aloft is not trivial. Would re-evaluate with updated progs, TAFs, and winds aloft forecast the day before.",
+    "single_most_important_improvement": "Add jet stream position and 12,000 ft shear layer context \u2014 knowing whether the planned altitude is below, in, or above any jet-induced shear over the Cascades is the most operationally significant missing piece for turbulence severity assessment on this route.",
+    "computed_avg": 7.7
+  }
+}

@@ -1,5 +1,6 @@
 briefing_*.html
 cache_*.json
+!test_briefings/**
 .claude/
 __pycache__/
 *.pyc

@@ -1,0 +1,78 @@
+{
+  "cache_prefix": "cache_KSQL_KMRY_2026-05-05_1730Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KSQL",
+    "destination": "KMRY",
+    "departure": "2026-05-05 17:30Z",
+    "altitude_ft": 4000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, correctly identifies the primary risk (timing-sensitive ceiling clearing at departure), gives a usable MARGINAL GO with a specific trigger. The single most important trigger is called out immediately \u2014 exactly what a time-constrained pilot needs."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Explicitly acknowledges that Bay Area coastal clearing timing is model-dependent and notoriously slippery, assigns Medium confidence with clear reasoning. Notes the 1\u20133 hour slip risk. One minor issue: the 6,000 ft SFO temp is listed as +4\u00b0C in two separate places where the 9,000 ft temp is also shown as +2\u00b0C \u2014 the lapse rate looks compressed and may reflect data entry inconsistency, but it doesn't affect the icing conclusion."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Pilot can absolutely make a decision from this briefing. Risks are translated into real-world implications: departure timing, 30-minute ground delay option, IFR filing recommendation, alternate identification, fuel top-off rationale. Nothing left abstract."
+      },
+      "decision_triggers": {
+        "score": 9,
+        "notes": "Quantitative triggers are present and specific: BKN020 or lower at 17Z = delay/no-go; ceiling below 1,500 ft at 18Z with no trend = no-go for the day VFR; KMRY OVC or below 1,200 ft = wait or divert. Preflight and in-flight triggers are both covered. Minor gap: no explicit in-flight abort trigger (e.g., 'if solid layer encountered at 4,000 ft over the mountains, turn back'), though the escape section partially covers this."
+      },
+      "winds_turbulence": {
+        "score": 8,
+        "notes": "Winds aloft are interpolated to cruise altitude with actual headwind/crosswind components calculated \u2014 not just stated. Turbulence correctly classified as smooth to light chop with terrain-threshold logic explained. Could strengthen by noting that post-trough residual instability with afternoon heating over the Santa Cruz ridges can occasionally punch light-moderate chop even at modest wind speeds, but this is a minor omission for a 20-minute flight."
+      },
+      "terrain_route_awareness": {
+        "score": 8,
+        "notes": "Santa Cruz Mountains crossing is specifically addressed, transmission tower obstacle at KSQL called out, KMRY sea-breeze variability noted. The briefing understands the coastal California terrain dynamic. Slightly thin on the specifics of the coastal valley/ridge interaction south of the Bay \u2014 but for a 20 nm flight at 4,000 ft this is adequate."
+      },
+      "altitude_strategy": {
+        "score": 9,
+        "notes": "Best/worst/escape altitudes are all provided with specific reasoning tied to marine layer tops, terrain clearance, and the synoptic pattern. The suggestion to request 4,500 ft for additional margin above stratus tops is practical and well-reasoned. Not generic."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "Conclusions are explicitly tied to SFO TAF FM groups, AFD language, winds aloft tables, and QPF timing. The reasoning feels grounded. The eTCF reference (Missouri/Tennessee) is slightly odd for a coastal California flight \u2014 likely auto-populated from a broader dataset \u2014 but correctly dismissed as irrelevant. No hallucinated precision issues."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-organized with headers, tables, and bullet points. Scannable. The 'If You Go \u2014 Do This' checklist is genuinely useful. Slightly verbose in the confidence section and some repetition between the 'Fly or No' section and 'What changes this call' \u2014 a single merged section would tighten it. Overall signal-to-noise is good for the complexity of a transitional weather day."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a real experienced pilot talking to another pilot. Specific, practical, direct. 'File IFR \u2014 it converts a MARGINAL GO into a GO' is exactly the kind of operational shortcut an experienced CFI would offer. KSNS as preferred alternate over KWVI (inland clears faster) shows actual coastal California familiarity. Avoids LLM throat-clearing entirely."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Primary risk correctly identified and framed as a timing problem, not a binary go/no-go \u2014 the 30-minute delay option is realistic and actionable",
+      "Quantitative decision triggers are specific, tiered, and cover both preflight and in-flight scenarios",
+      "Winds aloft are actually interpreted into headwind/crosswind components for the specific route heading rather than just transcribed",
+      "IFR filing recommendation is the single best piece of practical advice in the briefing \u2014 correctly converts the marginal condition into a non-event",
+      "Altitude strategy with best/worst/escape options is route-specific and correctly reasoned against the marine layer top estimate"
+    ],
+    "key_weaknesses": [
+      "No explicit in-flight abort trigger or go/no-go point en route \u2014 for a 20 nm flight this is minor but worth a single sentence",
+      "The eTCF convection reference to Missouri/Tennessee adds noise without value and slightly undermines data curation quality",
+      "Temperature lapse rate in the icing table appears internally inconsistent (3,000 ft = +4\u00b0C, 6,000 ft = +4\u00b0C, 9,000 ft = +2\u00b0C) \u2014 likely a data copy error, but a real pilot would notice and question it",
+      "Slight redundancy between 'Fly or No' hard stops and 'What changes this call' section \u2014 could be merged without losing information"
+    ],
+    "red_flags": [
+      "None critical. The eTCF Missouri/Tennessee reference is a minor red flag for data hygiene \u2014 suggests possible auto-population from a national dataset without route-relevance filtering.",
+      "The compressed temperature lapse rate in the icing table (4\u00b0C at both 3,000 and 6,000 ft) should be verified against source data before relying on it \u2014 does not affect the icing conclusion here but would matter at a different altitude or season."
+    ],
+    "would_you_fly": "Yes",
+    "would_you_fly_justification": "20 nm coastal hop on a synoptically-supported clearing day with a solid destination TAF and practical alternates available. The briefing correctly identifies this as a timing-dependent marginal condition, not a systemic hazard. Filing IFR as recommended removes the primary risk entirely. VFR is also acceptable if the 17Z METAR confirms the clearing trend \u2014 the briefing's trigger logic handles that correctly. The short route means any deterioration is recoverable with fuel and alternates in hand.",
+    "single_most_important_improvement": "Add a single explicit in-flight abort point: 'If you encounter a solid layer at or below 4,000 ft over the Santa Cruz Mountains with no clear path through, turn back immediately \u2014 KSQL will be improving behind you and there is no terrain-safe VFR option forward.' The current escape section implies this but never states it as a discrete decision gate, which is the one thing a pilot in IMC conditions needs pre-briefed and unambiguous.",
+    "computed_avg": 8.6
+  }
+}

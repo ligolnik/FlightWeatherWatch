@@ -1,0 +1,77 @@
+{
+  "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v1_pre_prompt_rules/cache_KSQL_KVGT_2026-03-13",
+  "version": "v1",
+  "meta": {
+    "origin": "KSQL",
+    "destination": "KVGT",
+    "departure": "2026-03-13 18:00Z",
+    "altitude_ft": 10500,
+    "model": "unknown",
+    "sys_prompt_len": 661
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 8,
+        "notes": "Clear GO with well-identified primary risks (marine layer departure, Sierra wave, just-below-freezing at cruise). Decision-oriented and correctly prioritized. Minor deduction: 'no hard stops' is slightly casual given the icing proximity at 10,500 ft."
+      },
+      "forecast_honesty": {
+        "score": 7,
+        "notes": "Handles marine layer uncertainty reasonably and flags the need to recheck Thursday night. However, the icing analysis is overconfident \u2014 stating 'moisture just isn't there' while also noting you're just below the freezing level transiting the Sierra is a tension that deserves more explicit uncertainty, not resolution by assertion. eTCF reference is fine but slightly name-dropped without specifics."
+      },
+      "operational_decision": {
+        "score": 8,
+        "notes": "Strong \u2014 the pilot can actually make a decision from this. Timing implications (marine layer burn-off), fuel, alternates, and IFR filing are all addressed practically. Block time estimate is useful and grounded."
+      },
+      "decision_triggers": {
+        "score": 7,
+        "notes": "Some quantitative triggers exist (OVC008 or lower at 16Z, SCT010 degrading to OVC) and the icing escape plan (descend to 8,000\u20139,000 ft) is concrete. Missing: explicit wind threshold for Sierra wave concern (e.g., 'if 12,000 ft winds exceed 35 kt, reconsider altitude'), and no PIREP-based go/no-go criteria for turbulence severity."
+      },
+      "winds_turbulence": {
+        "score": 7,
+        "notes": "Winds are interpreted (tailwind component calculated, block time impact noted) rather than just listed \u2014 good. Turbulence classified as light-to-moderate chop over the Sierra. However, 15\u201320 kt perpendicular flow over the Sierra is actually relatively weak for wave generation and the briefing correctly notes this, but then still says 'expect light to moderate chop' without explaining the wave mechanism or why rotor/wave amplitude would be limited \u2014 it's asserted rather than reasoned."
+      },
+      "terrain_route": {
+        "score": 7,
+        "notes": "Sierra Nevada wave hazard is identified and the Mammoth/Bishop area is called out specifically, which shows route awareness. However, the actual Sierra crossing geometry for KSQL\u2192KVGT (crossing likely near Lake Tahoe/Truckee corridor, not Mammoth/Bishop which is 150nm south of the direct route) appears incorrect \u2014 this is a meaningful navigation error that undermines confidence in the terrain analysis."
+      },
+      "altitude_strategy": {
+        "score": 7,
+        "notes": "10,500 ft is accepted with a clear escape (descend for icing, consider 12,500 for tailwinds). The freezing level conflict at 12,500 ft is correctly flagged. Missing: no explicit discussion of MEAs or terrain clearance concerns over the Sierra at 10,500 ft, which matters for a route crossing the range at that altitude."
+      },
+      "data_integration": {
+        "score": 7,
+        "notes": "Winds aloft tables are sourced from actual stations (SFO, LAS) with temps \u2014 good. TAF references are specific (SCT010, 27008KT). Some conclusions feel slightly hand-wavy (e.g., 'eTCF confirms' without chart values, 'surface progs show clear skies' without prog valid time citation). Overall grounded but not airtight."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-organized with clear headers, tables, and a scannable action list. The 'day before' section is a genuine value-add rather than filler. Slightly verbose in places (the Central US storm dismissal is belabored), but overall good signal-to-noise ratio."
+      },
+      "pilot_realism": {
+        "score": 8,
+        "notes": "Reads like an experienced CFI talking through a flight, not an LLM summarizing weather data. 'Pop through it in 60\u201390 seconds,' 'brief your passengers,' and the Thursday night check routine all feel operational. The tone is appropriately confident without being reckless."
+      }
+    },
+    "overall_score": 7,
+    "key_strengths": [
+      "Decision-oriented structure throughout \u2014 the pilot always knows what the briefing is recommending and why",
+      "Winds aloft interpreted into practical tailwind components and block time impact, not just listed",
+      "Concrete icing escape plan (descend to 8,000\u20139,000 ft) and marine layer decision triggers are usable preflight and in-flight",
+      "Pre-flight timeline (Thursday night check, morning-of update) is genuinely useful operational advice"
+    ],
+    "key_weaknesses": [
+      "Terrain routing error: the KSQL\u2192KVGT direct route crosses the Sierra near the Tahoe/Truckee corridor, not the Mammoth/Bishop area \u2014 this is a ~150nm geographic error that undermines the Sierra hazard analysis",
+      "Icing confidence is slightly overclaimed \u2014 'moisture just isn't there' is stated as fact when the freezing level is literally at cruise altitude; the distinction between wave cloud icing risk and organized precip icing deserved more careful treatment",
+      "No MEA/terrain clearance discussion for Sierra crossing at 10,500 ft, which is operationally relevant for a GA pilot on IFR",
+      "Turbulence severity classification is asserted without showing the wave mechanics reasoning (wind speed, stability, lee side behavior)"
+    ],
+    "red_flags": [
+      "Geographic error: Mammoth/Bishop cited as Sierra crossing zone for a SQL\u2192VGT direct route \u2014 the actual crossing is significantly further north near Tahoe/Truckee; this affects turbulence and terrain avoidance advice",
+      "Icing analysis resolves its own uncertainty ('just below freezing level' + 'moisture not there') without acknowledging that wave clouds can produce icing in clear-air high-pressure regimes \u2014 trace icing dismissal is slightly too casual"
+    ],
+    "would_you_fly": "Yes",
+    "would_you_fly_justification": "The overall meteorological picture is correctly assessed \u2014 high pressure ridge over the route, the major storm system is non-threatening, KVGT arrival will be clear and calm. The marine layer departure and Sierra turbulence are real but manageable nuisances. The geographic error in terrain analysis is concerning for briefing quality but doesn't change the go/no-go outcome on this day. File IFR, check PIREPs over the Sierra Tahoe corridor specifically, and go.",
+    "single_most_important_improvement": "Fix the terrain routing: identify the correct Sierra crossing zone for KSQL\u2192KVGT (Tahoe/Truckee area, not Mammoth/Bishop), verify MEA requirements there at 10,500 ft, and anchor the turbulence and icing analysis to the actual crossing latitude \u2014 this is the briefing's most concrete factual error.",
+    "computed_avg": 7.4
+  }
+}

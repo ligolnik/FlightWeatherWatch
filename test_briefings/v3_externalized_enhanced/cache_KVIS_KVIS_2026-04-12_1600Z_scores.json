@@ -1,0 +1,72 @@
+{
+  "cache_prefix": "cache_KVIS_KVIS_2026-04-12_1600Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KVIS",
+    "destination": "KVIS",
+    "departure": "2026-04-12 16:00Z",
+    "altitude_ft": 3500,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, correctly identifies the primary risk (trough/low track uncertainty), gives a usable CONDITIONAL GO with a specific trigger for reassessment. Not padded. Slightly verbose but the content earns it."
+      },
+      "forecast_honesty": {
+        "score": 10,
+        "notes": "Exceptional. Explicitly and repeatedly acknowledges 5-day range limitations, names missing data sources by type (TAF, winds aloft, G-AIRMET, SLD), and avoids false precision throughout. Rare to see this done correctly."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "A pilot can act on this \u2014 it gives a decision framework, timing guidance, specific recheck points, and translates synoptic risk into local valley conditions. The 'file IFR anyway' suggestion is practical and correct."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Triggers are specific and some are quantitative (ceilings below 1,000 ft OVC, low south of 38\u00b0N, winds exceeding 35 kt, MVFR PIREPs Saturday). Could be slightly sharper on the VFR vs. IFR split \u2014 e.g., explicit 'if not IFR current/equipped and TAF shows OVC008, it's a NO-GO' \u2014 but this is close."
+      },
+      "winds_turbulence": {
+        "score": 7,
+        "notes": "Correctly notes no data exists at 5 days and gives pattern-based expectations. Turbulence classification (smooth to light chop baseline, light-to-moderate post-frontal) is appropriately hedged. Doesn't over-interpret what isn't there, which is correct. Loses a point only because there's little to evaluate at this range \u2014 not the briefing's fault."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Correctly characterizes KVIS terrain (292 ft MSL, flat valley floor), explains why Sierra wave and mountain turbulence are non-factors at 3,500 ft for a local flight, and notes the marine stratus trapping mechanism in the San Joaquin Valley under synoptic troughing. Route awareness is solid for what is essentially a zero-terrain route."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "Correctly identifies 3,500 ft as appropriate, explains why there's no better or worse band for this specific route, and notes the ILS 30 as the escape tool. Alternates (KFAT, KBFL) are correctly identified with distances. Not generic \u2014 it's actually route-specific reasoning."
+      },
+      "data_integration": {
+        "score": 9,
+        "notes": "Every conclusion is explicitly tied to what data exists (synoptic prog patterns) vs. what doesn't (TAF, winds aloft, G-AIRMET). The reasoning chain from synoptic trough track \u2192 valley ceiling behavior \u2192 specific go/no-go thresholds is grounded and traceable."
+      },
+      "clarity_signal_noise": {
+        "score": 7,
+        "notes": "Well-organized with headers and a useful table. Slightly long for a local KVIS touch-and-go \u2014 the icing section and alternates section could each be one sentence. Some repetition between the 'Route Hazards' table and the body text. Scannable but not tight."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like an experienced CFI/dispatcher wrote it \u2014 practical advice on timing (marine stratus burn-off by 11-13 local), filing IFR as insurance, and the Friday evening recheck protocol are exactly what a real pilot would want. Avoids LLM hedging tone almost entirely."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Exceptional forecast honesty \u2014 correctly scoped to 5-day uncertainty without false precision, named every missing data source explicitly",
+      "Decision triggers are specific and quantitative, with a realistic Friday evening recheck protocol that gives the pilot an actionable workflow",
+      "Marine stratus trapping mechanism in the San Joaquin Valley is correctly explained and tied to synoptic trough track \u2014 shows genuine route knowledge"
+    ],
+    "key_weaknesses": [
+      "Slightly bloated for a local KVIS pattern flight \u2014 the icing section and alternates discussion consume space disproportionate to their risk level on this route",
+      "Some repetition between the hazard table and the narrative sections; a tighter edit would improve scan time",
+      "The IFR currency/equipment assumption is mentioned but not front-loaded \u2014 the 'file IFR anyway' recommendation should be conditional on currency/equipment earlier in the briefing"
+    ],
+    "red_flags": [],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "At 5 days out for a local KVIS flight, CONDITIONAL GO is the only defensible call \u2014 and this briefing makes it correctly. The Friday evening recheck is the real decision point. No red flags in the analysis itself; the briefing correctly defers the final call to when data actually exists.",
+    "single_most_important_improvement": "Tighten the briefing by 30% \u2014 the icing table, alternates section, and repetitive hazard coverage are disproportionate to the actual risk profile of a local KVIS pattern flight at 3,500 ft. A pilot reading under time pressure should reach the triggers and recheck protocol faster.",
+    "computed_avg": 8.4
+  }
+}

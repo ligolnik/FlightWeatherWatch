@@ -1,0 +1,76 @@
+{
+  "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v1_pre_prompt_rules/cache_KEDC_KBJC_2026-03-19",
+  "version": "v1",
+  "meta": {
+    "origin": "KEDC",
+    "destination": "KBJC",
+    "departure": "2026-03-19 16:00Z",
+    "altitude_ft": 10000,
+    "model": "unknown",
+    "sys_prompt_len": 661
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 8,
+        "notes": "Clear MARGINAL GO verdict with honest caveats. Primary risks (frontal timing, icing in NM/CO, mountain wave) are correctly identified and prioritized. Slightly buries the lead on icing severity \u2014 that should be front and center over frontal timing."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Explicitly calls out missing FIP and GTG data, avoids precision it can't support, and correctly frames the briefing around prog charts. Acknowledges uncertainty in frontal timing without hedging to uselessness. Rare and good."
+      },
+      "operational_decision": {
+        "score": 8,
+        "notes": "Pilot can realistically make a go/no-go from this. Fuel stop recommendation at KAMA, alternate strategy, and timing advice are genuinely useful. Block time estimate is practical. Could be slightly sharper on what 'marginal' means for an aircraft without known-ice certification."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Hard stops are clearly listed and mostly quantitative (SLD PIREPs, front position at 16Z, crosswind limits, convective SIGMETs). Missing a specific ceiling/wind trigger for KBJC (e.g., 'if TAF shows ceilings below 2,500 AGL or winds > 30G45 at departure time, reconsider'). The triggers are realistic and pre-flight usable."
+      },
+      "winds_turbulence": {
+        "score": 7,
+        "notes": "Correctly identifies post-frontal NW flow, tailwind potential on Austin-Amarillo leg, and mountain wave risk over Raton/front range. Turbulence classified as light-to-moderate chop, which is appropriate. Loses points because no winds aloft data was available and the briefing doesn't fully compensate \u2014 the tailwind/headwind shift analysis is directionally correct but thin."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Route is clearly understood \u2014 Palmer Divide, Raton Mesa, terrain rise into KBJC, MSL vs AGL awareness near the front range. The escarpment mention for central Texas is accurate. Correctly flags that 10,000 ft MSL is only 4,000-5,000 ft AGL near KBJC. Solid terrain situational awareness throughout."
+      },
+      "altitude_strategy": {
+        "score": 7,
+        "notes": "Recommends staying at 10,000 ft with a descent option to 7,000-8,000 ft if icing encountered, and correctly warns against climbing to 12,000-14,000 ft. However, no discussion of whether 10,000 ft is even legal/practical for a piston over the Rockies terrain, and no mention of MEAs or terrain clearance requirements on the NM/CO segment which could make that 'drop to 7,000 ft' escape harder than presented."
+      },
+      "data_integration": {
+        "score": 7,
+        "notes": "Analysis is tied to 48-hr and 60-hr prog charts, QPF, and surface low tracking \u2014 all appropriate sources. Honestly acknowledges FIP, GTG, TAF, and winds aloft FD are missing. The icing table is a reasonable inference but is presented slightly more confidently than raw prog data supports. Doesn't hallucinate specific values."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-structured with headers, tables, and a clear action list. The hazard summary table is genuinely useful for a scan. A few sections are slightly verbose (the Rockies moisture paragraph could be trimmed), but overall this is easy to read quickly under time pressure."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like an experienced CFII talking to a capable pilot \u2014 not a textbook, not an LLM. 'Down is your friend,' the KAMA fuel stop rationale, the Wednesday night model check, the 'I wouldn't be nervous if the front clears on schedule' line \u2014 all operationally grounded. The tone is appropriately direct without being alarmist."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Forecast honesty \u2014 explicitly calls out missing data sources (FIP, GTG, winds aloft) rather than fabricating precision",
+      "Operational practicality \u2014 KAMA fuel stop recommendation, alternate strategy, timing advice, and Wednesday night model check are genuinely actionable",
+      "Terrain and route awareness \u2014 demonstrates real understanding of the route's terrain profile and how post-frontal NW flow interacts with it",
+      "Decision triggers are mostly quantitative and pre-flight usable, not generic"
+    ],
+    "key_weaknesses": [
+      "No MEA/terrain clearance discussion for the NM/CO segment \u2014 the 'drop to 7,000 ft' escape route may not be available everywhere and this isn't flagged",
+      "Missing aircraft-specific context \u2014 the entire icing section assumes a piston without known-ice but never explicitly states this limits the go/no-go calculus",
+      "No specific TAF or METAR data cited for KEDC or KBJC \u2014 the briefing works from progs only, and doesn't prompt the pilot to cross-check with actual issued forecasts",
+      "Wind shift and fuel burn impact of the Austin-Amarillo tailwind vs northbound headwind isn't quantified even roughly, leaving fuel planning thin"
+    ],
+    "red_flags": [
+      "The 'drop to 7,000-8,000 ft over NM/CO' icing escape advice does not account for terrain clearance or MEAs on that segment \u2014 this could be dangerous if taken literally near the Raton area without chart verification"
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing correctly identifies this as a marginal situation dependent on frontal timing and icing conditions neither of which are resolvable 48 hours out. The go/no-go can't be made until the morning of with actual FIP data, a current TAF for KBJC, and PIREPs from the NM/CO corridor. The briefing sets up exactly the right framework for that morning check \u2014 but the answer isn't knowable yet, which is itself the correct answer.",
+    "single_most_important_improvement": "Add terrain clearance awareness to the altitude escape strategy \u2014 specifically flag that 'drop to 7,000-8,000 ft' over the Raton/southern Colorado segment requires MEA verification first, and that this escape may not be available everywhere on the route. This is the one piece of advice that could get a pilot in trouble if followed without that caveat.",
+    "computed_avg": 7.9
+  }
+}

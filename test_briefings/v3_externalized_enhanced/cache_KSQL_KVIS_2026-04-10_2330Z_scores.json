@@ -1,0 +1,74 @@
+{
+  "cache_prefix": "cache_KSQL_KVIS_2026-04-10_2330Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KSQL",
+    "destination": "KVIS",
+    "departure": "2026-04-10 23:30Z",
+    "altitude_ft": 5500,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, decision-oriented, correctly identifies marine layer at KSQL as primary risk, gives MARGINAL GO with appropriate caveat. The single most important trigger is named upfront. Minor ding: 'post-frontal transitional day' setup takes a sentence longer than needed."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Explicitly flags 72+ hr range limitation, acknowledges no FD winds data provided, distinguishes pattern-based estimates from confirmed data, and notes TAF window hasn't opened yet. Confidence section is unusually honest and well-structured."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Pilot can make a real decision from this. Timing, fuel, alternates, airport hours, and divert options are all addressed. The departure window recommendation (22:00\u201323:30Z optimal) is directly actionable and correctly reasoned."
+      },
+      "decision_triggers": {
+        "score": 9,
+        "notes": "Quantitative hard stops are present and realistic: ceiling <1,500 ft, vis <3 SM, winds >40 kt. Watch items are distinguished from hard stops. TAF timing trigger (when 30-hr TAF drops Thursday evening) is particularly useful."
+      },
+      "winds_turbulence": {
+        "score": 8,
+        "notes": "Wind interpretation is solid \u2014 NW post-frontal flow correctly tied to synoptic pattern, turbulence tiered by wind speed with realistic severity classifications. Clearly flagged as pattern-based estimates. Would benefit from explicit mention of valley/coastal wind gradient differential beyond the brief KVIS arrival note."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Diablo Range crossing is correctly identified as the terrain choke point, ridgeline elevation band called out (2,000\u20133,500 ft), and the KSQL obstacle environment (towers, dike) is specifically addressed. Could add more on the Pacheco Pass / Diablo Range gap that this route likely uses \u2014 route geometry feels slightly generic."
+      },
+      "altitude_strategy": {
+        "score": 9,
+        "notes": "Best/worst altitude bands are named with reasoning, VFR hemispherical rule correctly applied, escape altitude (7,500 ft) tied to specific wind threshold. Worst-band call (2,000\u20133,500 ft over the ridge) is correct and practical."
+      },
+      "data_integration": {
+        "score": 7,
+        "notes": "Synoptic reasoning is well-grounded (surface prog, frontal timing). However, no actual TAF text, METAR values, or FD numbers are quoted because none were provided \u2014 briefing is transparent about this but it does reduce the data-integration score since conclusions are substantially pattern-based. AFD references are specific and correct."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-organized with headers, tables, and bullet structure. Scannable and prioritized correctly. Minor noise in the 'If You Go' section \u2014 items 5 (noise abatement) and 7 (return leg IFR) are useful but slightly off-topic for a one-way GO/NO-GO briefing. Overall length is justified given route complexity."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like an experienced CFI/dispatcher talking to a real pilot. Practical advice on fuel topping, AWOS check on approach, MALSR activation, and hotel contingency for the return is the kind of thing a real briefer includes. Avoids LLM hedging language almost entirely."
+      }
+    },
+    "overall_score": 8.5,
+    "key_strengths": [
+      "Forecast honesty is exceptional \u2014 explicitly distinguishes pattern-based estimates from actual data, flags the 72-hr range limitation, and identifies exactly when the key data (30-hr TAF, FD winds) will become available",
+      "Decision triggers are quantitative and tiered \u2014 hard stops vs. watch items vs. upgrade conditions gives pilot a clear mental model without false precision",
+      "Departure timing analysis is operationally sharp \u2014 correctly identifies 22:00\u201323:30Z as the optimal marine layer burn-off window and explains the diurnal reasoning"
+    ],
+    "key_weaknesses": [
+      "No actual data quoted \u2014 TAFs, METARs, and FD winds are absent because none were provided, which means the entire briefing is synoptic pattern inference. Transparent about this, but a real briefing needs real numbers.",
+      "Route geometry is slightly underspecified \u2014 the Diablo/Coast Range crossing path (likely Pacheco Pass corridor or Highway 152 gap) is not pinned down, which matters for terrain turbulence assessment",
+      "Return-leg IFR comment and noise abatement are clutter in a one-way departure briefing \u2014 minor but reduces signal-to-noise"
+    ],
+    "red_flags": [
+      "No winds aloft data \u2014 all turbulence and wind assessments are pattern-estimated. Acceptable given transparent disclosure, but a pilot should not rely on this without pulling actual FD winds before committing."
+    ],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing correctly identifies that a GO/NO-GO decision at 72+ hours is premature for this specific route. The synoptic picture is favorable, the en route and arrival are non-events, but KSQL departure conditions are genuinely uncertain at this range. I would use this briefing to plan and set triggers, then make the actual decision Thursday evening when the 30-hr KSFO TAF drops and FD winds are available. The briefing itself tells you exactly this \u2014 which is the right answer.",
+    "single_most_important_improvement": "Pull and quote actual data \u2014 even partial. At minimum, include the current KSFO TAF text, the latest available FD winds (even if 24+ hrs old), and the Day 3 NDFD or WPC surface prog discussion. Pattern-based reasoning is a useful framework but the briefing currently has no data anchor, which means a pilot reading it cannot verify any of the meteorological conclusions.",
+    "computed_avg": 8.5
+  }
+}

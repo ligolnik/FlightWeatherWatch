@@ -1,0 +1,76 @@
+{
+  "cache_prefix": "cache_KSJC_KBUR_2026-04-20_2300Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KSJC",
+    "destination": "KBUR",
+    "departure": "2026-04-20 23:00Z",
+    "altitude_ft": 21000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, decision-oriented. Correctly identifies the primary risk as IMC departure + icing in climb, not the en route or arrival. The 1,500 ft ceiling trigger is front and center. Minor quibble: 'MARGINAL GO' is the right call but the summary could more explicitly state aircraft/pilot prerequisites before the recommendation."
+      },
+      "forecast_honesty": {
+        "score": 8,
+        "notes": "Front timing uncertainty (\u00b13 hours) is explicitly acknowledged and sourced to the AFD. Interpolated winds aloft are labeled as such. FIP probabilities are given as ranges, not false precision. Small deduction: the FL210 interpolated winds are presented with moderate confidence despite being extrapolated from FL180 data on a frontal day when vertical wind shear can be high."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Excellent translation of risks into pilot actions \u2014 IFR currency, ice protection, fuel reserves, ATIS check timing, PIREP solicitation. The 25\u201335 minute block time estimate with 'you'll barely reach cruise before descending' is genuinely useful for altitude strategy. Covers the full decision loop from preflight through arrival."
+      },
+      "decision_triggers": {
+        "score": 9,
+        "notes": "Quantitative triggers are specific and realistic: ceiling below 1,000 ft AGL = hold/delay; ceiling below 1,500 ft = reassess; icing SIGMET issued = NO-GO without ice protection; freezing level below 6,000 ft = reassess. Front acceleration by 2+ hours is also flagged. These are the right thresholds and are actually usable at the aircraft."
+      },
+      "winds_turbulence": {
+        "score": 8,
+        "notes": "Winds are interpreted, not just stated \u2014 tailwind component is calculated and tied to block time impact. Turbulence is classified (light/light-moderate) and correctly sourced to GTG and G-AIRMET. One weakness: the briefing mentions '40\u201365 kt winds at FL210 in mountain wave range' then dismisses it with 'terrain not significant enough' without fully quantifying the wave potential over the Tehachapis/San Gabriels on a southwesterly flow day."
+      },
+      "terrain_route": {
+        "score": 7,
+        "notes": "Coast Ranges icing interaction is correctly identified and emphasized. KBUR basin arrival is handled well. However, the Tehachapi/San Gabriel crossing at FL210 on 40-65kt southwesterly flow gets a brief dismissal without discussing the mountain wave potential in more depth \u2014 that range of winds over the Tehachapis can produce moderate turbulence or wave activity, and a more thorough treatment was warranted. The SJC departure terrain environment is not discussed."
+      },
+      "altitude_strategy": {
+        "score": 9,
+        "notes": "Best/worst/escape altitudes are all provided with correct reasoning. The 'climb through it, don't loiter' guidance for the FL080-FL150 icing band is exactly right. The escape-to-below-freezing-level caveat with the terrain separation warning over the Coast Ranges shows real operational thinking. Temperature-based icing reasoning at FL210 (-21 to -25\u00b0C) is solid."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "Conclusions are tied to specific data sources: TAF, AFD (MTR and LOX cited by name), G-AIRMET, GTG, FIP, winds aloft tables. Decoded wind tables are presented and interpreted. The KBUR noise curfew check (with correct local/Zulu conversion) shows genuine AFD review. Slight deduction because some FIP probability percentages (e.g., '25\u201345%' for FL080-FL150) feel slightly more precise than the source product typically warrants."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-structured with headers, tables, and progressive depth. The route hazard table is an excellent scan-friendly format. Some redundancy between the hazard table and the detailed icing section \u2014 the same icing bands are described twice. The 'If You Go \u2014 Do This' checklist is high signal. Overall length is justified by the complexity of the weather, but a tighter pilot could trim ~15% without losing anything critical."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a real dispatcher or experienced CFII briefing, not an LLM summary. Practical specifics like 'check ATIS at 22:30Z,' 'get IFR clearance on the ground,' 'solicit PIREPs from southbound traffic,' and 'continuing to BUR is better than reversing into deteriorating SJC' are operationally mature. The KBUR noise curfew verification with correct local time conversion is a nice touch that signals real AFD review."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Executive summary correctly identifies the primary risk and gives a clear, conditional GO recommendation with prerequisites stated upfront",
+      "Decision triggers are quantitative, realistic, and distributed across preflight, departure, and en route phases",
+      "Altitude strategy section is genuinely useful \u2014 best/worst/escape logic is correct and operationally actionable",
+      "Data integration is grounded in named sources (MTR AFD, LOX AFD, FIP, GTG) with actual decoded values, not hand-waving",
+      "Pilot action checklist ('If You Go') is practical and time-specific, not generic"
+    ],
+    "key_weaknesses": [
+      "Tehachapi/San Gabriel mountain wave potential is underanalyzed for a 40-65kt southwesterly flow day at FL210 \u2014 dismissal is plausible but not sufficiently supported",
+      "Interpolated FL210 winds on a frontal day are presented with higher confidence than the vertical shear environment warrants",
+      "Minor redundancy between the route hazard table and the detailed icing discussion adds length without adding clarity"
+    ],
+    "red_flags": [
+      "Mountain wave dismissal over the Tehachapis/San Gabriels without quantitative support \u2014 southwesterly flow at 40-65kt at FL210 crossing terrain oriented NW-SE can produce more than light chop and deserves a more explicit treatment or a PIREP request specifically for that segment"
+    ],
+    "would_you_fly": "Yes",
+    "would_you_fly_justification": "The briefing correctly characterizes this as a manageable IFR departure with a clean en route and arrival. For an IFR-current pilot in a properly equipped aircraft with functional ice protection, the risks are real but bounded. The departure is the only meaningful exposure window, the flight is short enough to limit icing accumulation time, and FL210 puts you above the worst of the frontal moisture quickly. The decision triggers are sensible and the ATIS-at-22:30Z check provides a final go/no-go gate. I would go, with ice protection confirmed operational and a resolved plan to climb expeditiously through FL080-FL150.",
+    "single_most_important_improvement": "Give the Tehachapi/San Gabriel mountain wave segment a proper analysis rather than a brief dismissal \u2014 specifically address whether 40-65kt southwesterly flow at FL210 crossing that terrain could produce moderate turbulence or wave activity, and add a PIREP request for that corridor to the preflight checklist.",
+    "computed_avg": 8.4
+  }
+}

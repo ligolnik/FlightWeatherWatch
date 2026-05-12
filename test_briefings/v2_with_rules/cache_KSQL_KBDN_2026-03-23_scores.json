@@ -1,0 +1,78 @@
+{
+  "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v2_with_rules/cache_KSQL_KBDN_2026-03-23",
+  "version": "v2",
+  "meta": {
+    "origin": "KSQL",
+    "destination": "KBDN",
+    "departure": "2026-03-23 14:00Z",
+    "altitude_ft": 12000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 4906
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, direct, correctly identifies primary risk (Cascade terrain/turbulence), gives a confident GO with appropriate caveat. Not padded. The one minor miss: doesn't mention the early departure time means crossing Cascades in low-light conditions, which is operationally relevant."
+      },
+      "forecast_honesty": {
+        "score": 8,
+        "notes": "Correctly flags the AFD coverage gap over the Cascade crest, and separates HIGH confidence (go/no-go) from MEDIUM confidence (ride quality). The 'no moisture = no icing' logic is sound but slightly hand-wavy \u2014 a brief mention of why no orographic cloud is expected would strengthen it. No hallucinated precision detected."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Pilot can absolutely make a decision from this briefing. Risks are translated into real-world implications: timing, altitude, maneuvering speed, alternates, IFR filing rationale. The IFR-for-terrain recommendation is practically useful and not generic."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "The 35\u201340 kt winds-aloft threshold for reconsidering altitude/timing is a concrete, usable trigger. G-AIRMET check is specified. Missing: a ceiling or visibility floor trigger for KBDN arrival, and no explicit 'turn back' or divert trigger if turbulence exceeds expectations en route. Good but not complete."
+      },
+      "winds_turbulence": {
+        "score": 8,
+        "notes": "Winds are interpreted, not just listed \u2014 crosswind/tailwind/headwind implications are drawn out for each leg. Turbulence is correctly classified as mechanical/terrain-driven and labeled conditional. The note that wave mechanics aren't fully resolved at forecast range is honest. Could quantify expected chop better (e.g., light-to-moderate vs. isolated moderate) rather than leaving it open-ended."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Cascade crossing is correctly identified as the terrain crux. Cascade crest elevation (~9\u201310k ft) is cited and used in the altitude reasoning. The note about local wind modification at KBDN is a nice practical touch. Slightly underweights the Sierra Nevada crossing early in the route \u2014 27 kt westerlies crossing the Sierra at 12,000 ft could also produce chop before the Cascades."
+      },
+      "altitude_strategy": {
+        "score": 7,
+        "notes": "12,000 ft is confirmed as the right call for terrain clearance. Mentions descending to 10,000 ft as a turbulence escape but correctly flags the terrain constraint. What's missing: a discussion of whether 14,000 ft might be smoother (above wave rotor) or whether there's a meaningful performance penalty. The escape altitude logic is present but not fully developed."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "Conclusions are grounded in specific data points \u2014 SFO/SAC/RDM winds aloft values, TAF conditions, AFD language, surface prog position. The eTCF reference is appropriate. No hallucinated METARs or PIREPs. The 06Z winds aloft being used for a 14Z\u201316:30Z flight is noted implicitly but not explicitly flagged as a timing gap \u2014 that's a minor miss."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-organized, scannable headers, tables are used appropriately and not over-used. The 'What Forecasters Are Saying' section adds mild redundancy with the executive summary. 'Don't overthink it' closing is punchy and appropriate. Slightly long overall but nothing egregiously padded."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a real experienced briefer \u2014 the IFR-for-terrain advice, the Va over ridgelines reminder, the 'file KRDM as a formality' framing, and the confidence split between go/no-go vs. ride quality all feel operationally grounded. Avoids LLM hedging language almost entirely."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Executive summary is clean, decision-oriented, and correctly identifies the primary risk without burying the lede",
+      "Winds aloft are interpreted with route-specific implications at each waypoint rather than just recited",
+      "Confidence tiering (HIGH for go/no-go, MEDIUM for ride quality) is honest and practically useful",
+      "IFR filing recommendation is well-reasoned and not generic \u2014 terrain + darkness argument is sound",
+      "Actionable pre-flight checklist with specific data items (RDM winds aloft threshold, G-AIRMET timing) rather than vague 'check the weather' advice"
+    ],
+    "key_weaknesses": [
+      "Sierra Nevada crossing at 27 kt westerlies is underweighted \u2014 potential for mechanical turbulence before the Cascades is not addressed",
+      "06Z winds aloft data being applied to a 14Z\u201316:30Z flight window is not explicitly flagged as a temporal gap \u2014 could matter if flow accelerates through the day",
+      "No arrival decision trigger (e.g., if KBDN METAR shows unexpected winds above X or visibility below Y, go direct to KRDM)",
+      "Altitude escape strategy is incomplete \u2014 no discussion of whether FL140+ would be smoother above wave rotor, leaving the pilot with only a downward escape option"
+    ],
+    "red_flags": [
+      "Minor: Sierra Nevada mechanical turbulence potential with 27 kt westerlies is not mentioned \u2014 same flow crossing earlier high terrain before the Cascades",
+      "Minor: Freezing level at 12,000 ft over terrain with no explicit orographic cloud discussion \u2014 the 'no moisture' assertion is correct for this setup but the reasoning could be tightened"
+    ],
+    "would_you_fly": "Yes",
+    "would_you_fly_justification": "Pacific High firmly in control, both AFDs clean, no system weather within several hundred miles. The Cascade terrain turbulence with 25\u201327 kt westerlies at cruise altitude is a real consideration but entirely manageable. The IFR filing recommendation is correct for this route and time of day. Only meaningful pre-flight action is verifying winds aloft haven't amplified overnight. This flight goes.",
+    "single_most_important_improvement": "Add a brief Sierra Nevada turbulence note for the first third of the route \u2014 the same 27 kt westerly flow that concerns you over the Cascades is also crossing the Sierra Nevada, and that's the first terrain interaction the pilot will encounter. Ignoring it leaves a gap in the ride quality picture and could surprise a pilot who was told to expect smooth air until the Cascades.",
+    "computed_avg": 8.2
+  }
+}

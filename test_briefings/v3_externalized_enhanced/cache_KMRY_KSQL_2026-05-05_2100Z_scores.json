@@ -1,0 +1,75 @@
+{
+  "cache_prefix": "cache_KMRY_KSQL_2026-05-05_2100Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KMRY",
+    "destination": "KSQL",
+    "departure": "2026-05-05 21:00Z",
+    "altitude_ft": 5000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, correctly identifies residual ceiling risk as primary hazard, gives a defensible MARGINAL GO with appropriate caveat about upper low timing. The single most important trigger is called out immediately \u2014 that's exactly what a time-constrained pilot needs."
+      },
+      "forecast_honesty": {
+        "score": 9,
+        "notes": "Explicitly flags that no valid KMRY TAF exists yet for the departure window, uses SFO as a proxy and says so, acknowledges coastal upper low clearing uncertainty, and distinguishes between synoptic confidence and mesoscale timing confidence. Confidence section at the end is well-calibrated and not boilerplate."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Pilot can absolutely make a decision from this briefing. Risks are translated into timing, specific METARs to watch, a clear check sequence, and realistic alternates. The 21Z departure window rationale is explained and actionable."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Multiple concrete triggers provided with specific thresholds (BKN/OVC below 1,500 ft persisting through 21Z, ceilings below 3,000 ft at departure, upper low stalling visible on satellite by 18Z). Slightly short of a 9 because some triggers lack precise quantification \u2014 e.g., 'convective development' is vague and the satellite/upper low stall trigger requires interpretation. Still well above average."
+      },
+      "winds_turbulence": {
+        "score": 8,
+        "notes": "Winds aloft are interpolated and translated into a route-relevant tailwind component \u2014 that's the right move. Turbulence is correctly classified as smooth to light chop with terrain reasoning provided. Minor gap: no mention of surface wind gradient or any sea-breeze interaction along the bay shoreline near KSQL, which is a real coastal phenomenon on NW flow days."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Santa Cruz Mountains terrain interaction is correctly assessed as low risk at 12-14 kt NW flow. KSQL approach hazards (transmission towers, lighted dike at Runway 30 threshold) are specifically called out \u2014 that's operationally sharp. Monterey Bay coastal geometry is acknowledged as a modifier on clearing timing. Could have briefly noted the coastal orographic influence on ceiling lifting at KMRY specifically."
+      },
+      "altitude_strategy": {
+        "score": 8,
+        "notes": "Best, worst, and escape altitudes are clearly stated with correct reasoning. 5,000 ft sits above expected cloud tops, below icing, and in favorable tailwind \u2014 logic is sound. Escape advice (turn back to KMRY, divert KSJC) is practical for a 23 nm leg. Slight deduction for not mentioning MEAs or obstacle clearance on coastal routing at lower altitudes if forced down."
+      },
+      "data_integration": {
+        "score": 8,
+        "notes": "SFO TAF is quoted directly, winds aloft table is sourced and dated, AFD clearing timeline is cited, eTCF convective product is referenced, QPF moisture timeline is mentioned. Reasoning feels grounded. Minor issue: the SAC winds aloft being 'calm/light' at 3,000-6,000 ft seems slightly unusual for a post-upper-low NW flow pattern and warrants a brief explanation or caveat."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-structured with headers, tables, and bullet points. The 'If You Go \u2014 Do This' checklist is genuinely useful and scannable. Icing table is thorough but arguably overkill for a May coastal flight well above freezing \u2014 that space could be trimmed. Overall signal-to-noise is good without being padded."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a real experienced coastal California briefer. The specific notes about Monterey Bay coastal geometry, KSQL tower/dike hazards, suggesting IFR as a 'costs nothing' option, and the 'don't lock in a runway expectation until you have the ATIS' line are all authentically operational. Not generic, not LLM-fluffy."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Correctly identifies the primary risk (residual coastal ceiling from a slow-ejecting upper low) and gives a calibrated MARGINAL GO rather than defaulting to a binary answer",
+      "Decision triggers are specific and checkable \u2014 pilot knows exactly what TAFs to pull, when to pull them, and what values to look for",
+      "KSQL-specific terrain and approach hazards (transmission towers, lighted dike) are called out precisely \u2014 shows real route familiarity",
+      "Forecast honesty is high: explicitly acknowledges the missing KMRY TAF, uses SFO as a proxy and flags that limitation, distinguishes synoptic confidence from mesoscale timing confidence"
+    ],
+    "key_weaknesses": [
+      "No discussion of sea-breeze or bay surface wind interaction near KSQL on an NW flow afternoon \u2014 this is a real factor for runway surface winds and approach stability on this type of day",
+      "SAC calm/light winds at 3,000-6,000 ft presented without explanation \u2014 slightly odd for post-upper-low NW flow and could erode data credibility if a sharp pilot notices it",
+      "Icing section is disproportionately detailed for a May coastal VFR/IFR flight where temperatures are comfortably above freezing at cruise altitude \u2014 space could be redirected to coastal ceiling behavior nuances"
+    ],
+    "red_flags": [
+      "None critical. Minor: 'convective development along the coast' trigger is vague \u2014 no threshold given for what constitutes an avoidance condition (cell size, proximity, SIGMET vs PIREPs)."
+    ],
+    "would_you_fly": "Yes",
+    "would_you_fly_justification": "The synoptic setup is well-understood, the clearing trend is credible, and the 21Z departure window has meaningful buffer after the AFD-cited 17-18Z clearing. The flight is 23 nm with multiple solid alternates. Filing IFR as recommended removes the residual ceiling ambiguity entirely. The briefing correctly tells the pilot exactly what to check Tuesday morning before committing \u2014 that's the right posture for a MARGINAL GO on a coastal upper low day.",
+    "single_most_important_improvement": "Add a sea-breeze and bay surface wind interaction note for the KSQL arrival \u2014 on NW flow afternoons, the bay shoreline frequently produces localized wind shifts and gusty surface conditions that don't show up in SFO winds aloft data, and this is directly relevant to runway selection and approach stability at KSQL.",
+    "computed_avg": 8.4
+  }
+}

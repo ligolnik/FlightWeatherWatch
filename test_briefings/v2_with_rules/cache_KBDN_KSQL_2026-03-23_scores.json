@@ -1,0 +1,75 @@
+{
+  "cache_prefix": "/Users/lim/Claude/Personal/FlightWeatherWatch/test_briefings/v2_with_rules/cache_KBDN_KSQL_2026-03-23",
+  "version": "v2",
+  "meta": {
+    "origin": "KBDN",
+    "destination": "KSQL",
+    "departure": "2026-03-23 21:30Z",
+    "altitude_ft": 12000,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 4906
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, correctly identifies coastal stratus as primary risk, gives a confident GO with honest caveats. The 21:30Z\u2192~00Z arrival math is immediately useful and grounded."
+      },
+      "forecast_honesty": {
+        "score": 8,
+        "notes": "Appropriately flags the Monterey Bay eddy as a wildcard and acknowledges TAF timing gaps. Slightly overconfident calling icing 'academic' \u2014 near-freezing level in any residual moisture deserves a touch more respect, even if low probability."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Pilot can clearly decide to go, knows what to watch, when to recheck, and what changes the decision. Fuel, alternates, and timing are all addressed practically."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Two hard stops are explicit and one is quantitative (OVC005\u2013010 persisting past 22Z). Would benefit from a quantitative wind trigger for KSQL crosswind limits (e.g., 'if surface winds exceed 20 kts at KSQL, reassess runway options') and a turbulence ride trigger."
+      },
+      "winds_turbulence": {
+        "score": 8,
+        "notes": "Winds are interpreted with route-relevant component breakdown (crosswind vs tailwind by leg), and turbulence is correctly classified as smooth-to-light with terrain context. The eTCF chart reference is a nice specific touch. Minor gap: no mention of what the ~27 kt westerly at SFO/SAC means for the coastal approach segment specifically."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Cascades lee side rotor flagged correctly and proportioned as low-risk given light winds. Sierra Nevada terrain is mentioned but not analyzed \u2014 the route from Bend to SQL crosses significant northern California terrain that gets one passing mention without specifics."
+      },
+      "altitude_strategy": {
+        "score": 7,
+        "notes": "12,000 ft is accepted without a strong alternatives discussion. No mention of whether 10,000 ft or 14,000 ft might be better for terrain clearance, winds, or icing avoidance. The freezing level straddle at cruise is noted but no 'if you pick up ice, descend to X' altitude is given \u2014 just 'be ready to descend.'"
+      },
+      "data_integration": {
+        "score": 9,
+        "notes": "Conclusions are consistently tied to named sources: PDT AFD, MTR AFD, eTCF charts, winds aloft with station identifiers and temperatures. No hallucinated precision detected. RDM/SAC/SFO winds aloft table is well-sourced and directly usable."
+      },
+      "clarity_signal_noise": {
+        "score": 8,
+        "notes": "Well-structured with headers and tables that are easy to scan. The hazards summary table is genuinely useful. Some repetition between the 'Fly or No' section and the 'Confidence' section \u2014 could be trimmed. 'If You Go \u2014 Do This' list is excellent and rare in briefings."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a knowledgeable CFI talking to a prepared pilot \u2014 not a weather service bulletin. Practical advice is specific (KPAO vs KHAF as alternate reasoning, ATIS timing, IFR filing rationale for terrain not IMC). The closing line lands well without being cute."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Decision triggers are explicit and tied to named forecast products with specific threshold values",
+      "Winds aloft are interpreted with route-specific component analysis rather than just transcribed",
+      "Pre-flight action checklist with timing (Sunday night vs Monday morning) is rare and highly practical",
+      "Alternate airport reasoning (why KHAF is a bad choice) shows genuine route awareness"
+    ],
+    "key_weaknesses": [
+      "Altitude strategy is thin \u2014 12,000 ft accepted without alternatives, no specific descent altitude given if icing encountered",
+      "Northern California terrain (Shasta, Trinity Alps, Coast Ranges) between Oregon border and Bay Area gets almost no analysis despite being a meaningful portion of the route",
+      "No quantitative crosswind trigger for KSQL despite identifying it as a concern"
+    ],
+    "red_flags": [
+      "Icing dismissed as 'academic' while acknowledging the freezing level is at cruise altitude \u2014 this framing could cause a pilot to lower their guard in any unexpected moisture encounter along the route"
+    ],
+    "would_you_fly": "Yes",
+    "would_you_fly_justification": "The synoptic picture is genuinely benign \u2014 strong ridge, no fronts near route, VFR departure and VFR arrival window. The primary risk (Bay Area marine layer) is correctly timed as a non-issue for a ~00Z arrival. The briefing gives enough specifics to support a confident go decision with a clear set of pre-departure checks. Only hesitation would be confirming the Monday morning satellite picture before departure as suggested.",
+    "single_most_important_improvement": "Add a specific altitude escape plan for the icing straddle: 'If you pick up any trace icing at 12,000 ft, descend to [X] ft where temps at SAC/SFO are +3\u20134\u00b0C' \u2014 right now 'be ready to descend' leaves the pilot without an actual number, which is the one thing they need in that moment.",
+    "computed_avg": 8.3
+  }
+}

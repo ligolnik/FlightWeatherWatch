@@ -1,0 +1,71 @@
+{
+  "cache_prefix": "cache_KVIS_KVIS_2026-04-11_2000Z",
+  "version": "v2",
+  "meta": {
+    "origin": "KVIS",
+    "destination": "KVIS",
+    "departure": "2026-04-11 20:00Z",
+    "altitude_ft": 3500,
+    "model": "claude-sonnet-4-6",
+    "sys_prompt_len": 3855
+  },
+  "scores": {
+    "scores": {
+      "executive_summary": {
+        "score": 9,
+        "notes": "Clear, concise, correctly identifies the primary risk as forecast uncertainty at 4+ days range rather than any specific hazard. The CONDITIONAL GO with explicit rationale is exactly right \u2014 doesn't pretend to know what it can't know, but still gives a usable posture."
+      },
+      "forecast_honesty": {
+        "score": 10,
+        "notes": "Exceptional handling of the long-range planning problem. Explicitly calls out that the benign assessment is a negative indicator, not positive confirmation. Correctly treats Day 5-7 progs as scenario-framing only and doesn't manufacture precision from non-existent products."
+      },
+      "operational_decision": {
+        "score": 9,
+        "notes": "Highly usable \u2014 tells the pilot exactly what to pull on Friday evening and Saturday morning, what to look for, and what the actual threat vector is (marine layer, not synoptic). The step-by-step 'If You Go' section translates directly to preflight action."
+      },
+      "decision_triggers": {
+        "score": 8,
+        "notes": "Triggers are specific and mostly quantitative: ceiling below 1,500 ft AGL, visibility below 3 SM, winds aloft >30 kt at 3,000 ft, active G-AIRMET IFR. Minor ding: the marine layer trigger could specify a hard METAR observation time (e.g., if KVIS still reporting BKN below 1,500 ft at 17:00Z, reassess) rather than a general 'Saturday morning' check."
+      },
+      "winds_turbulence": {
+        "score": 7,
+        "notes": "Correctly characterizes expected afternoon thermals as light chop and properly limits mountain wave concern at 3,500 ft. Pattern-based wind estimate is appropriately hedged. The >25 kt NW threshold for terrain-adjacent turbulence is useful, but the briefing could more explicitly state this is a smooth-to-light-chop flight under the expected benign pattern \u2014 the current framing is slightly hedge-heavy for what is likely a non-event ride."
+      },
+      "terrain_route": {
+        "score": 8,
+        "notes": "Correctly identifies KVIS as Valley floor, dismisses Sierra wave as a non-factor at this altitude, and correctly names the Coast Range/Sierra foothill edges as the terrain-turbulence exposure zone. Notes AFD constraint on Runway 12 departure. Good route awareness for a local flight with minimal terrain exposure."
+      },
+      "altitude_strategy": {
+        "score": 9,
+        "notes": "Best/worst/escape bands are clearly stated and climatologically grounded \u2014 identifying 1,000-2,500 ft as the marine stratus layer and 3,500 ft as above typical tops is practical and correct. Escape logic is simple and realistic for a local flight."
+      },
+      "data_integration": {
+        "score": 9,
+        "notes": "Conclusions are consistently tied to the actual data that exists (Day 5-7 extended progs) and clearly labeled when they are climatology vs. forecast. No hallucinated product validity. AFD detail on Runway 12 departure constraint shows real source integration."
+      },
+      "clarity_signal_noise": {
+        "score": 7,
+        "notes": "Well-organized with headers and tables, easy to scan. However, the briefing is long for a local VFR flight at a non-complex airport \u2014 the icing tables and SLD discussion, while technically correct, consume space better spent elsewhere. The core message could be delivered in about 60% of the current length without losing decision value."
+      },
+      "pilot_realism": {
+        "score": 9,
+        "notes": "Reads like a real experienced pilot-forecaster wrote it \u2014 practical advice on fuel, timing, alternate, CTAF-activated MALSR, and the Friday evening rebrief cycle. Avoids generic boilerplate. The observation that 1 PM local is the best window due to peak diurnal burnoff is exactly the kind of local knowledge that matters."
+      }
+    },
+    "overall_score": 8,
+    "key_strengths": [
+      "Exemplary handling of the long-range forecast limitation \u2014 correctly frames the entire briefing as planning-only and directs the pilot to the Friday rebrief as the real decision point",
+      "Decision triggers are quantitative, specific, and actionable with clear flip conditions",
+      "Local knowledge is solid: marine layer mechanics, diurnal burnoff timing, AFD runway constraint, alternate selection \u2014 all correct and practically useful"
+    ],
+    "key_weaknesses": [
+      "Slightly overlong for the actual complexity of the flight \u2014 a KVIS-KVIS local at 3,500 ft over flat terrain doesn't require SLD icing tables; length dilutes the signal",
+      "Marine layer trigger could be more precise \u2014 a specific METAR observation time for go/no-go decision would sharpen an already good trigger"
+    ],
+    "red_flags": [],
+    "would_you_fly": "Needs more data",
+    "would_you_fly_justification": "The briefing itself correctly answers this: no go/no-go is possible at 4+ days range. The Friday evening rebrief with a valid TAF, winds aloft, and Day 1 surface prog is the actual decision brief. Current data supports a planning posture of CONDITIONAL GO with no threatening synoptic signal \u2014 that's the right call and I agree with it.",
+    "single_most_important_improvement": "Tighten the briefing by 40% \u2014 remove the SLD/icing tables (not warranted for a spring afternoon Valley flight with no moisture signal), consolidate the departure and arrival sections (same location, same conditions), and lead with the Friday rebrief checklist as the action item. The core decision logic is excellent; the presentation buries it in volume.",
+    "computed_avg": 8.5
+  }
+}
