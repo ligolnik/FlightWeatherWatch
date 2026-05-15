@@ -628,6 +628,129 @@ def _load_afd_csv(filename, faa_id):
     return rows
 
 
+# ---------------------------------------------------------------------------
+# d-TPP (Digital Terminal Procedures Publication) — instrument approach list
+# Sourced from FAA's d-TPP_Metafile.xml, refreshed every 28-day AIRAC cycle.
+# Used to fill the "Approaches" line of the A/FD block so the LLM doesn't
+# guess from runway/ILS data alone.
+# ---------------------------------------------------------------------------
+
+_DTPP_FILE = "d-TPP_Metafile.xml"
+# Known AIRAC anchor: cycle 2605 starts 2026-05-14 (13 cycles per year, 28 days each).
+_DTPP_ANCHOR_YEAR = 2026
+_DTPP_ANCHOR_CYCLE = 5
+_DTPP_ANCHOR_DATE = datetime(2026, 5, 14).date()
+_DTPP_INDEX = None  # icao -> [chart_name, ...]
+
+
+def _dtpp_cycle_for(target_date):
+    """Return AIRAC cycle code 'YYCC' for the given date."""
+    offset = (target_date - _DTPP_ANCHOR_DATE).days // 28
+    year = _DTPP_ANCHOR_YEAR
+    cn = _DTPP_ANCHOR_CYCLE + offset
+    while cn > 13:
+        year += 1
+        cn -= 13
+    while cn < 1:
+        year -= 1
+        cn += 13
+    return f"{year % 100:02d}{cn:02d}"
+
+
+def _parse_dtpp_edate(s):
+    """Parse a d-TPP edate like '0901Z  05/14/26' to a date."""
+    m = re.search(r"(\d{2})/(\d{2})/(\d{2})", s or "")
+    if not m:
+        return None
+    mm, dd, yy = (int(x) for x in m.groups())
+    return datetime(2000 + yy, mm, dd).date()
+
+
+def _ensure_dtpp_metafile():
+    """Download d-TPP Metafile XML if missing or expired. Returns path or None."""
+    import xml.etree.ElementTree as ET
+    path = os.path.join(_FAA_DATA_DIR, _DTPP_FILE)
+    today = datetime.now(timezone.utc).date()
+
+    if os.path.exists(path):
+        try:
+            root = ET.parse(path).getroot()
+            from_dt = _parse_dtpp_edate(root.get("from_edate"))
+            to_dt = _parse_dtpp_edate(root.get("to_edate"))
+            if from_dt and to_dt and from_dt <= today <= to_dt:
+                return path
+        except Exception:
+            pass
+
+    primary = _dtpp_cycle_for(today)
+    yr = int(primary[:2])
+    cn = int(primary[2:])
+    candidates = [primary]
+    for delta in (-1, 1, -2, 2):
+        c2, y2 = cn + delta, yr
+        while c2 > 13:
+            y2 += 1
+            c2 -= 13
+        while c2 < 1:
+            y2 -= 1
+            c2 += 13
+        candidates.append(f"{y2:02d}{c2:02d}")
+
+    print("Updating FAA d-TPP data ...", end=" ", flush=True)
+    for cycle in candidates:
+        url = f"https://aeronav.faa.gov/d-tpp/{cycle}/xml_data/d-TPP_Metafile.xml"
+        try:
+            r = httpx.get(url, timeout=60, follow_redirects=True)
+            if r.status_code != 200 or b"<digital_tpp" not in r.content[:512]:
+                continue
+            os.makedirs(_FAA_DATA_DIR, exist_ok=True)
+            with open(path, "wb") as f:
+                f.write(r.content)
+            print(f"done (cycle {cycle}).")
+            return path
+        except Exception:
+            continue
+    print("failed.")
+    return None
+
+
+def _load_dtpp_index():
+    """Build {icao: [chart_name, ...]} for IAP records. Cached at module level."""
+    global _DTPP_INDEX
+    if _DTPP_INDEX is not None:
+        return _DTPP_INDEX
+    import xml.etree.ElementTree as ET
+    path = _ensure_dtpp_metafile()
+    index = {}
+    if not path:
+        _DTPP_INDEX = index
+        return index
+    try:
+        root = ET.parse(path).getroot()
+        for ap in root.iter("airport_name"):
+            icao = (ap.get("icao_ident") or "").strip().upper()
+            if not icao:
+                continue
+            iaps = [
+                (rec.findtext("chart_name") or "").strip()
+                for rec in ap.findall("record")
+                if (rec.findtext("chart_code") or "").strip() == "IAP"
+            ]
+            index[icao] = [name for name in iaps if name]
+    except Exception:
+        pass
+    _DTPP_INDEX = index
+    return index
+
+
+def lookup_iaps(icao):
+    """Return list of published IAP names for an ICAO, or None if d-TPP unavailable."""
+    index = _load_dtpp_index()
+    if not index:
+        return None
+    return index.get(icao.upper(), [])
+
+
 def lookup_afd(icao):
     """Look up A/FD data for an airport. Returns formatted text or empty string."""
     faa_id = icao.lstrip("K") if icao.startswith("K") and len(icao) == 4 else icao
@@ -711,6 +834,14 @@ def lookup_afd(icao):
             continue
         remarks.append(text)
 
+    # Instrument approaches from d-TPP (RNAV/GPS/ILS/VOR/LOC, etc.)
+    iaps = lookup_iaps(icao)
+    if iaps is not None:
+        if iaps:
+            lines.append(f"  Approaches: {', '.join(iaps)}")
+        else:
+            lines.append("  Approaches: None published")
+
     if remarks:
         lines.append("  Remarks:")
         for r in remarks:
@@ -722,6 +853,7 @@ def lookup_afd(icao):
 def fetch_afd_for_airports(airports):
     """Look up A/FD data for a list of ICAO airports. Returns formatted text block."""
     _ensure_faa_data()
+    _ensure_dtpp_metafile()
     sections = []
     for icao in airports:
         text = lookup_afd(icao)
