@@ -63,6 +63,11 @@ python3 flightweather.py <ORIGIN> [WAYPOINTS...] <DESTINATION> <DATE> <TIME_UTC>
      group), and that ride/turbulence reasoning leans on the winds-aloft period valid for the flight —
      not vivid prior-day AFD prose. A flag like "this afternoon's winds = your departure window" on a
      next-morning flight is the classic error to catch.
+   - **Factual values** — the briefing must use the tool's computed values, not invented ones:
+     distances should match the route's computed great-circle distance (watch for the ETA minutes
+     mistaken for nautical miles), and the briefing must NOT assert control-tower operating hours or
+     "tower open/closed at ETA" as fact (the FAA data only carries airport *attendance* hours, not
+     tower hours — those need separate verification via Chart Supplement/NOTAM/ATIS).
 5. **Report to user** — summarize the recommendation and note any fetch failures or missing data (e.g., TAFs not yet valid). If the tool errored, diagnose and re-run or advise.
 
 ## Interpreting User Requests
