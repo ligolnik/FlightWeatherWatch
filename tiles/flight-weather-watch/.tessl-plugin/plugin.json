@@ -1,0 +1,9 @@
+{
+  "name": "ligolnik/flight-weather-watch",
+  "version": "0.13.0",
+  "description": "Aviation weather briefing tool that fetches WPC prog charts, QPF, and AWC products, overlays flight routes, and generates HTML briefings with Claude analysis.",
+  "private": false,
+  "skills": [
+    "skills/flight-weather"
+  ]
+}

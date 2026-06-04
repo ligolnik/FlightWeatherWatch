@@ -1,0 +1,21 @@
+{
+  "name": "my-project",
+  "mode": "vendored",
+  "dependencies": {
+    "jbaruch/fifty-tabs-of-fares": {
+      "version": "0.4.4"
+    },
+    "jbaruch/fifty-tabs-of-fares-asi": {
+      "version": "0.2.0"
+    },
+    "jbaruch/jbaruch-travel-policy": {
+      "version": "0.7.6"
+    },
+    "ligolnik/leonid-travel-policy": {
+      "version": "0.1.1"
+    },
+    "ligolnik/flight-weather-watch": {
+      "version": "0.13.0"
+    }
+  }
+}

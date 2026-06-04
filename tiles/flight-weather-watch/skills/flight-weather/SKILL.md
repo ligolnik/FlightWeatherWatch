@@ -1,6 +1,6 @@
 ---
 name: flight-weather
-description: Generate an aviation weather briefing for a VFR/IFR flight. Fetches WPC surface prog charts, QPF precipitation forecasts, extended day progs, AWC icing/turbulence/SIGMET charts, overlays the flight route on each chart, and produces a self-contained HTML briefing with Claude analysis.
+description: Generate an aviation weather briefing for a VFR/IFR flight. Use when the user asks for a weather briefing, preflight weather, go/no-go assessment, or route weather analysis for a flight. Fetches WPC prog charts, QPF, AWC icing/turbulence/SIGMET charts, overlays the flight route, and produces a self-contained HTML briefing.
 ---
 
 # Flight Weather Briefing
@@ -56,29 +56,19 @@ python3 flightweather.py <ORIGIN> [WAYPOINTS...] <DESTINATION> <DATE> <TIME_UTC>
    - The HTML file was created (tool prints the filename).
    - Chart fetch summary shows `OK` for most charts (a few failures are tolerable; all failures means a network issue).
    - The briefing contains a GO / NO-GO / CAUTION recommendation.
+   - **Time-window alignment** (especially for briefings generated the day before): the briefing must
+     anchor each product to its own valid/issue time, not the flight time. Spot-check that AFD relative
+     words ("this afternoon", "tonight") are tied to the AFD's issuance day rather than the flight
+     window, that arrival conditions use the TAF group valid at the arrival ETA (not an expired earlier
+     group), and that ride/turbulence reasoning leans on the winds-aloft period valid for the flight —
+     not vivid prior-day AFD prose. A flag like "this afternoon's winds = your departure window" on a
+     next-morning flight is the classic error to catch.
 5. **Report to user** — summarize the recommendation and note any fetch failures or missing data (e.g., TAFs not yet valid). If the tool errored, diagnose and re-run or advise.
 
 ## Interpreting User Requests
 
-### Airport Codes
-Convert names/cities to 4-letter ICAO codes (K-prefixed in the US). The user's commonly used airports:
-- Nashville area → **KMQY** (Smyrna/Rutherford County — the user's preferred Nashville airport)
-- Austin → **KEDC** (Austin Executive)
-- San Carlos → **KSQL**
-- Las Vegas → **KVGT** (North Las Vegas)
-- Denver metro → **KBJC** (Rocky Mountain Metropolitan)
-
-For unfamiliar airports, look up the ICAO code before running.
-
-### Local Time → UTC
-The user gives departure in **local time at the departure airport**. Convert to UTC based on the airport's timezone. DST is active from the second Sunday of March through the first Sunday of November.
-
-| Zone | Standard | Daylight |
-|------|----------|----------|
-| Eastern | +5 | +4 |
-| Central | +5 (CDT) or +6 (CST) | +5 |
-| Mountain | +7 | +6 |
-| Pacific | +8 | +7 |
+### Airport Codes & Time Zones
+Convert city names to ICAO codes and local times to UTC. See [reference.md](reference.md) for the user's preferred airports and timezone conversion table.
 
 ### Fuel Stops / Waypoints
 If the user mentions a fuel stop or intermediate point, insert it as a waypoint between origin and destination. Example: "stop at Amarillo" → add `KAMA` between origin and destination.
