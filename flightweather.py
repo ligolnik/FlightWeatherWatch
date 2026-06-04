@@ -1068,6 +1068,21 @@ def _fetch_afd_text(wfo):
         return None
 
 
+def _parse_afd_issued(afd_text):
+    """Extract the AFD product issuance timestamp line, e.g. '449 AM PDT Wed Jun 3 2026'.
+
+    Returns the matched string or None. AFDs carry this near the product header
+    (before .AVIATION), so it survives even when the AVIATION section itself omits it.
+    """
+    if not afd_text:
+        return None
+    m = re.search(
+        r'(\d{3,4}\s+(?:AM|PM)\s+[A-Z]{2,4}\s+[A-Za-z]{3}\s+[A-Za-z]{3}\s+\d{1,2}\s+\d{4})',
+        afd_text,
+    )
+    return m.group(1).strip() if m else None
+
+
 def _extract_aviation_section(afd_text):
     """Extract the AVIATION section from an AFD. Returns text or None."""
     if not afd_text:
@@ -1110,7 +1125,8 @@ def fetch_afd_aviation(waypoint_coords, log=None):
         raw = _fetch_afd_text(wfo)
         aviation = _extract_aviation_section(raw)
         if aviation:
-            results.append({"wfo": wfo, "role": role, "text": aviation})
+            results.append({"wfo": wfo, "role": role, "text": aviation,
+                            "issued": _parse_afd_issued(raw)})
             _log("OK", log=log)
         else:
             _log("no AVIATION section found", log=log)
@@ -1773,6 +1789,37 @@ def _card_class(label):
     return ""
 
 
+def _active_taf_group_plain(taf_text, target_ddhh):
+    """Plaintext sibling of _highlight_taf_line for the LLM prompt.
+
+    Returns (annotated_taf_text, active_group_str). The active group is the last
+    FM/initial group whose validity starts at or before target_ddhh (DDHH) — i.e.
+    the group in effect at the ETA. Marks that line inline with ' <<< valid at ETA'.
+    Returns (taf_text, None) if no group can be resolved.
+    """
+    lines = taf_text.split("\n")
+    line_times = []  # (index, ddhh_start)
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        m = re.search(r'\b(\d{4})/(\d{4})\b', stripped)
+        if i == 0 and m:
+            line_times.append((i, m.group(1)))
+            continue
+        m = re.match(r'\s*FM(\d{6})', stripped)
+        if m:
+            line_times.append((i, m.group(1)[:4]))
+            continue
+    best_idx = None
+    for idx, start in line_times:
+        if start <= target_ddhh:
+            best_idx = idx
+    if best_idx is None:
+        return taf_text, None
+    active = lines[best_idx].strip()
+    lines[best_idx] = lines[best_idx].rstrip() + "   <<< valid at ETA"
+    return "\n".join(lines), active
+
+
 def _highlight_taf_line(taf_text, target_ddhh, role_label):
     """Bold the TAF line that covers target_ddhh (e.g. '1019' = 10th day 19Z).
 
@@ -1876,10 +1923,28 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
         if isinstance(taf_data, list):
             for entry in taf_data:
                 eta = entry.get("eta", "")
-                eta_str = eta if isinstance(eta, str) else (eta.strftime("%H:%MZ") if eta else "?")
+                if isinstance(eta, str):
+                    eta_str = eta
+                    target_ddhh = (eta[8:10] + eta[11:13]) if len(eta) >= 13 else ""
+                elif eta:
+                    eta_str = eta.strftime("%H:%MZ")
+                    target_ddhh = eta.strftime("%d%H")
+                else:
+                    eta_str = "?"
+                    target_ddhh = ""
                 if entry.get("taf"):
                     hdr = entry.get("note") or entry["icao"]
-                    taf_lines.append(f"  {entry['role']} {hdr} (ETA {eta_str}):\n    {entry['taf']}")
+                    taf_body, active_group = (
+                        _active_taf_group_plain(entry["taf"], target_ddhh)
+                        if target_ddhh else (entry["taf"], None)
+                    )
+                    block = f"  {entry['role']} {hdr} (ETA {eta_str}):\n    {taf_body}"
+                    if active_group:
+                        block += (
+                            f"\n    >> For {entry['role'].lower()} conditions use the group valid at "
+                            f"ETA {eta_str}: {active_group}  (NOT the initial line if a later group supersedes it)"
+                        )
+                    taf_lines.append(block)
                 else:
                     note = entry.get("note", "")
                     if "not yet available" in note.lower() or "not yet valid" in note.lower():
@@ -1895,8 +1960,14 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
         if taf_lines:
             taf_section = "\n  TAFs:\n" + "\n".join(taf_lines) + "\n"
 
-    now_str = datetime.now(timezone.utc).strftime("%A %Y-%m-%d %H:%MZ")
+    now_dt = datetime.now(timezone.utc)
+    now_str = now_dt.strftime("%A %Y-%m-%d %H:%MZ")
     dep_day = departure_dt.strftime("%A")
+    lead_h = (departure_dt - now_dt).total_seconds() / 3600.0
+    # "now" only equals briefing-generation time on a live run. When replaying an old
+    # cache the wall clock is unrelated to the flight, so only trust lead_h / now-based
+    # anchoring when the lead is operationally plausible (issued 0-8 days pre-departure).
+    lead_plausible = 0 <= lead_h <= 192
 
     winds_section = ""
     if winds_text:
@@ -1906,7 +1977,24 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
     if afd_data:
         afd_lines = []
         for entry in afd_data:
-            afd_lines.append(f"  {entry['role']} WFO {entry['wfo']}:\n{entry['text']}")
+            issued = entry.get("issued")
+            if issued:
+                anchor = f"issued {issued}"
+            elif lead_plausible:
+                anchor = f"issued near briefing-generation time ({now_str})"
+            else:
+                anchor = "issued shortly before this flight (same day or the day prior)"
+            if lead_plausible:
+                lead_clause = f"Your flight departs {dep_day} {dep_str} (~{lead_h:.0f} h after issuance)."
+            else:
+                lead_clause = f"Your flight departs {dep_day} {dep_str}, at or just after the issuance day."
+            afd_lines.append(
+                f"  {entry['role']} WFO {entry['wfo']} — AFD {anchor}.\n"
+                f"  Relative words below ('today', 'tonight', 'this afternoon', 'tomorrow') are anchored to the\n"
+                f"  AFD ISSUANCE time, NOT your flight. {lead_clause} Translate each phrase to absolute time;\n"
+                f"  discard the parts that do not overlap your flight window.\n"
+                f"{entry['text']}"
+            )
         if afd_lines:
             afd_section = "\n  Area Forecast Discussion — AVIATION:\n" + "\n\n".join(afd_lines) + "\n"
 
@@ -1924,9 +2012,11 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
 FLIGHT
   Today        : {now_str}
   Route        : {origin.upper()} → {destination.upper()}
-  Departure    : {dep_day} {dep_str} UTC
+  Departure    : {dep_day} {dep_str} UTC{f"  (~{lead_h:.0f} h after this briefing)" if lead_plausible else ""}
   Planned Alt  : {altitude_ft:,} ft MSL
   Charts       : {len(chart_data)} weather charts
+  Time note    : Every TAF/AFD/winds product below carries its OWN issue/valid time, not your
+                 flight time. Align each to the flight window (departure → arrival) before using it.
 {afd_facility_section}{taf_section}{winds_section}{afd_section}"""
 
     label_list = "\n".join(f"  - {l}" for l in chart_labels)

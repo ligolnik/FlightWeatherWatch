@@ -2,7 +2,7 @@
 """
 Score weather briefing quality using an LLM judge.
 
-Reads cached briefing HTML from test_briefings/ and scores it on 10 dimensions
+Reads cached briefing HTML from test_briefings/ and scores it on 11 dimensions
 using the judge prompt in prompts/judge.txt. Supports scoring individual cached
 briefings or batch-scoring all versions for comparison.
 
@@ -95,7 +95,7 @@ def score_briefing(html, meta, model="claude-sonnet-4-6"):
         try:
             response = client.messages.create(
                 model=model,
-                max_tokens=4096,
+                max_tokens=6000,
                 system=judge_prompt,
                 messages=[
                     {
@@ -153,12 +153,12 @@ def print_comparison_table(results):
         "executive_summary", "forecast_honesty", "operational_decision",
         "decision_triggers", "winds_turbulence", "terrain_route",
         "altitude_strategy", "data_integration", "clarity_signal_noise",
-        "pilot_realism",
+        "pilot_realism", "temporal_alignment",
     ]
     cat_labels = [
         "Exec Summary", "Forecast Honesty", "Op Decision", "Decision Triggers",
         "Winds/Turb", "Terrain/Route", "Alt Strategy", "Data Integration",
-        "Clarity/S:N", "Pilot Realism",
+        "Clarity/S:N", "Pilot Realism", "Temporal Align",
     ]
 
     # Group by version

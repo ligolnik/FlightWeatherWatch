@@ -49,6 +49,7 @@ ALL_FLIGHTS = [
     "cache_KEDC_KBJC_2026-03-19",
     "cache_KSQL_KVGT_2026-03-13",
     "cache_KSQL_KCOS_2026-03-30",
+    "cache_KSQL_KTVL_2026-06-04_1630Z",  # day-before AFD/TAF time-window regression case
 ]
 
 CATEGORIES = [

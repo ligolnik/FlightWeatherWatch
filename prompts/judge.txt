@@ -28,6 +28,9 @@ Score each category from 1–10 and explain briefly (1–2 sentences each).
 - Does the briefing correctly reflect uncertainty (especially at long range)?
 - Does it avoid false precision or overconfidence?
 - Are missing data sources acknowledged?
+- NOT honesty: deferring to prior-day AFD prose over winds-aloft / TAF data that is valid for the
+  flight window, or dismissing flight-valid quantitative data as "understating actual conditions"
+  in favor of vivid narrative. That is a temporal/correctness error — penalize it, do not credit it.
 
 3. OPERATIONAL DECISION VALUE
 - Can a pilot actually decide whether to fly from this briefing?
@@ -69,6 +72,24 @@ Score each category from 1–10 and explain briefly (1–2 sentences each).
 - Does it include practical advice (timing, alternates, tactics)?
 - Does it avoid "LLM tone" and feel operational?
 
+11. TEMPORAL ALIGNMENT (CRITICAL)
+- Does the briefing anchor every product to its OWN valid/issue time and align it to the
+  flight window (departure → arrival)?
+- AFD relative words ("today", "this afternoon", "tonight", "tomorrow"): are they tied to the
+  AFD's ISSUANCE day, NOT assumed to be the flight window? A day-before AFD describing
+  "this afternoon" winds refers to the PRIOR day, not a next-morning flight.
+- TAF: are ARRIVAL conditions taken from the FM/BECMG/TEMPO group valid at the arrival ETA,
+  not an earlier group that has already expired by arrival?
+- Winds aloft: is the forecast period whose valid / "for use" window covers the flight time used?
+- When AFD prose conflicts with quantitative data valid for the flight window, does the briefing
+  prefer the flight-window data (winds aloft, active TAF group) over vivid prior-day prose?
+- Scoring: 1–3 if the briefing maps prior-day or expired data onto the flight as if current
+  (e.g. carries a prior-afternoon wind/turbulence event into a next-morning flight, or quotes an
+  expired TAF group for arrival); 4–7 for partial/ambiguous alignment; 8–10 only if all products
+  (TAF group, AFD relative time, winds-aloft period) are correctly time-aligned to the flight.
+- Treat temporal misalignment as a CORRECTNESS error: it should also drag down Forecast Honesty
+  and Data Integration, not just this category.
+
 ---
 
 RED FLAGS (call out explicitly if present)
@@ -77,6 +98,7 @@ RED FLAGS (call out explicitly if present)
 - No decision triggers
 - Misunderstanding of terrain or turbulence
 - Generic or non-actionable advice
+- Time-frame misalignment (prior-day AFD language or an expired TAF group treated as the flight window)
 
 ---
 
@@ -95,7 +117,8 @@ Provide your response as valid JSON with this exact structure:
     "altitude_strategy": {"score": N, "notes": "..."},
     "data_integration": {"score": N, "notes": "..."},
     "clarity_signal_noise": {"score": N, "notes": "..."},
-    "pilot_realism": {"score": N, "notes": "..."}
+    "pilot_realism": {"score": N, "notes": "..."},
+    "temporal_alignment": {"score": N, "notes": "..."}
   },
   "overall_score": N,
   "key_strengths": ["...", "..."],
