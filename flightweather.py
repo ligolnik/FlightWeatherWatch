@@ -751,8 +751,41 @@ def lookup_iaps(icao):
     return index.get(icao.upper(), [])
 
 
-def lookup_afd(icao):
-    """Look up A/FD data for an airport. Returns formatted text or empty string."""
+def _us_dst_active(dt):
+    """Approximate US DST window: 2nd Sunday of March to 1st Sunday of November.
+    Compared in UTC — good enough for tower-hours sanity (not exact at the changeover hour)."""
+    import calendar
+    y = dt.year
+    def nth_sunday(month, n):
+        suns = [w[6] for w in calendar.monthcalendar(y, month) if w[6]]
+        return suns[n - 1]
+    start = datetime(y, 3, nth_sunday(3, 2), tzinfo=timezone.utc)
+    end = datetime(y, 11, nth_sunday(11, 1), tzinfo=timezone.utc)
+    return start <= dt < end
+
+
+def _local_from_utc(eta_dt, lon_decimal):
+    """Rough airport-local time from a UTC datetime using a longitude-based standard
+    offset plus US DST. Returns (local_dt, offset_hours) or (None, None).
+    Continental-US oriented; non-DST zones (AZ) or zone-edge airports may be off by 1h."""
+    from datetime import timedelta
+    try:
+        lon = float(lon_decimal)
+    except (TypeError, ValueError):
+        return None, None
+    offset = round(lon / 15.0)
+    if _us_dst_active(eta_dt):
+        offset += 1
+    return eta_dt + timedelta(hours=offset), offset
+
+
+def lookup_afd(icao, eta_dt=None):
+    """Look up A/FD data for an airport. Returns formatted text or empty string.
+
+    If eta_dt (UTC) is given, append the airport-local time at that ETA so the model
+    doesn't convert Zulu->local itself. Attendance hours are labeled as attendance
+    (not tower hours), and towered fields get an explicit "tower hours not in dataset" note.
+    """
     faa_id = icao.lstrip("K") if icao.startswith("K") and len(icao) == 4 else icao
     if not os.path.isdir(_FAA_DATA_DIR):
         return ""
@@ -775,8 +808,19 @@ def lookup_afd(icao):
     hours = att_rows[0]["HOUR"].strip() if att_rows else ""
 
     lines = [f"{icao} — {name}, {city}, {state}"]
-    hours_str = f" | Hours: {hours}" if hours else ""
-    lines.append(f"  {tower_str} | Elev {elev} ft{hours_str}")
+    # NOTE: APT_ATT HOUR is the AIRPORT ATTENDANCE schedule (FBO/management), NOT the ATCT
+    # tower operating hours. We have no tower-hours source, so never present it as tower hours.
+    att_str = f" | Attendance (local): {hours}" if hours else ""
+    lines.append(f"  {tower_str} | Elev {elev} ft{att_str}")
+    if eta_dt is not None:
+        local_dt, _off = _local_from_utc(eta_dt, base.get("LONG_DECIMAL", ""))
+        if local_dt:
+            note = (" Tower operating hours are NOT in this dataset — do not infer tower"
+                    " open/closed from attendance; verify via Chart Supplement/NOTAM/ATIS."
+                    if towered else "")
+            lines.append(
+                f"    ETA {eta_dt.strftime('%H:%MZ')} ≈ {local_dt.strftime('%H:%M')} local.{note}"
+            )
 
     # Runways
     rwy_rows = _load_afd_csv("APT_RWY.csv", faa_id)
@@ -850,13 +894,18 @@ def lookup_afd(icao):
     return "\n".join(lines)
 
 
-def fetch_afd_for_airports(airports):
-    """Look up A/FD data for a list of ICAO airports. Returns formatted text block."""
+def fetch_afd_for_airports(airports, etas=None):
+    """Look up A/FD data for a list of ICAO airports. Returns formatted text block.
+
+    etas: optional {ICAO: datetime_utc} so each towered field gets its tower OPEN/CLOSED
+    status pre-computed at that airport's ETA.
+    """
     _ensure_faa_data()
     _ensure_dtpp_metafile()
+    etas = etas or {}
     sections = []
     for icao in airports:
-        text = lookup_afd(icao)
+        text = lookup_afd(icao, eta_dt=etas.get(icao))
         if text:
             sections.append(text)
     return "\n\n".join(sections) if sections else ""
@@ -1998,9 +2047,34 @@ def analyze(origin, destination, departure_dt, altitude_ft, chart_data, taf_data
         if afd_lines:
             afd_section = "\n  Area Forecast Discussion — AVIATION:\n" + "\n\n".join(afd_lines) + "\n"
 
+    # Per-airport ETAs (UTC) so tower hours get pre-evaluated against airport-local time
+    etas = {origin.upper(): departure_dt}
+    if isinstance(taf_data, list):
+        for e in taf_data:
+            if e.get("role") == "Arrival":
+                ev = e.get("eta")
+                if isinstance(ev, str) and len(ev) >= 16:
+                    try:
+                        etas[destination.upper()] = datetime.strptime(
+                            ev.replace("Z", ""), "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+                    except ValueError:
+                        pass
+                elif hasattr(ev, "strftime"):
+                    etas[destination.upper()] = ev
+
+    # Authoritative great-circle route distance (taf entries carry cumulative nm)
+    route_dist_line = ""
+    if isinstance(taf_data, list):
+        cum = [e.get("nm") for e in taf_data if isinstance(e.get("nm"), (int, float))]
+        if cum and max(cum) > 0:
+            route_dist_line = (
+                f"\n  Route dist   : {max(cum):.0f} nm total, great-circle (computed). Use THIS exact"
+                f" distance for block-time/fuel/leg reasoning; do NOT state a different \"direct nm\"."
+            )
+
     # A/FD data — factual airport info prevents LLM from guessing
     afd_facility_section = ""
-    facility_text = fetch_afd_for_airports([origin.upper(), destination.upper()])
+    facility_text = fetch_afd_for_airports([origin.upper(), destination.upper()], etas)
     if facility_text:
         afd_facility_section = f"\n  Airport Facility Data (A/FD):\n{facility_text}\n"
     elif airport_names:
@@ -2013,7 +2087,7 @@ FLIGHT
   Today        : {now_str}
   Route        : {origin.upper()} → {destination.upper()}
   Departure    : {dep_day} {dep_str} UTC{f"  (~{lead_h:.0f} h after this briefing)" if lead_plausible else ""}
-  Planned Alt  : {altitude_ft:,} ft MSL
+  Planned Alt  : {altitude_ft:,} ft MSL{route_dist_line}
   Charts       : {len(chart_data)} weather charts
   Time note    : Every TAF/AFD/winds product below carries its OWN issue/valid time, not your
                  flight time. Align each to the flight window (departure → arrival) before using it.

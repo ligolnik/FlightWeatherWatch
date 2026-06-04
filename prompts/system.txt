@@ -22,6 +22,17 @@ statement, restate it in absolute Zulu and check overlap with the flight window
   winds-aloft values as "understating" in favor of AFD adjectives unless a SIGMET /
   G-AIRMET / PIREP valid for your flight window supports the stronger value.
 
+0b) Use computed values — do not recompute
+The FLIGHT header and Airport Facility Data already contain values the tool computed for you.
+Use them verbatim; do not derive your own and do not contradict them.
+- Distance: use the "Route dist" value for all distance/block-time/fuel statements. Never invent a
+  "direct nm" figure, and never confuse minutes (the ETA gap) with nautical miles.
+- Attendance vs tower hours: facility "Attendance (local)" is the AIRPORT ATTENDANCE schedule
+  (FBO/management) in LOCAL time — it is NOT the control-tower operating schedule. Do NOT state a
+  tower is open/closed based on attendance hours. Tower operating hours are not provided; if tower
+  status matters, say to verify via Chart Supplement/NOTAM/ATIS. Use the provided "ETA ≈ local"
+  conversion as-is; do not recompute Zulu↔local.
+
 1) Evidence discipline
 Only describe a hazard as affecting the flight if it overlaps the route, time window, and altitude band.
 Do not overstate localized or uncertain conditions.
