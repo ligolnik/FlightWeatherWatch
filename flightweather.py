@@ -1923,6 +1923,55 @@ def _load_prompt(filename):
 
 SYSTEM_PROMPT = _load_prompt("system.txt")
 
+# Output cap for the briefing call. Sonnet 4.6 briefings run past 6.5k tokens; the previous
+# 6,144 cap cut 3 of 42 cached briefings off mid-sentence.
+BRIEFING_MAX_TOKENS = 16000
+
+# Stop reasons meaning the model finished on its own (Anthropic names, then OpenAI's).
+_COMPLETE_STOPS = {"end_turn", "stop_sequence", "stop"}
+
+# Prepended to an incomplete briefing; the renderer lifts it to the top of the page.
+TRUNCATION_BANNER = (
+    '<section class="truncation-warning" style="border:2px solid var(--red);border-radius:6px;'
+    'padding:0.8rem 1rem;margin-bottom:1.2rem;color:var(--text)">'
+    '<strong style="color:var(--red)">INCOMPLETE BRIEFING</strong> — the analysis reached its '
+    'output limit and was cut off before it finished. Later sections may be missing or end '
+    'mid-sentence. Re-run the briefing before relying on it.</section>\n'
+)
+
+
+class BriefingFailed(RuntimeError):
+    """The briefing call produced nothing usable."""
+
+
+class BriefingRefused(BriefingFailed):
+    """The model declined to write the briefing."""
+
+
+def check_completion(stop_reason):
+    """Return "complete" or "truncated" for the briefing call's stop reason.
+
+    Raises BriefingRefused on a refusal. Anything unrecognised — including a stream that
+    ended with no reason — counts as truncated, so an incomplete briefing is never
+    presented as a whole one.
+    """
+    if stop_reason in _COMPLETE_STOPS:
+        return "complete"
+    if stop_reason == "refusal":
+        raise BriefingRefused(
+            "The model declined to write this briefing (stop_reason=refusal). "
+            "Re-run it; if it repeats, try a different model with --model."
+        )
+    return "truncated"
+
+
+def lift_truncation_banner(briefing_html):
+    """Split TRUNCATION_BANNER out of briefing_html -> (banner_html, remaining_html)."""
+    if TRUNCATION_BANNER in briefing_html:
+        return TRUNCATION_BANNER, briefing_html.replace(TRUNCATION_BANNER, "", 1)
+    return "", briefing_html
+
+
 def _is_openai_model(model):
     """Return True if the model name indicates an OpenAI model."""
     return model.startswith(("gpt-", "o1", "o3", "o4"))
@@ -2096,13 +2145,14 @@ FLIGHT
     label_list = "\n".join(f"  - {l}" for l in chart_labels)
 
     def _stream_with_retry(prompt, max_tokens=4096, retries=3):
-        """Stream an LLM request with retry on rate limit."""
+        """Stream an LLM request with retry on rate limit -> (text, stop_reason)."""
         rate_limit_exc = (
             _openai_mod.RateLimitError if use_openai else anthropic.RateLimitError
         )
         for attempt in range(retries):
             try:
                 result = ""
+                stop_reason = None
                 if use_openai:
                     messages = [
                         {"role": "system", "content": SYSTEM_PROMPT},
@@ -2124,6 +2174,8 @@ FLIGHT
                         if delta and delta.content:
                             result += delta.content
                             print(".", end="", flush=True)
+                        if chunk.choices and chunk.choices[0].finish_reason:
+                            stop_reason = chunk.choices[0].finish_reason
                 else:
                     with client.messages.stream(
                         model=model,
@@ -2134,8 +2186,9 @@ FLIGHT
                         for text in stream.text_stream:
                             result += text
                             print(".", end="", flush=True)
+                        stop_reason = stream.get_final_message().stop_reason
                 print(" done.")
-                return result
+                return result, stop_reason
             except rate_limit_exc:
                 wait = 30 * (attempt + 1)
                 print(f" rate limited, waiting {wait}s ...", end="", flush=True)
@@ -2148,7 +2201,10 @@ FLIGHT
                 else:
                     raise
         print(" FAILED after retries.")
-        return ""
+        raise BriefingFailed(
+            f"The {model} briefing call was still rate-limited or overloaded after "
+            f"{retries} attempts — wait a few minutes and re-run."
+        )
 
     # ── Single pass: classification + operational briefing ────────────────
     briefing_template = _load_prompt("briefing.txt")
@@ -2166,7 +2222,12 @@ FLIGHT
     }]
 
     print(f"\nAnalyzing {len(chart_data)} charts ", end="", flush=True)
-    raw_html = _stream_with_retry(briefing_prompt, max_tokens=6144)
+    raw_html, stop_reason = _stream_with_retry(briefing_prompt, max_tokens=BRIEFING_MAX_TOKENS)
+    completion = check_completion(stop_reason)
+    if not raw_html.strip():
+        raise BriefingFailed(
+            f"The {model} briefing call returned no text (stop_reason={stop_reason}) — re-run it."
+        )
 
     # Parse SIGNIFICANT_CHARTS from the first line
     significant_labels = set()
@@ -2185,6 +2246,11 @@ FLIGHT
     if not significant_labels:
         significant_labels = set(chart_labels)
 
+    if completion == "truncated":
+        print(f"WARNING: the briefing was cut off (stop_reason={stop_reason}) and is incomplete; "
+              f"the page carries a warning banner.", file=sys.stderr)
+        briefing_html = TRUNCATION_BANNER + briefing_html
+
     # Extract text-only prompt for cache
     def _prompt_text(blocks):
         return "\n".join(b["text"] for b in blocks if b.get("type") == "text")
@@ -2193,6 +2259,7 @@ FLIGHT
         "model": model,
         "system": SYSTEM_PROMPT,
         "briefing_prompt": _prompt_text(briefing_prompt),
+        "stop_reason": stop_reason,
     }
 
     return briefing_html, significant_labels, prompts
@@ -2404,9 +2471,12 @@ def main():
             if hours_until > 48:
                 print(f"\nAFD: skipped (flight is {hours_until:.0f} hrs out, AFD only useful within ~48 hrs)")
 
-        briefing_html, significant_labels, prompts = analyze(
-            origin, destination, departure_dt, altitude, chart_data, taf_data, winds_text, airport_names, afd_data, args.model
-        )
+        try:
+            briefing_html, significant_labels, prompts = analyze(
+                origin, destination, departure_dt, altitude, chart_data, taf_data, winds_text, airport_names, afd_data, args.model
+            )
+        except BriefingFailed as exc:
+            sys.exit(f"\nError: {exc}")
 
         if args.cache:
             # Charts file — binary image data + metadata
@@ -2582,6 +2652,9 @@ def main():
         arr_str = last.get("eta", "—")
         total_nm = f"{last.get('nm', 0):.0f}"
 
+    # An incomplete briefing's warning goes above everything, including the summary
+    truncation_html, briefing_html = lift_truncation_banner(briefing_html)
+
     # Extract Executive Summary from briefing HTML and place it above charts
     exec_summary_html = ""
     exec_match = re.search(
@@ -2617,6 +2690,8 @@ def main():
         )
         briefing_html = briefing_html[:hazards_match.start()] + briefing_html[hazards_match.end():]
         briefing_html = briefing_html.lstrip("\n")
+
+    exec_summary_html = truncation_html + exec_summary_html
 
     now_utc = datetime.now(timezone.utc)
     html = HTML_TEMPLATE.format(
